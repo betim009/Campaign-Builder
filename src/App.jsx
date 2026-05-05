@@ -12,9 +12,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/mensal" replace />} />
+        <Route path="/" element={<Dashboard />} />
         <Route path="/mensal" element={<Mensal />} />
-        <Route path="/dashboard" element={<Navigate to="/mensal" replace />} />
+        <Route path="/dashboard" element={<Navigate to="/" replace />} />
         <Route path="/nova-campanha" element={<NovaCampanha />} />
         <Route path="/roi-ontem" element={<RoiOntem />} />
         <Route path="/campanhas/:id" element={<CampanhaDetalhes />} />
