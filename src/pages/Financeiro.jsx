@@ -1,4 +1,8 @@
 import BackLink from "../components/BackLink.jsx";
+import ExportButton from "../components/ExportButton.jsx";
+import FinanceMetricCard from "../components/FinanceMetricCard.jsx";
+import PeriodPills from "../components/PeriodPills.jsx";
+import SelectLike from "../components/SelectLike.jsx";
 import SpendLineChart from "../components/SpendLineChart.jsx";
 import { mockFinancial } from "../data/mockFinancial.js";
 import { mockCountries } from "../data/mockCountries.js";
@@ -27,108 +31,58 @@ export default function Financeiro() {
         <div className="container">
           <div className="card filtersCard">
             <div className="filtersGrid">
-              <div>
-                <div className="fieldLabel">Conta de anúncio</div>
-                <div className="selectLike" role="button" aria-label="Conta de anúncio">
-                  <span>{filters.account}</span>
-                  <span aria-hidden="true" style={{ opacity: 0.6 }}>
-                    ▾
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <div className="fieldLabel">Business Manager</div>
-                <div className="selectLike" role="button" aria-label="Business Manager">
-                  <span>{filters.businessManager}</span>
-                  <span aria-hidden="true" style={{ opacity: 0.6 }}>
-                    ▾
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <div className="fieldLabel">Período</div>
-                <div className="periodPills" role="tablist" aria-label="Período">
-                  {filters.periodOptions.map((opt) => (
-                    <button
-                      key={opt}
-                      type="button"
-                      className={`periodPill${opt === filters.activePeriod ? " periodPillActive" : ""}`}
-                      role="tab"
-                      aria-selected={opt === filters.activePeriod}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <SelectLike label="Conta de anúncio" value={filters.account} />
+              <SelectLike label="Business Manager" value={filters.businessManager} />
+              <PeriodPills
+                label="Período"
+                options={filters.periodOptions}
+                active={filters.activePeriod}
+              />
             </div>
           </div>
 
           <section className="gridFinanceMetrics" aria-label="Métricas financeiras">
-            <div className="card financeMetricCard">
-              <div className="financeMetricTop">
-                <div className="metricIconBadge" style={{ background: "#dcfce7", color: "#16a34a" }}>
-                  $
-                </div>
-                <span aria-hidden="true" style={{ color: "#22c55e", fontWeight: 900 }}>
-                  ↗
-                </span>
-              </div>
-              <div className="financeValue">{metrics.spendTotal}</div>
-              <div className="financeLabel">
-                <span aria-hidden="true">💰</span> Gasto Total
-              </div>
-            </div>
-
-            <div className="card financeMetricCard">
-              <div className="financeMetricTop">
-                <div className="metricIconBadge" style={{ background: "#dbeafe", color: "#2563eb" }}>
-                  ↗
-                </div>
-              </div>
-              <div className="financeValue">{metrics.cpm}</div>
-              <div className="financeLabel">
-                <span aria-hidden="true">📊</span> CPM Médio
-              </div>
-            </div>
-
-            <div className="card financeMetricCard">
-              <div className="financeMetricTop">
-                <div className="metricIconBadge" style={{ background: "#ede9fe", color: "#7c3aed" }}>
-                  ↖
-                </div>
-              </div>
-              <div className="financeValue">{metrics.clicks}</div>
-              <div className="financeLabel">
-                <span aria-hidden="true">🖱</span> Cliques Totais
-              </div>
-            </div>
-
-            <div className="card financeMetricCard">
-              <div className="financeMetricTop">
-                <div className="metricIconBadge" style={{ background: "#ffedd5", color: "#f97316" }}>
-                  👁
-                </div>
-              </div>
-              <div className="financeValue">{metrics.impressions}</div>
-              <div className="financeLabel">
-                <span aria-hidden="true">👁</span> Impressões
-              </div>
-            </div>
-
-            <div className="card financeMetricCard">
-              <div className="financeMetricTop">
-                <div className="metricIconBadge" style={{ background: "#fce7f3", color: "#db2777" }}>
-                  ↗
-                </div>
-              </div>
-              <div className="financeValue">{metrics.cpc}</div>
-              <div className="financeLabel">
-                <span aria-hidden="true">📉</span> CPC Médio
-              </div>
-            </div>
+            <FinanceMetricCard
+              badgeBg="#dcfce7"
+              badgeColor="#16a34a"
+              badgeText="$"
+              topRight="↗"
+              value={metrics.spendTotal}
+              labelIcon="💰"
+              label="Gasto Total"
+            />
+            <FinanceMetricCard
+              badgeBg="#dbeafe"
+              badgeColor="#2563eb"
+              badgeText="↗"
+              value={metrics.cpm}
+              labelIcon="📊"
+              label="CPM Médio"
+            />
+            <FinanceMetricCard
+              badgeBg="#ede9fe"
+              badgeColor="#7c3aed"
+              badgeText="↖"
+              value={metrics.clicks}
+              labelIcon="🖱"
+              label="Cliques Totais"
+            />
+            <FinanceMetricCard
+              badgeBg="#ffedd5"
+              badgeColor="#f97316"
+              badgeText="👁"
+              value={metrics.impressions}
+              labelIcon="👁"
+              label="Impressões"
+            />
+            <FinanceMetricCard
+              badgeBg="#fce7f3"
+              badgeColor="#db2777"
+              badgeText="↗"
+              value={metrics.cpc}
+              labelIcon="📉"
+              label="CPC Médio"
+            />
           </section>
 
           <section className="card chartCard" aria-label="Gráfico de Gastos">
@@ -170,15 +124,9 @@ export default function Financeiro() {
                 <p className="chartSubtitle">Performance detalhada de cada país</p>
               </div>
               <div className="exportButtons" aria-label="Exportar">
-                <button type="button" className="exportButton">
-                  <span aria-hidden="true">⬇</span> CSV
-                </button>
-                <button type="button" className="exportButton">
-                  <span aria-hidden="true">⬇</span> Excel
-                </button>
-                <button type="button" className="exportButton">
-                  <span aria-hidden="true">⬇</span> PDF
-                </button>
+                <ExportButton>CSV</ExportButton>
+                <ExportButton>Excel</ExportButton>
+                <ExportButton>PDF</ExportButton>
               </div>
             </div>
 
