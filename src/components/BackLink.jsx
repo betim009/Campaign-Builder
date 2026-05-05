@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-export default function BackLink({ fallbackTo = "/" }) {
+export default function BackLink({ fallbackTo = "/", label = "Voltar" }) {
   const navigate = useNavigate();
 
   return (
@@ -30,8 +30,7 @@ export default function BackLink({ fallbackTo = "/" }) {
       <span aria-hidden="true" style={{ fontSize: 22, lineHeight: 1 }}>
         ←
       </span>
-      Voltar
+      {label}
     </button>
   );
 }
-

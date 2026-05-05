@@ -80,7 +80,7 @@ export default function Dashboard() {
               buttonVariant="secondary"
               buttonIcon="◎"
               buttonText="Ver ROI (Ontem)"
-              onButtonClick={() => {}}
+              onButtonClick={() => navigate("/roi-ontem")}
             />
           </section>
 
