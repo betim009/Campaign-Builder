@@ -54,7 +54,7 @@ Explica o objetivo e o resultado visível.
 
 ## Progress
 
-Última atualização: [2026-05-05 14:29]
+Última atualização: [2026-05-05 14:33]
 
 - [x] Entendimento inicial: o XLSX era usado como sistema manual do cliente.
 - [x] Entendimento inicial: o Figma representa a futura interface do sistema.
@@ -78,7 +78,7 @@ Explica o objetivo e o resultado visível.
 
 - [x] P1 — Corrigir inputs (Nova Campanha)
 - [x] P2 — Separar Home de Mensal
-- [ ] P3 — Substituir emojis por Material UI Icons
+- [x] P3 — Substituir emojis por Material UI Icons
 - [ ] P4 — Corrigir escala/tipografia global
 - [ ] P5 — Completar tela Nova Campanha fiel ao design
 - [ ] P6 — Adicionar mocks comportamentais
@@ -108,7 +108,7 @@ Explica o objetivo e o resultado visível.
 
 ## Pending Work (Pendências)
 
-Última atualização: [2026-05-05 14:29]
+Última atualização: [2026-05-05 14:33]
 
 Esta seção lista tudo que ainda NÃO foi implementado,
 mesmo que não esteja explicitamente no Progress.
@@ -172,17 +172,24 @@ Tarefas:
 O projeto usa emojis como ícones provisórios. Isso deve ser substituído por Material UI Icons para consistência profissional.
 
 Tarefas:
-- [ ] Instalar: `npm install @mui/icons-material @mui/material @emotion/react @emotion/styled`
-- [ ] Criar lista de mapeamento: qual emoji/ícone atual → qual MUI Icon substitui
-- [ ] Substituir emojis em:
+- [x] Instalar: `npm install @mui/icons-material @mui/material @emotion/react @emotion/styled`
+- [x] Criar lista de mapeamento: qual emoji/ícone atual → qual MUI Icon substitui
+- [x] Substituir emojis em:
   - Header (ícone de globo → `PublicIcon`)
   - Botões de ação (`+ Nova Campanha` → `AddIcon`, `Ver Financeiro` → `BarChartIcon`, etc.)
   - Cards de campanha (flags de países → `FlagIcon` ou flags reais via componente)
   - StatusBadge (`Publicado` → `CheckCircleIcon` verde, `Rascunho` → `EditIcon` cinza)
   - Botões de filtro/ordenar (`FilterListIcon`, `SortIcon`)
   - Botão Voltar → `ArrowBackIcon`
-- [ ] Padronizar tamanho de ícones: `fontSize="small"` como padrão, `fontSize="medium"` para destaques
-- [ ] Commit: `feat: substitui emojis por Material UI Icons`
+- [x] Padronizar tamanho de ícones: `fontSize="small"` como padrão, `fontSize="medium"` para destaques
+- [x] Commit: `feat: substitui emojis por Material UI Icons`
+
+Mapeamento aplicado (resumo):
+- Globo/flags UI → `PublicIcon` / flags mantidas como emoji temporariamente
+- Check/ok → `TaskAltIcon` / status → `CheckCircleIcon`
+- Info → `InfoOutlinedIcon`
+- Pin → `PushPinIcon`
+- Ações/olho/pausa → `TrendingUpIcon` / `VisibilityIcon` / `PauseCircleOutlineIcon`
 
 ---
 
@@ -259,7 +266,7 @@ Esta seção deve ser atualizada sempre que:
 - O projeto não é apenas um CRUD. Ele tende a envolver automação, relatórios, regras de campanha e integração externa com a Meta Ads API.
 - As informações de países, idiomas, objetivos de campanha e nomes de campanha precisam ser tratadas como regras importantes, não como textos soltos de interface.
 
-Última atualização: [2026-05-05 14:19]
+Última atualização: [2026-05-05 14:33]
 
 - [2026-05-04] O XLSX era o sistema principal do cliente
 - [2026-05-04] O projeto não é apenas CRUD, envolve automação
@@ -274,6 +281,7 @@ Esta seção deve ser atualizada sempre que:
 - [2026-05-05 00:00] Inputs de `NovaCampanha.jsx` não respondem à digitação — provável uso de `value` sem `onChange` (inputs controlados quebrados).
 - [2026-05-05 00:00] Layout visual está com escala aproximadamente 2x o esperado — fonte base provavelmente não foi definida corretamente em `global.css`, e os componentes herdaram tamanhos do browser default.
 - [2026-05-05 14:19] A pasta de design no repo está em `screens/desktop/*` e `screens/mobile/*` (não `screens/Desktop/*`), então ao seguir o ExecPlan é necessário ajustar o caminho conforme a estrutura real.
+- [2026-05-05 14:33] `@mui/icons-material` no projeto não possui alguns nomes sugeridos no plano (ex: `PersonOutline`, `PauseCircleOutline`); foi necessário ajustar para variantes existentes (ex: `PersonOutlined`, `PauseCircleOutlined`) mantendo a API interna em `src/styles/icons.js`.
 
 ## Decision Log
 
@@ -322,7 +330,7 @@ Esta seção deve ser atualizada sempre que:
   Motivo: o frontend deve ter interatividade real (filtros que filtram, períodos que mudam dados) mesmo sem backend. Hooks de mock centralizam essa lógica e facilitam a futura substituição por chamadas reais de API.
 
 
-Última atualização: [2026-05-05 14:19]
+Última atualização: [2026-05-05 14:33]
 
 - [2026-05-04] Decisão: iniciar pelo frontend
   Motivo: validar interface antes da API
@@ -335,6 +343,9 @@ Esta seção deve ser atualizada sempre que:
 
 - [2026-05-05 14:19] Decisão: restaurar `/` como Home e implementar `/mensal` como página separada conforme `screens/desktop/mensal/*`.
   Motivo: corrigir a confusão Home vs Mensal descrita no [P2] e manter as duas rotas visualmente distintas.
+
+- [2026-05-05 14:33] Decisão: centralizar ícones em `src/styles/icons.js` usando Material UI Icons e normalizar nomes conforme disponibilidade do pacote.
+  Motivo: substituir emojis por ícones consistentes sem espalhar imports diretos de `@mui/icons-material` pelo projeto.
 
 ## Outcomes & Retrospective
 
