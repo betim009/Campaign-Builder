@@ -1,5 +1,6 @@
 import { mockCountries } from "../data/mockCountries.js";
 import PageShell from "../components/PageShell.jsx";
+import { useMemo, useState } from "react";
 
 function StepBadge({ n }) {
   return (
@@ -41,12 +42,13 @@ function Field({ label, required, children }) {
   );
 }
 
-function InputLike({ placeholder, value, disabled }) {
+function InputLike({ placeholder, value, onChange, disabled, type = "text" }) {
   return (
     <input
+      type={type}
       disabled={disabled}
       value={value}
-      readOnly
+      onChange={onChange}
       placeholder={placeholder}
       style={{
         height: 54,
@@ -62,30 +64,29 @@ function InputLike({ placeholder, value, disabled }) {
   );
 }
 
-function SelectLike({ placeholder, disabled }) {
+function SelectLike({ value, onChange, disabled, options }) {
   return (
-    <div
+    <select
+      value={value}
+      onChange={onChange}
       style={{
         height: 54,
         borderRadius: 16,
         border: "1px solid #e5e7eb",
         padding: "0 18px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
         fontSize: 18,
         fontWeight: 700,
         color: disabled ? "#9ca3af" : "#111827",
         background: disabled ? "#f3f4f6" : "#ffffff",
       }}
-      role="button"
-      aria-disabled={disabled}
+      disabled={disabled}
     >
-      <span>{placeholder}</span>
-      <span aria-hidden="true" style={{ opacity: 0.6 }}>
-        ▾
-      </span>
-    </div>
+      {options.map((opt) => (
+        <option key={opt.value} value={opt.value} disabled={opt.disabled}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
   );
 }
 
@@ -101,6 +102,58 @@ function InfoLine({ icon, text, tone = "muted" }) {
 }
 
 export default function NovaCampanha() {
+  const [campaignName, setCampaignName] = useState("");
+  const [businessManager, setBusinessManager] = useState("");
+  const [adAccount, setAdAccount] = useState("");
+  const [pageId, setPageId] = useState("");
+  const [pixel, setPixel] = useState("");
+  const [beneficiary, setBeneficiary] = useState("");
+
+  const [domain, setDomain] = useState("");
+  const [slug, setSlug] = useState("");
+  const [nicheParam, setNicheParam] = useState("");
+
+  const businessManagerOptions = useMemo(
+    () => [
+      { value: "", label: "Selecione...", disabled: true },
+      { value: "main-bm", label: "Main BM" },
+      { value: "secondary-bm", label: "Secondary BM" },
+    ],
+    [],
+  );
+
+  const adAccountOptionsByBm = useMemo(
+    () => ({
+      "main-bm": [
+        { value: "", label: "Selecione...", disabled: true },
+        { value: "global", label: "Global Account" },
+        { value: "latam", label: "Conta LATAM" },
+      ],
+      "secondary-bm": [
+        { value: "", label: "Selecione...", disabled: true },
+        { value: "us-primary", label: "Conta US Primary" },
+        { value: "us-secondary", label: "Conta US Secondary" },
+      ],
+    }),
+    [],
+  );
+
+  const adAccountDisabled = businessManager === "";
+  const adAccountOptions = adAccountDisabled
+    ? [{ value: "", label: "Selecione uma BM primeiro", disabled: true }]
+    : adAccountOptionsByBm[businessManager] ?? [
+        { value: "", label: "Selecione...", disabled: true },
+      ];
+
+  const finalUrl = useMemo(() => {
+    const cleanDomain = (domain ?? "").trim().replace(/^https?:\/\//, "");
+    const cleanSlug = (slug ?? "").trim();
+    const normalizedSlug =
+      cleanSlug === "" ? "" : cleanSlug.startsWith("/") ? cleanSlug : `/${cleanSlug}`;
+    if (!cleanDomain && !normalizedSlug) return "";
+    return `${cleanDomain}${normalizedSlug}`;
+  }, [domain, slug]);
+
   return (
     <PageShell
       title="Criar Nova Campanha"
@@ -128,15 +181,32 @@ export default function NovaCampanha() {
                   }}
                 >
                   <Field label="Nome da campanha" required>
-                    <InputLike value="DirigirBTN4" />
+                    <InputLike
+                      placeholder="Ex: DirigirBTN4"
+                      value={campaignName}
+                      onChange={(e) => setCampaignName(e.target.value)}
+                    />
                   </Field>
 
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
                     <Field label="Business Manager" required>
-                      <SelectLike placeholder="Selecione..." />
+                      <SelectLike
+                        value={businessManager}
+                        onChange={(e) => {
+                          const nextBm = e.target.value;
+                          setBusinessManager(nextBm);
+                          setAdAccount("");
+                        }}
+                        options={businessManagerOptions}
+                      />
                     </Field>
                     <Field label="Conta de anúncio" required>
-                      <SelectLike placeholder="Selecione uma BM primeiro" disabled />
+                      <SelectLike
+                        value={adAccount}
+                        onChange={(e) => setAdAccount(e.target.value)}
+                        options={adAccountOptions}
+                        disabled={adAccountDisabled}
+                      />
                       <div style={{ marginTop: 10 }}>
                         <InfoLine
                           icon="ⓘ"
@@ -149,15 +219,27 @@ export default function NovaCampanha() {
 
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
                     <Field label="ID da Página" required>
-                      <InputLike value="123456789" />
+                      <InputLike
+                        placeholder="Ex: 123456789"
+                        value={pageId}
+                        onChange={(e) => setPageId(e.target.value)}
+                      />
                     </Field>
                     <Field label="Pixel" required>
-                      <InputLike value="PX_123456" />
+                      <InputLike
+                        placeholder="Ex: PX_123456"
+                        value={pixel}
+                        onChange={(e) => setPixel(e.target.value)}
+                      />
                     </Field>
                   </div>
 
                   <Field label="Beneficiário" required>
-                    <InputLike placeholder="Nome da empresa" value="Nome da empresa" />
+                    <InputLike
+                      placeholder="Nome da empresa"
+                      value={beneficiary}
+                      onChange={(e) => setBeneficiary(e.target.value)}
+                    />
                   </Field>
                 </div>
               </section>
@@ -174,10 +256,18 @@ export default function NovaCampanha() {
                   }}
                 >
                   <Field label="Domínio">
-                    <InputLike value="receitaspravocê.com" />
+                    <InputLike
+                      placeholder="Ex: receitaspravocê.com"
+                      value={domain}
+                      onChange={(e) => setDomain(e.target.value)}
+                    />
                   </Field>
                   <Field label="Slug">
-                    <InputLike value="/apps-to-recover-lost-photos" />
+                    <InputLike
+                      placeholder="/apps-to-recover-lost-photos"
+                      value={slug}
+                      onChange={(e) => setSlug(e.target.value)}
+                    />
                   </Field>
                 </div>
 
@@ -196,7 +286,7 @@ export default function NovaCampanha() {
                         background: "#eff6ff",
                       }}
                     >
-                      receitaspravocê.com/apps-to-recover-lost-photos
+                      {finalUrl || "—"}
                     </div>
                   </Field>
                 </div>
@@ -239,21 +329,21 @@ export default function NovaCampanha() {
                     <span aria-hidden="true">🟢</span>
                     <div style={{ fontWeight: 900 }}>Parâmetro Nicho *</div>
                   </div>
-                  <div
+                  <input
+                    value={nicheParam}
+                    onChange={(e) => setNicheParam(e.target.value)}
                     style={{
                       height: 54,
                       borderRadius: 16,
                       border: "2px solid #86efac",
                       padding: "0 18px",
-                      display: "flex",
-                      alignItems: "center",
                       fontSize: 18,
                       fontWeight: 800,
-                      color: "#6b7280",
+                      color: "#111827",
+                      outline: "none",
                     }}
-                  >
-                    DirigirBTN4
-                  </div>
+                    placeholder="Ex: DirigirBTN4"
+                  />
                   <InfoLine
                     icon="📌"
                     text="Nome usado para rastreamento no Google e identificação da campanha"
