@@ -54,7 +54,7 @@ Explica o objetivo e o resultado visível.
 
 ## Progress
 
-Última atualização: [2026-05-05 09:54]
+Última atualização: [2026-05-05 09:55]
 
 - [x] Entendimento inicial: o XLSX era usado como sistema manual do cliente.
 - [x] Entendimento inicial: o Figma representa a futura interface do sistema.
@@ -71,12 +71,12 @@ Explica o objetivo e o resultado visível.
 - [x] Componentizar cards, botões, listas, filtros e seções.
 - [x] Validar responsividade mínima.
 - [x] Revisar fidelidade visual com o Figma.
-- [ ] Registrar pendências para backend e Meta Ads API.
-- [ ] Atualizar este ExecPlan com tudo que foi feito.
+- [x] Registrar pendências para backend e Meta Ads API.
+- [x] Atualizar este ExecPlan com tudo que foi feito.
 
 ## Data Progress
 
-Última atualização: [2026-05-05 09:54]
+Última atualização: [2026-05-05 09:55]
 
 - [2026-05-04] Entendimento do projeto baseado no XLSX
 - [2026-05-04] Definição do escopo do frontend
@@ -94,6 +94,8 @@ Explica o objetivo e o resultado visível.
 - [x] [2026-05-05 09:51] Componentização extra (Financeiro: filtros/metric cards/export button)
 - [x] [2026-05-05 09:53] Ajustes de responsividade (grids + overflow da tabela do Financeiro)
 - [x] [2026-05-05 09:54] Revisão de fidelidade visual (comparação com `screens/Desktop/*`)
+- [x] [2026-05-05 09:55] Registro de pendências (backend/db/Meta Ads API + telas futuras)
+- [x] [2026-05-05 09:55] ExecPlan atualizado e consistente com o código atual
 
 ## Surprises & Discoveries
 
@@ -151,7 +153,21 @@ Explica o objetivo e o resultado visível.
 
 ## Outcomes & Retrospective
 
-Ainda não iniciado.
+Última atualização: [2026-05-05 09:55]
+
+Entregue nesta fase (frontend):
+
+- SPA React + Vite rodando e buildando (sem backend).
+- Navegação entre `Dashboard (Mensal)`, `Financeiro` e `Configurações`.
+- Dashboard com cards de métricas, cards de ação e listagem visual de campanhas.
+- Financeiro com filtros visuais, cards de métricas, gráfico (SVG) e tabela de detalhamento.
+- Configurações com países fixos e “Outras Configurações”.
+- Dados mockados centralizados em `src/data/`.
+
+Pendências imediatas (frontend):
+
+- Substituir emojis por ícones/asset definitivos, se necessário para fidelidade.
+- Refinar “Mensal” (se existir tela própria no design).
 
 Ao final da primeira fase, preencher esta seção com:
 
@@ -816,6 +832,8 @@ Para recuperação:
 
 ## Artifacts and Notes
 
+Última atualização: [2026-05-05 09:55]
+
 Arquivos esperados ao final da primeira fase, dependendo da stack real:
 
     src/App.jsx
@@ -824,12 +842,16 @@ Arquivos esperados ao final da primeira fase, dependendo da stack real:
     src/pages/Financeiro.jsx
     src/pages/Configuracoes.jsx
     src/components/Header.jsx
+    src/components/BackLink.jsx
     src/components/MetricCard.jsx
     src/components/ActionCard.jsx
     src/components/CampaignCard.jsx
     src/components/StatusBadge.jsx
-    src/components/CountriesList.jsx
-    src/components/SettingRow.jsx
+    src/components/SpendLineChart.jsx
+    src/components/SelectLike.jsx
+    src/components/PeriodPills.jsx
+    src/components/FinanceMetricCard.jsx
+    src/components/ExportButton.jsx
     src/data/mockCampaigns.js
     src/data/mockCountries.js
     src/data/mockFinancial.js
