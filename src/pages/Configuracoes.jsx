@@ -1,15 +1,7 @@
 import BackLink from "../components/BackLink.jsx";
+import { mockCountries } from "../data/mockCountries.js";
 
 export default function Configuracoes() {
-  const countries = [
-    { name: "Brasil", code: "BR", lang: "PT", flag: "🇧🇷" },
-    { name: "EUA", code: "US", lang: "EN", flag: "🇺🇸" },
-    { name: "México", code: "MX", lang: "ES", flag: "🇲🇽" },
-    { name: "Emirados", code: "AE", lang: "AR", flag: "🇦🇪" },
-    { name: "França", code: "FR", lang: "FR", flag: "🇫🇷" },
-    { name: "Espanha", code: "ES", lang: "ES", flag: "🇪🇸" },
-  ];
-
   const otherSettings = [
     { title: "Tradução automática", desc: "Ativada para todos os idiomas" },
     { title: "Detecção de idioma", desc: "Baseada em nome de arquivo" },
@@ -42,7 +34,7 @@ export default function Configuracoes() {
               </div>
 
               <div className="settingsList">
-                {countries.map((c) => (
+                {mockCountries.map((c) => (
                   <div key={c.code} className="settingsRow">
                     <div className="settingsLeft">
                       <div className="flagBox" aria-hidden="true">

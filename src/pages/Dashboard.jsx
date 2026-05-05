@@ -3,9 +3,15 @@ import ActionCard from "../components/ActionCard.jsx";
 import CampaignCard from "../components/CampaignCard.jsx";
 import MetricCard from "../components/MetricCard.jsx";
 import { useNavigate } from "react-router-dom";
+import { mockCampaigns } from "../data/mockCampaigns.js";
+import { mockCountries } from "../data/mockCountries.js";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const flagByCode = Object.fromEntries(
+    mockCountries.map((c) => [c.code, c.flag]),
+  );
+  const campaign = mockCampaigns[0];
 
   return (
     <>
@@ -92,12 +98,12 @@ export default function Dashboard() {
 
           <section aria-label="Campanhas">
             <CampaignCard
-              name="DirigirBTN4"
-              status="Publicado"
-              scopeLabel="Global"
-              generatedLabel="6 campanhas geradas"
-              createdAtLabel="Criado em 2026-04-24"
-              countryFlags={["🇧🇷", "🇺🇸", "🇲🇽", "🇦🇪", "🇫🇷", "🇪🇸"]}
+              name={campaign.name}
+              status={campaign.status}
+              scopeLabel={campaign.scopeLabel}
+              generatedLabel={campaign.generatedLabel}
+              createdAtLabel={campaign.createdAtLabel}
+              countryFlags={campaign.countryCodes.map((code) => flagByCode[code])}
             />
           </section>
         </div>

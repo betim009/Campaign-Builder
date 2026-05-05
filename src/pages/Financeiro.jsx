@@ -1,88 +1,13 @@
 import BackLink from "../components/BackLink.jsx";
 import SpendLineChart from "../components/SpendLineChart.jsx";
+import { mockFinancial } from "../data/mockFinancial.js";
+import { mockCountries } from "../data/mockCountries.js";
 
 export default function Financeiro() {
-  const periodOptions = ["Hoje", "Ontem", "7 dias", "30 dias"];
-  const activePeriod = "7 dias";
-
-  const spendSeries = [
-    { label: "17/4", value: 4100 },
-    { label: "18/4", value: 4850 },
-    { label: "19/4", value: 5050 },
-    { label: "20/4", value: 4700 },
-    { label: "21/4", value: 5250 },
-    { label: "22/4", value: 5920 },
-    { label: "23/4", value: 5850 },
-  ];
-
-  const rows = [
-    {
-      campaign: "DirigirBTN4",
-      country: "Brasil",
-      flag: "🇧🇷",
-      spend: "R$ 10.250,50",
-      impressions: "850.000",
-      clicks: "42.500",
-      cpc: "R$ 0,24",
-      cpm: "R$ 12,06",
-      status: "Ativo",
-    },
-    {
-      campaign: "DirigirBTN4",
-      country: "EUA",
-      flag: "🇺🇸",
-      spend: "R$ 8.420,30",
-      impressions: "720.000",
-      clicks: "36.000",
-      cpc: "R$ 0,23",
-      cpm: "R$ 11,69",
-      status: "Ativo",
-    },
-    {
-      campaign: "DirigirBTN4",
-      country: "México",
-      flag: "🇲🇽",
-      spend: "R$ 5.680,75",
-      impressions: "620.000",
-      clicks: "31.000",
-      cpc: "R$ 0,18",
-      cpm: "R$ 9,16",
-      status: "Ativo",
-    },
-    {
-      campaign: "DirigirBTN4",
-      country: "Emirados",
-      flag: "🇦🇪",
-      spend: "R$ 4.320,80",
-      impressions: "480.000",
-      clicks: "19.200",
-      cpc: "R$ 0,23",
-      cpm: "R$ 9,00",
-      status: "Ativo",
-    },
-    {
-      campaign: "DirigirBTN4",
-      country: "França",
-      flag: "🇫🇷",
-      spend: "R$ 4.150,48",
-      impressions: "510.000",
-      clicks: "25.500",
-      cpc: "R$ 0,16",
-      cpm: "R$ 8,14",
-      status: "Ativo",
-    },
-    {
-      campaign: "DirigirBTN4",
-      country: "Espanha",
-      flag: "🇪🇸",
-      spend: "R$ 3.080,25",
-      impressions: "462.748",
-      clicks: "24.611",
-      cpc: "R$ 0,13",
-      cpm: "R$ 6,66",
-      status: "Pausado",
-    },
-  ];
+  const { filters, metrics, spendSeries, tableRows } = mockFinancial;
+  const flagByCode = Object.fromEntries(
+    mockCountries.map((c) => [c.code, c.flag]),
+  );
 
   return (
     <>
@@ -105,7 +30,7 @@ export default function Financeiro() {
               <div>
                 <div className="fieldLabel">Conta de anúncio</div>
                 <div className="selectLike" role="button" aria-label="Conta de anúncio">
-                  <span>Global Account</span>
+                  <span>{filters.account}</span>
                   <span aria-hidden="true" style={{ opacity: 0.6 }}>
                     ▾
                   </span>
@@ -115,7 +40,7 @@ export default function Financeiro() {
               <div>
                 <div className="fieldLabel">Business Manager</div>
                 <div className="selectLike" role="button" aria-label="Business Manager">
-                  <span>Main BM</span>
+                  <span>{filters.businessManager}</span>
                   <span aria-hidden="true" style={{ opacity: 0.6 }}>
                     ▾
                   </span>
@@ -125,13 +50,13 @@ export default function Financeiro() {
               <div>
                 <div className="fieldLabel">Período</div>
                 <div className="periodPills" role="tablist" aria-label="Período">
-                  {periodOptions.map((opt) => (
+                  {filters.periodOptions.map((opt) => (
                     <button
                       key={opt}
                       type="button"
-                      className={`periodPill${opt === activePeriod ? " periodPillActive" : ""}`}
+                      className={`periodPill${opt === filters.activePeriod ? " periodPillActive" : ""}`}
                       role="tab"
-                      aria-selected={opt === activePeriod}
+                      aria-selected={opt === filters.activePeriod}
                     >
                       {opt}
                     </button>
@@ -151,7 +76,7 @@ export default function Financeiro() {
                   ↗
                 </span>
               </div>
-              <div className="financeValue">R$ 35.902,08</div>
+              <div className="financeValue">{metrics.spendTotal}</div>
               <div className="financeLabel">
                 <span aria-hidden="true">💰</span> Gasto Total
               </div>
@@ -163,7 +88,7 @@ export default function Financeiro() {
                   ↗
                 </div>
               </div>
-              <div className="financeValue">R$ 8,88</div>
+              <div className="financeValue">{metrics.cpm}</div>
               <div className="financeLabel">
                 <span aria-hidden="true">📊</span> CPM Médio
               </div>
@@ -175,7 +100,7 @@ export default function Financeiro() {
                   ↖
                 </div>
               </div>
-              <div className="financeValue">208.811</div>
+              <div className="financeValue">{metrics.clicks}</div>
               <div className="financeLabel">
                 <span aria-hidden="true">🖱</span> Cliques Totais
               </div>
@@ -187,7 +112,7 @@ export default function Financeiro() {
                   👁
                 </div>
               </div>
-              <div className="financeValue">4.042.748</div>
+              <div className="financeValue">{metrics.impressions}</div>
               <div className="financeLabel">
                 <span aria-hidden="true">👁</span> Impressões
               </div>
@@ -199,7 +124,7 @@ export default function Financeiro() {
                   ↗
                 </div>
               </div>
-              <div className="financeValue">R$ 0,41</div>
+              <div className="financeValue">{metrics.cpc}</div>
               <div className="financeLabel">
                 <span aria-hidden="true">📉</span> CPC Médio
               </div>
@@ -271,12 +196,12 @@ export default function Financeiro() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
-                  <tr key={`${r.country}-${r.status}`}>
+                {tableRows.map((r) => (
+                  <tr key={`${r.countryCode}-${r.status}`}>
                     <td style={{ fontWeight: 900 }}>{r.campaign}</td>
                     <td>
                       <span className="countryCell">
-                        <span aria-hidden="true">{r.flag}</span>
+                        <span aria-hidden="true">{flagByCode[r.countryCode]}</span>
                         {r.country}
                       </span>
                     </td>
