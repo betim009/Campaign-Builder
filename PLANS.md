@@ -54,10 +54,12 @@ Explica o objetivo e o resultado visível.
 
 ## Progress
 
+Última atualização: [2026-05-05 09:35]
+
 - [x] Entendimento inicial: o XLSX era usado como sistema manual do cliente.
 - [x] Entendimento inicial: o Figma representa a futura interface do sistema.
 - [x] Entendimento inicial: o projeto tem relação com campanhas de anúncios e API da Meta.
-- [ ] Criar ou revisar a estrutura do projeto frontend.
+- [x] Criar ou revisar a estrutura do projeto frontend.
 - [ ] Instalar e validar dependências necessárias.
 - [ ] Criar layout base da aplicação.
 - [ ] Criar navegação entre telas.
@@ -74,13 +76,13 @@ Explica o objetivo e o resultado visível.
 
 ## Data Progress
 
-Última atualização: [2026-05-05 09:33]
+Última atualização: [2026-05-05 09:35]
 
 - [2026-05-04] Entendimento do projeto baseado no XLSX
 - [2026-05-04] Definição do escopo do frontend
 - [x] [2026-05-04 22:10] Entendimento do XLSX como sistema
 - [x] [2026-05-05 09:33] Auditoria do repositório (estado real + screens + XLSX)
-- [ ] Criar estrutura do projeto
+- [x] [2026-05-05 09:35] Criar estrutura do projeto (Vite + React + pasta `src/`)
 - [ ] Implementar dashboard
 - [ ] Implementar financeiro
 
