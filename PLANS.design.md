@@ -1,13 +1,6 @@
-# Campaign Builder
+# <Descrição curta>
 
-Este ExecPlan é um documento vivo. Sistema de automação de campanhas de anúncios (Meta Ads)
-
-Um tipo de plataforma estilo SaaS, que faz:
-
-- Criar campanhas automaticamente
-- Rodar campanhas em vários países
-- Acompanhar resultados (ROI, custo, cliques)
-- Tomar decisões baseado em performance
+Este ExecPlan é um documento vivo.
 
 ## Purpose / Big Picture
 Explica o objetivo e o resultado visível.
