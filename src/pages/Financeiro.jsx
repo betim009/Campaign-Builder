@@ -6,6 +6,8 @@ import SpendLineChart from "../components/SpendLineChart.jsx";
 import { mockFinancial } from "../data/mockFinancial.js";
 import { mockCountries } from "../data/mockCountries.js";
 import PageShell from "../components/PageShell.jsx";
+import usePeriodFilter from "../mocks/usePeriodFilter.js";
+import { useState } from "react";
 import {
   AdsClickIcon,
   AttachMoneyIcon,
@@ -20,7 +22,17 @@ import {
 } from "../styles/icons.js";
 
 export default function Financeiro() {
-  const { filters, metrics, spendSeries, tableRows } = mockFinancial;
+  const { filters, periods } = mockFinancial;
+  const [account, setAccount] = useState(filters.account);
+  const [businessManager, setBusinessManager] = useState(filters.businessManager);
+  const { activePeriod, setActivePeriod, options, data } = usePeriodFilter({
+    options: filters.periodOptions,
+    initial: filters.activePeriod,
+    dataByPeriod: periods,
+  });
+  const metrics = data?.metrics ?? {};
+  const spendSeries = data?.spendSeries ?? [];
+  const tableRows = data?.tableRows ?? [];
   const flagByCode = Object.fromEntries(
     mockCountries.map((c) => [c.code, c.flag]),
   );
@@ -30,16 +42,26 @@ export default function Financeiro() {
       title="Financeiro"
       subtitle="Acompanhe os gastos e performance das campanhas"
       backFallbackTo="/mensal"
-      titleStyle={{ fontSize: 56 }}
     >
       <div className="card filtersCard">
             <div className="filtersGrid">
-              <SelectLike label="Conta de anúncio" value={filters.account} />
-              <SelectLike label="Business Manager" value={filters.businessManager} />
+              <SelectLike
+                label="Conta de anúncio"
+                value={account}
+                options={filters.accountOptions}
+                onChange={(e) => setAccount(e.target.value)}
+              />
+              <SelectLike
+                label="Business Manager"
+                value={businessManager}
+                options={filters.businessManagerOptions}
+                onChange={(e) => setBusinessManager(e.target.value)}
+              />
               <PeriodPills
                 label="Período"
-                options={filters.periodOptions}
-                active={filters.activePeriod}
+                options={options}
+                active={activePeriod}
+                onChange={setActivePeriod}
               />
             </div>
       </div>

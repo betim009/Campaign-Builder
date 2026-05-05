@@ -1,5 +1,6 @@
 import PageShell from "../components/PageShell.jsx";
 import {
+  BoltIcon,
   PauseCircleOutlineIcon,
   TrendingUpIcon,
   VisibilityIcon,
@@ -7,10 +8,10 @@ import {
 
 function MetricCard({ label, value, tone, hint }) {
   return (
-    <div className="card" style={{ padding: 22, minHeight: 132 }}>
+    <div className="card" style={{ padding: 24, minHeight: 120 }}>
       <div
         style={{
-          fontSize: 14,
+          fontSize: "var(--fs-label)",
           fontWeight: 900,
           letterSpacing: "0.08em",
           color: "#6b7280",
@@ -21,8 +22,8 @@ function MetricCard({ label, value, tone, hint }) {
       </div>
       <div
         style={{
-          marginTop: 12,
-          fontSize: 34,
+          marginTop: 10,
+          fontSize: 22,
           fontWeight: 900,
           letterSpacing: "-0.02em",
           color: tone === "green" ? "#16a34a" : tone === "red" ? "#ef4444" : "#111827",
@@ -31,7 +32,7 @@ function MetricCard({ label, value, tone, hint }) {
         {value}
       </div>
       {hint ? (
-        <div style={{ marginTop: 10, color: "#6b7280", fontWeight: 700 }}>
+        <div style={{ marginTop: 8, color: "#6b7280", fontWeight: 700, fontSize: "var(--fs-secondary)" }}>
           {hint}
         </div>
       ) : null}
@@ -202,14 +203,12 @@ export default function RoiOntem() {
       }
       backLabel="Voltar ao Dashboard"
       backFallbackTo="/mensal"
-      titleStyle={{ fontSize: 44 }}
-      subtitleStyle={{ fontSize: 16 }}
       headerRight={
         <button
           type="button"
           style={{
-            height: 54,
-            padding: "0 20px",
+            height: 44,
+            padding: "0 16px",
             borderRadius: 14,
             border: 0,
             background: "#0b0b0d",
@@ -217,10 +216,11 @@ export default function RoiOntem() {
             fontWeight: 900,
             display: "inline-flex",
             alignItems: "center",
-            gap: 12,
+            gap: 10,
+            fontSize: 14,
           }}
         >
-          <span aria-hidden="true">⚡</span> Aplicar Otimização Geral
+          <BoltIcon fontSize="small" /> Aplicar Otimização Geral
         </button>
       }
     >

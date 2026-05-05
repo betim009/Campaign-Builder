@@ -14,12 +14,12 @@ export default function PageShell({
   return (
     <>
       <main style={{ background: "#ffffff" }}>
-        <div className="container" style={{ paddingTop: 24 }}>
+        <div className="container" style={{ paddingTop: 16 }}>
           <BackLink fallbackTo={backFallbackTo} label={backLabel} />
 
           <div
             style={{
-              marginTop: 18,
+              marginTop: 12,
               display: "flex",
               alignItems: "flex-start",
               justifyContent: "space-between",
@@ -41,7 +41,7 @@ export default function PageShell({
         </div>
       </main>
 
-      <section className="page" style={{ marginTop: 22 }}>
+      <section className="page" style={{ marginTop: 16 }}>
         <div className="container">{children}</div>
       </section>
     </>

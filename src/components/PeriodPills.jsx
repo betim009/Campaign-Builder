@@ -1,4 +1,4 @@
-export default function PeriodPills({ label, options, active }) {
+export default function PeriodPills({ label, options, active, onChange }) {
   return (
     <div>
       <div className="fieldLabel">{label}</div>
@@ -10,6 +10,7 @@ export default function PeriodPills({ label, options, active }) {
             className={`periodPill${opt === active ? " periodPillActive" : ""}`}
             role="tab"
             aria-selected={opt === active}
+            onClick={() => onChange?.(opt)}
           >
             {opt}
           </button>
@@ -18,4 +19,3 @@ export default function PeriodPills({ label, options, active }) {
     </div>
   );
 }
-

@@ -5,6 +5,7 @@ import MetricCard from "../components/MetricCard.jsx";
 import { useNavigate } from "react-router-dom";
 import { mockCampaigns } from "../data/mockCampaigns.js";
 import { mockCountries } from "../data/mockCountries.js";
+import useCampaignFilters from "../mocks/useCampaignFilters.js";
 import {
   AddIcon,
   BarChartIcon,
@@ -20,7 +21,8 @@ export default function Dashboard() {
   const flagByCode = Object.fromEntries(
     mockCountries.map((c) => [c.code, c.flag]),
   );
-  const campaign = mockCampaigns[0];
+  const { campaigns, statusFilter, sortMode, cycleStatus, cycleSort } =
+    useCampaignFilters(mockCampaigns);
 
   return (
     <>
@@ -96,27 +98,32 @@ export default function Dashboard() {
           <div className="sectionTitleRow">
             <h2 className="sectionTitle">Suas Campanhas</h2>
             <div style={{ display: "flex", gap: 12 }}>
-              <button type="button" className="ghostButton">
+              <button type="button" className="ghostButton" onClick={cycleStatus}>
                 <FilterListIcon fontSize="small" />
-                Filtrar
+                <span title={`Filtro: ${statusFilter}`}>Filtrar</span>
               </button>
-              <button type="button" className="ghostButton">
+              <button type="button" className="ghostButton" onClick={cycleSort}>
                 <SortIcon fontSize="small" />
-                Ordenar
+                <span title={`Ordenação: ${sortMode}`}>Ordenar</span>
               </button>
             </div>
           </div>
 
           <section aria-label="Campanhas">
-            <CampaignCard
-              id={campaign.id}
-              name={campaign.name}
-              status={campaign.status}
-              scopeLabel={campaign.scopeLabel}
-              generatedLabel={campaign.generatedLabel}
-              createdAtLabel={campaign.createdAtLabel}
-              countryFlags={campaign.countryCodes.map((code) => flagByCode[code])}
-            />
+            <div style={{ display: "grid", gap: 16 }}>
+              {campaigns.map((campaign) => (
+                <CampaignCard
+                  key={campaign.id}
+                  id={campaign.id}
+                  name={campaign.name}
+                  status={campaign.status}
+                  scopeLabel={campaign.scopeLabel}
+                  generatedLabel={campaign.generatedLabel}
+                  createdAtLabel={campaign.createdAtLabel}
+                  countryFlags={campaign.countryCodes.map((code) => flagByCode[code])}
+                />
+              ))}
+            </div>
           </section>
         </div>
       </main>

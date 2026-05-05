@@ -54,7 +54,7 @@ Explica o objetivo e o resultado visível.
 
 ## Progress
 
-Última atualização: [2026-05-05 14:57]
+Última atualização: [2026-05-05 09:55]
 
 - [x] Entendimento inicial: o XLSX era usado como sistema manual do cliente.
 - [x] Entendimento inicial: o Figma representa a futura interface do sistema.
@@ -74,18 +74,9 @@ Explica o objetivo e o resultado visível.
 - [x] Registrar pendências para backend e Meta Ads API.
 - [x] Atualizar este ExecPlan com tudo que foi feito.
 
-### Fase 2 — Correções críticas (em andamento)
-
-- [x] P1 — Corrigir inputs (Nova Campanha)
-- [x] P2 — Separar Home de Mensal
-- [x] P3 — Substituir emojis por Material UI Icons
-- [x] P4 — Corrigir escala/tipografia global
-- [x] P5 — Completar tela Nova Campanha fiel ao design
-- [x] P6 — Adicionar mocks comportamentais
-
 ## Data Progress
 
-Última atualização: [2026-05-05 14:57]
+Última atualização: [2026-05-05 09:55]
 
 - [2026-05-04] Entendimento do projeto baseado no XLSX
 - [2026-05-04] Definição do escopo do frontend
@@ -105,151 +96,30 @@ Explica o objetivo e o resultado visível.
 - [x] [2026-05-05 09:54] Revisão de fidelidade visual (comparação com `screens/Desktop/*`)
 - [x] [2026-05-05 09:55] Registro de pendências (backend/db/Meta Ads API + telas futuras)
 - [x] [2026-05-05 09:55] ExecPlan atualizado e consistente com o código atual
-- [x] [2026-05-05 14:57] P4 — Ajuste de escala tipográfica e espaçamentos globais (base 14px + refinamentos)
-- [x] [2026-05-05 14:57] P5 — Tela Nova Campanha completada conforme `screens/Desktop/nova-campanha/*` (steps 1–5 + sidebar)
-- [x] [2026-05-05 14:57] P6 — Mocks comportamentais (período no Financeiro + filtro/ordenação na Home + selects reais)
 
 ## Pending Work (Pendências)
 
-Última atualização: [2026-05-05 14:57]
+Última atualização: [2026-05-05 13:20]
 
 Esta seção lista tudo que ainda NÃO foi implementado,
 mesmo que não esteja explicitamente no Progress.
 
-### Funcionalidades pendentes (Fase 1 — concluídas)
+### Funcionalidades pendentes
 
 - [x] Ao clicar em `+ Nova Campanha` ir para tela de nova campanha
 - [x] Ao clicar em `Ver ROI (ontem)` ir para tela de ROI
 - [x] Os botoes precisam de ter um Refinamento de UI/UX - hover cursor pointer
 - [x] Cria a pagina `Mensal` e ao clicar no botao mensal navegar para essa pagina
 
-### Problemas identificados (Fase 1 — concluídos)
+### Problemas identificados
 
 - [x] Botões apenas visuais (sem ação)
 - [x] Falta de rotas para algumas telas
 - [x] Componentes não reutilizados corretamente
 
-### Ajustes visuais (Fase 1 — concluídos)
+### Ajustes visuais
 
 - [x] Ajustar/Refinar o design. A impressão ao analisar o design é que todos components e textos estão com o dobro do tamanho, peso da fonte...
-
----
-
-### FASE 2 — Correções e melhorias prioritárias
-
-> Estas tarefas corrigem problemas reais identificados após a entrega da Fase 1.
-> Todas são OBRIGATÓRIAS antes de considerar o frontend pronto.
-
-#### [P1] BUG CRÍTICO: Inputs de Nova Campanha não funcionam
-
-- [x] Auditar `src/pages/NovaCampanha.jsx` — identificar todos os `<input>` e `<textarea>` sem `value`/`onChange`
-- [x] Converter cada campo para input controlado com `useState`
-- [x] Garantir que o usuário consegue digitar em todos os campos do formulário
-- [x] Validar: nenhum campo deve estar "congelado" ou somente leitura
-- [x] Commit: `fix: corrige inputs controlados em NovaCampanha`
-
-Causa provável: inputs com `value` sem `onChange` — React bloqueia a edição.
-
----
-
-#### [P2] BUG CRÍTICO: Confusão HOME vs MENSAL
-
-O Codex confundiu as telas HOME e MENSAL porque o botão "Mensal" aparece visualmente ativo no Figma da tela principal. Ele interpretou a HOME como sendo a página MENSAL. Isso está ERRADO.
-
-Regra correta:
-- `/` → Rota da HOME (Dashboard principal — `screens/Desktop/home/`)
-- `/mensal` → Rota separada MENSAL (`screens/Desktop/mensal/`)
-- O botão "Mensal" na navbar navega para `/mensal`, não é a página atual
-
-Tarefas:
-- [x] Consultar imagens em `screens/Desktop/home/` e `screens/Desktop/mensal/` para entender a diferença visual
-- [x] Corrigir a rota `/` para renderizar o Dashboard correto (Home) — não deve ser redirecionado para `/mensal`
-- [x] Corrigir `src/pages/Mensal.jsx` para refletir fielmente o design de `screens/Desktop/mensal/`
-- [x] Garantir que a navegação da navbar distingue Home de Mensal
-- [x] Commit: `fix: separa rotas home e mensal conforme design`
-
----
-
-#### [P3] ÍCONES: Substituir emojis por Material UI Icons
-
-O projeto usa emojis como ícones provisórios. Isso deve ser substituído por Material UI Icons para consistência profissional.
-
-Tarefas:
-- [x] Instalar: `npm install @mui/icons-material @mui/material @emotion/react @emotion/styled`
-- [x] Criar lista de mapeamento: qual emoji/ícone atual → qual MUI Icon substitui
-- [x] Substituir emojis em:
-  - Header (ícone de globo → `PublicIcon`)
-  - Botões de ação (`+ Nova Campanha` → `AddIcon`, `Ver Financeiro` → `BarChartIcon`, etc.)
-  - Cards de campanha (flags de países → `FlagIcon` ou flags reais via componente)
-  - StatusBadge (`Publicado` → `CheckCircleIcon` verde, `Rascunho` → `EditIcon` cinza)
-  - Botões de filtro/ordenar (`FilterListIcon`, `SortIcon`)
-  - Botão Voltar → `ArrowBackIcon`
-- [x] Padronizar tamanho de ícones: `fontSize="small"` como padrão, `fontSize="medium"` para destaques
-- [x] Commit: `feat: substitui emojis por Material UI Icons`
-
-Mapeamento aplicado (resumo):
-- Globo/flags UI → `PublicIcon` / flags mantidas como emoji temporariamente
-- Check/ok → `TaskAltIcon` / status → `CheckCircleIcon`
-- Info → `InfoOutlinedIcon`
-- Pin → `PushPinIcon`
-- Ações/olho/pausa → `TrendingUpIcon` / `VisibilityIcon` / `PauseCircleOutlineIcon`
-
----
-
-#### [P4] ESCALA / TIPOGRAFIA: Corrigir proporções visuais
-
-O layout atual tem componentes e fontes aparentemente 2x maiores que o Figma.
-
-Tarefas:
-- [x] Definir e aplicar base tipográfica em `src/styles/global.css`:
-  - `font-size` base: `14px` (body)
-  - `h1`: `22px` / `font-weight: 600`
-  - `h2`: `18px` / `font-weight: 600`
-  - `h3`: `15px` / `font-weight: 500`
-  - Textos secundários: `12px`
-  - Labels/badges: `11px`
-- [x] Revisar `padding` e `margin` dos componentes principais. Base: grid de 8px (`4px`, `8px`, `16px`, `24px`, `32px`)
-- [x] Revisar larguras de cards — contidas por `.container` e grids
-- [x] Comparar visualmente telas principais com `screens/Desktop/*` após ajuste
-- [x] Commit: `style: corrige escala tipográfica e espaçamentos conforme Figma`
-
----
-
-#### [P5] TELA NOVA CAMPANHA: Implementar fiel ao design
-
-A tela `nova-campanha` está incompleta. Não reflete o design do Figma.
-
-Tarefas:
-- [x] Consultar TODAS as imagens em `screens/Desktop/nova-campanha/`
-- [x] Mapear cada seção visível no design (steps 1–5 + sidebar)
-- [x] Implementar Step 1 — Configuração (Nome, BM, Conta de anúncio, ID da Página, Pixel, Beneficiário)
-- [x] Implementar Step 2 — Link e Parâmetros (Domínio, Slug, URL final, Tracking automático, Parâmetro Nicho + campos gerados)
-- [x] Implementar Step 3 — Copy Base (Biblioteca por Nicho + variações de Texto/Título/Descrição)
-- [x] Implementar Step 4 — Orçamento e Programação (orçamento, tipo, datas/horários, rodar continuamente)
-- [x] Implementar Step 5 — Upload de Vídeos (dropzone + seleção de arquivos)
-- [x] Implementar Sidebar (Resumo Automático + Publicar + Salvar como rascunho + Diferenciais)
-- [x] Garantir que TODOS os campos editáveis do formulário são editáveis (ver [P1])
-- [x] Aplicar layout fiel ao design (grid 2 colunas + cards)
-- [x] Commit: `feat: completa tela nova-campanha conforme Figma`
-
----
-
-#### [P6] MOCKS COMPORTAMENTAIS: Tornar o frontend "vivo"
-
-Atualmente o UI é estático — filtros não fazem nada, seleções não mudam estado visual.
-
-Tarefas:
-- [x] Criar pasta `src/mocks/`
-- [x] Criar `src/mocks/useCampaignFilters.js` — hook que simula filtro por status/tipo
-- [x] Criar `src/mocks/usePeriodFilter.js` — hook que simula seleção de período no Financeiro (Hoje/Ontem/7dias/30dias) e retorna dados diferentes por período
-- [x] Criar `src/mocks/useFormState.js` — hook genérico de formulário controlado
-- [x] Conectar `PeriodPills` ao `usePeriodFilter` — ao clicar, os cards de métricas mudam de valor
-- [x] Conectar botões "Filtrar" e "Ordenar" da Home — ao clicar, aplicar filtro real na lista de campanhas
-- [x] Conectar `SelectLike` (Conta / BM) — ao selecionar, valor deve persistir visualmente
-- [x] Objetivo: usuário interage com a tela e vê resposta visual sem backend
-- [x] Commit: `feat: adiciona mocks comportamentais e interatividade ao frontend`
-
----
 
 ### Observação
 
@@ -266,7 +136,7 @@ Esta seção deve ser atualizada sempre que:
 - O projeto não é apenas um CRUD. Ele tende a envolver automação, relatórios, regras de campanha e integração externa com a Meta Ads API.
 - As informações de países, idiomas, objetivos de campanha e nomes de campanha precisam ser tratadas como regras importantes, não como textos soltos de interface.
 
-Última atualização: [2026-05-05 14:57]
+Última atualização: [2026-05-05 09:36]
 
 - [2026-05-04] O XLSX era o sistema principal do cliente
 - [2026-05-04] O projeto não é apenas CRUD, envolve automação
@@ -276,13 +146,6 @@ Esta seção deve ser atualizada sempre que:
 - [2026-05-05 09:36] `npm install` reportou 2 vulnerabilidades moderadas via `npm audit` (não corrigido ainda para evitar alterações não relacionadas).
 - [2026-05-05 12:59] A seção `Pending Work` estava com data futura `[2026-05-05 23:00]` em relação ao horário real do sistema (corrigido para refletir o estado atual).
 - [2026-05-05 13:01] Arquivos locais de prompt (`PROMPT.*.txt`) estavam na raiz e apareciam como untracked; adicionados ao `.gitignore` para evitar commits acidentais.
-- [2026-05-05 00:00] ERRO DE INTERPRETAÇÃO (Codex — Fase 1): o botão “Mensal” aparece visualmente ativo no Figma da tela HOME, o que levou o Codex a tratar a HOME como sendo a página MENSAL. As duas são páginas distintas: `screens/Desktop/home/` ≠ `screens/Desktop/mensal/`. A rota `/` deve ser a Home; `/mensal` deve ser a Mensal. A decisão de redirecionar `/` para `/mensal` foi um erro e deve ser revertida.
-- [2026-05-05 00:00] O projeto usa emojis como substitutos de ícones — isso foi uma decisão temporária (Fase 1) que deve ser resolvida na Fase 2 com Material UI Icons.
-- [2026-05-05 00:00] Inputs de `NovaCampanha.jsx` não respondem à digitação — provável uso de `value` sem `onChange` (inputs controlados quebrados).
-- [2026-05-05 00:00] Layout visual está com escala aproximadamente 2x o esperado — fonte base provavelmente não foi definida corretamente em `global.css`, e os componentes herdaram tamanhos do browser default.
-- [2026-05-05 14:19] A pasta de design no repo está em `screens/desktop/*` e `screens/mobile/*` (não `screens/Desktop/*`), então ao seguir o ExecPlan é necessário ajustar o caminho conforme a estrutura real.
-- [2026-05-05 14:33] `@mui/icons-material` no projeto não possui alguns nomes sugeridos no plano (ex: `PersonOutline`, `PauseCircleOutline`); foi necessário ajustar para variantes existentes (ex: `PersonOutlined`, `PauseCircleOutlined`) mantendo a API interna em `src/styles/icons.js`.
-- [2026-05-05 14:57] O design completo de `Nova Campanha` inclui steps 3–5 (Copy Base, Orçamento/Programação, Upload + sidebar); a seção [P5] foi atualizada e implementada conforme `screens/desktop/nova-campanha/*`.
 
 ## Decision Log
 
@@ -315,45 +178,21 @@ Esta seção deve ser atualizada sempre que:
 
 - Decisão: tornar `/mensal` a rota principal e redirecionar `/` para `/mensal`.
   Motivo: o design e o `Pending Work` tratam “Mensal” como uma página; manter o dashboard acessível via essa rota evita ambiguidade.
-  ⚠️ REVISADA [2026-05-05]: Esta decisão foi um ERRO. HOME e MENSAL são páginas distintas. A rota `/` deve ser a Home (Dashboard), e `/mensal` deve ser a tela Mensal separada. Ver [P2] em Pending Work.
 
 - Decisão: criar o componente `PageShell` para padronizar headers/containers de páginas.
   Motivo: reduzir duplicação e manter consistência visual entre telas.
 
 - Decisão: reduzir o tamanho padrão de títulos (`.pageTitle`) para melhorar a proporção com o design.
   Motivo: feedback do `Pending Work` indicava tipografia/escala visual acima do esperado.
-  ⚠️ INCOMPLETA [2026-05-05]: Apenas títulos foram ajustados. A escala global (body, paddings, grids) ainda precisa ser revisada. Ver [P4] em Pending Work.
-  ✅ CONCLUÍDA [2026-05-05 14:57]: Base tipográfica + espaçamentos revisados em `src/styles/global.css`.
-
-- Decisão: instalar `@mui/icons-material` na Fase 2 para substituir emojis por ícones reais.
-  Motivo: emojis foram usados como solução temporária na Fase 1. Material UI Icons é a biblioteca padrão definida para este projeto.
-
-- Decisão: criar `src/mocks/` com hooks comportamentais na Fase 2.
-  Motivo: o frontend deve ter interatividade real (filtros que filtram, períodos que mudam dados) mesmo sem backend. Hooks de mock centralizam essa lógica e facilitam a futura substituição por chamadas reais de API.
 
 
-Última atualização: [2026-05-05 14:57]
+Última atualização: [2026-05-05 09:46]
 
 - [2026-05-04] Decisão: iniciar pelo frontend
   Motivo: validar interface antes da API
 
 - [2026-05-04] Decisão: usar dados mockados
   Motivo: desacoplar da Meta API inicialmente
-
-- [2026-05-05 13:45] Decisão: converter campos de `NovaCampanha` para inputs controlados (useState) e selects reais.
-  Motivo: garantir edição do formulário e eliminar campos “congelados”.
-
-- [2026-05-05 14:19] Decisão: restaurar `/` como Home e implementar `/mensal` como página separada conforme `screens/desktop/mensal/*`.
-  Motivo: corrigir a confusão Home vs Mensal descrita no [P2] e manter as duas rotas visualmente distintas.
-
-- [2026-05-05 14:33] Decisão: centralizar ícones em `src/styles/icons.js` usando Material UI Icons e normalizar nomes conforme disponibilidade do pacote.
-  Motivo: substituir emojis por ícones consistentes sem espalhar imports diretos de `@mui/icons-material` pelo projeto.
-
-- [2026-05-05 14:57] Decisão: aplicar base tipográfica/spacing via CSS global e remover overrides de título em páginas.
-  Motivo: corrigir a sensação de “2x maior” e manter consistência entre telas.
-
-- [2026-05-05 14:57] Decisão: tornar `SelectLike` um `<select>` real e centralizar interatividade mock em `src/mocks/*`.
-  Motivo: permitir seleção persistente sem backend e preparar substituição futura por API.
 
 ## Outcomes & Retrospective
 
@@ -627,7 +466,7 @@ Card `Outras Configurações`:
 
 ## Plan of Work
 
-Última atualização: [2026-05-05 00:00]
+Última atualização: [2026-05-04 22:30]
 
 A primeira fase deve ser feita em camadas.
 
@@ -782,92 +621,6 @@ Ao final, registrar em `Artifacts and Notes` o que ainda precisa ser feito:
 - Regras de ROI.
 - Publicação/pausa automática.
 - Tratamento de tokens e permissões da Meta.
-
----
-
-## FASE 2 — Correções críticas e melhorias de qualidade
-
-> Fase 2 inicia APÓS a Fase 1 estar entregue. O objetivo é corrigir problemas encontrados na Fase 1 e elevar a qualidade do frontend antes de qualquer integração de backend.
-> Ordem de execução sugerida: P1 → P2 → P3 → P4 → P5 → P6
-
-### F2-Fase 1 — Corrigir inputs (P1)
-
-1. Abrir `src/pages/NovaCampanha.jsx`
-2. Listar todos os `<input>`, `<textarea>`, `<select>`
-3. Para cada campo sem state:
-   - Adicionar `const [valor, setValor] = useState('')`
-   - Adicionar `value={valor}` e `onChange={e => setValor(e.target.value)}`
-4. Testar digitação em cada campo
-5. Commit: `fix: corrige inputs controlados em NovaCampanha`
-
-### F2-Fase 2 — Separar Home de Mensal (P2)
-
-1. Consultar `screens/Desktop/home/` → entender o que é exclusivo da Home
-2. Consultar `screens/Desktop/mensal/` → entender o que é exclusivo do Mensal
-3. Em `src/App.jsx`, garantir:
-   - `<Route path="/" element={<Dashboard />} />` (sem redirect)
-   - `<Route path="/mensal" element={<Mensal />} />`
-4. Implementar `Mensal.jsx` baseado no design de `screens/Desktop/mensal/`
-5. Garantir que o Header/navbar mostra botão "Mensal" que navega para `/mensal`
-6. Commit: `fix: separa rotas home e mensal conforme design`
-
-### F2-Fase 3 — Instalar e aplicar Material UI Icons (P3)
-
-1. `npm install @mui/icons-material @mui/material @emotion/react @emotion/styled`
-2. Verificar que o build continua funcionando (`npm run build`)
-3. Criar arquivo `src/styles/icons.js` com mapeamento de ícones usados no projeto:
-   ```js
-   export { PublicIcon, AddIcon, BarChartIcon, SettingsIcon,
-            ArrowBackIcon, FilterListIcon, SortIcon,
-            CheckCircleIcon, EditIcon, ContentCopyIcon } from '@mui/icons-material'
-   ```
-4. Substituir emojis em cada componente — um componente por vez
-5. Commit: `feat: substitui emojis por Material UI Icons`
-
-### F2-Fase 4 — Corrigir escala e tipografia (P4)
-
-1. Abrir `src/styles/global.css`
-2. Definir variáveis CSS:
-   ```css
-   :root {
-     --font-size-xs: 11px;
-     --font-size-sm: 12px;
-     --font-size-base: 14px;
-     --font-size-md: 15px;
-     --font-size-lg: 18px;
-     --font-size-xl: 22px;
-     --space-1: 4px;
-     --space-2: 8px;
-     --space-3: 16px;
-     --space-4: 24px;
-     --space-5: 32px;
-   }
-   ```
-3. Aplicar `font-size: var(--font-size-base)` no `body`
-4. Revisar cada componente que usa tamanhos hardcoded — substituir por variáveis
-5. Comparar visualmente com `screens/Desktop/*` após cada ajuste
-6. Commit: `style: aplica escala tipográfica baseada em grid 8px`
-
-### F2-Fase 5 — Completar tela Nova Campanha (P5)
-
-1. Consultar todas as imagens em `screens/Desktop/nova-campanha/`
-2. Identificar todos os campos visíveis
-3. Implementar layout completo da tela (não layout livre)
-4. Garantir que todos os campos são controlados (P1 resolvido antes)
-5. Adicionar validação básica: campos obrigatórios não podem estar vazios ao submeter
-6. Ação de submit: console.log dos dados + toast visual de confirmação mockado
-7. Commit: `feat: completa tela nova-campanha fiel ao Figma`
-
-### F2-Fase 6 — Adicionar mocks comportamentais (P6)
-
-1. Criar `src/mocks/usePeriodFilter.js`:
-   - Retorna dados de métricas diferentes por período selecionado
-   - Períodos: 'hoje', 'ontem', '7dias', '30dias'
-2. Criar `src/mocks/useCampaignFilters.js`:
-   - Filtra array de campanhas por status (Publicado / Rascunho / Todos)
-3. Conectar `PeriodPills` ao `usePeriodFilter` na tela Financeiro
-4. Conectar botão Filtrar na Home ao `useCampaignFilters`
-5. Commit: `feat: adiciona interatividade com hooks de mock comportamental`
 
 ## Concrete Steps
 
@@ -1028,103 +781,54 @@ Uma tarefa só é considerada concluída após commit e push.
 
 ## Validation and Acceptance
 
-### Fase 1 — Critérios (concluída)
+A primeira fase será considerada aceita quando:
 
-- [x] A aplicação abre sem erro.
-- [x] O Dashboard está implementado.
-- [x] A tela Financeiro está implementada.
-- [x] A tela Configurações está implementada.
-- [x] Os botões principais navegam corretamente.
-- [x] Os dados estão mockados em arquivos separados.
-- [x] O visual está próximo ao Figma.
-- [x] O layout está minimamente responsivo.
-- [x] O código está componentizado.
-- [x] Sem dependência obrigatória de backend.
-- [x] Este ExecPlan está atualizado.
+- A aplicação abrir sem erro.
+- O Dashboard estiver implementado.
+- A tela Financeiro estiver implementada.
+- A tela Configurações estiver implementada.
+- Os botões principais navegarem corretamente.
+- Os dados estiverem mockados em arquivos separados.
+- O visual estiver próximo ao Figma.
+- O layout estiver minimamente responsivo.
+- O código estiver componentizado.
+- Não houver dependência obrigatória de backend nesta fase.
+- Este ExecPlan estiver atualizado com o estado real da implementação.
 
-### Fase 2 — Critérios de aceite
+### Checklist visual do Dashboard
 
-A Fase 2 será considerada concluída quando TODOS os itens abaixo estiverem verificados:
+- [ ] Header com logo, título e subtítulo.
+- [ ] Botões superiores.
+- [ ] Card `Total de campanhas`.
+- [ ] Card `Campanhas ativas`.
+- [ ] Card `Rascunhos`.
+- [ ] Card `ROI (Ontem)`.
+- [ ] Card `Países configurados`.
+- [ ] Card `Criar Nova Campanha`.
+- [ ] Card `Financeiro & Relatórios`.
+- [ ] Card `ROI - Dia Anterior`.
+- [ ] Seção `Suas Campanhas`.
+- [ ] Card da campanha `DirigirBTN4`.
 
-Última atualização: [2026-05-05 14:57]
+### Checklist visual do Financeiro
 
-#### Ícones (P3)
+- [ ] Botão voltar.
+- [ ] Título e subtítulo.
+- [ ] Filtros de conta, BM e período.
+- [ ] Cards financeiros.
+- [ ] Gráfico de gastos.
+- [ ] Link `Ver relatório completo`.
 
-- [x] `@mui/icons-material` instalado e buildando sem erro
-- [x] Nenhum emoji usado como ícone de UI (emojis de flag de país são permitidos temporariamente)
-- [x] Todos os botões de ação do design usam ícone MUI quando aplicável
-- [x] StatusBadge usa ícones MUI para cada status
+### Checklist visual de Configurações
 
-#### Escala / Tipografia (P4)
-
-- [x] `font-size` base do body definido como `14px` no `global.css`
-- [x] Títulos de página não ultrapassam `22px`
-- [x] Cards com padding proporcional (16–24px) conforme Figma
-- [x] Layout visualmente comparável ao Figma (não pixel-perfect, mas proporcional)
-
-#### Home vs Mensal (P2)
-
-- [x] Rota `/` renderiza a página Home (Dashboard) baseada em `screens/desktop/home/`
-- [x] Rota `/mensal` renderiza a página Mensal baseada em `screens/desktop/mensal/`
-- [x] Botão "Mensal" na navbar navega para `/mensal` (não é a página atual)
-- [x] As duas páginas são visualmente distintas conforme design
-
-#### Inputs (P1)
-
-- [x] Todos os campos editáveis de `NovaCampanha.jsx` aceitam digitação
-- [x] Nenhum input editável está bloqueado ou somente leitura
-- [x] Estado do formulário é mantido ao navegar entre campos
-
-#### Nova Campanha (P5)
-
-- [x] Todos os campos/seções visíveis no design estão presentes (steps 1–5 + sidebar)
-- [x] Seções incluem: Configuração, Link e Parâmetros, Copy Base (variações), Orçamento/Programação, Upload
-- [x] Botões principais do design existem (Publicar / Salvar como rascunho) e possuem ação mockada
-- [x] Botão `Voltar` retorna ao fluxo anterior (fallback para `/mensal`)
-
-#### Mocks Comportamentais (P6)
-
-- [x] Pasta `src/mocks/` existe com hooks documentados
-- [x] Clicar em período (Hoje/Ontem/7dias/30dias) muda valores dos cards do Financeiro
-- [x] Botão Filtrar na Home filtra a lista de campanhas por algum critério
-- [x] Interações não causam erros no build e não devem gerar erros no console
-
----
-
-### Checklist visual do Dashboard (Fase 1 — referência)
-
-- [x] Header com logo, título e subtítulo.
-- [x] Botões superiores.
-- [x] Card `Total de campanhas`.
-- [x] Card `Campanhas ativas`.
-- [x] Card `Rascunhos`.
-- [x] Card `ROI (Ontem)`.
-- [x] Card `Países configurados`.
-- [x] Card `Criar Nova Campanha`.
-- [x] Card `Financeiro & Relatórios`.
-- [x] Card `ROI - Dia Anterior`.
-- [x] Seção `Suas Campanhas`.
-- [x] Card da campanha `DirigirBTN4`.
-
-### Checklist visual do Financeiro (Fase 1 — referência)
-
-- [x] Botão voltar.
-- [x] Título e subtítulo.
-- [x] Filtros de conta, BM e período.
-- [x] Cards financeiros.
-- [x] Gráfico de gastos.
-- [x] Link `Ver relatório completo`.
-
-### Checklist visual de Configurações (Fase 1 — referência)
-
-- [x] Botão voltar.
-- [x] Título e subtítulo.
-- [x] Lista de países.
-- [x] Códigos dos países.
-- [x] Badges de idioma.
-- [x] Aviso de países fixos.
-- [x] Outras configurações.
-- [x] Badges `Ativo`.
+- [ ] Botão voltar.
+- [ ] Título e subtítulo.
+- [ ] Lista de países.
+- [ ] Códigos dos países.
+- [ ] Badges de idioma.
+- [ ] Aviso de países fixos.
+- [ ] Outras configurações.
+- [ ] Badges `Ativo`.
 
 ### 12. Analisar XLSX antes de implementar
 
@@ -1173,20 +877,15 @@ Para recuperação:
 
 ## Artifacts and Notes
 
-Última atualização: [2026-05-05 00:00]
+Última atualização: [2026-05-05 09:55]
 
-### Arquivos existentes (Fase 1 — entregues)
+Arquivos esperados ao final da primeira fase, dependendo da stack real:
 
     src/App.jsx
     src/main.jsx
     src/pages/Dashboard.jsx
     src/pages/Financeiro.jsx
     src/pages/Configuracoes.jsx
-    src/pages/Mensal.jsx           ← criado mas com erro (confusão Home/Mensal)
-    src/pages/NovaCampanha.jsx     ← incompleto + bug de inputs
-    src/pages/RoiOntem.jsx
-    src/pages/CampanhaDetalhes.jsx
-    src/pages/CampanhaDuplicar.jsx
     src/components/Header.jsx
     src/components/BackLink.jsx
     src/components/MetricCard.jsx
@@ -1198,23 +897,12 @@ Para recuperação:
     src/components/PeriodPills.jsx
     src/components/FinanceMetricCard.jsx
     src/components/ExportButton.jsx
-    src/components/PageShell.jsx
     src/data/mockCampaigns.js
     src/data/mockCountries.js
     src/data/mockFinancial.js
     src/styles/global.css
-
-### Arquivos novos esperados após Fase 2
-
-    src/mocks/usePeriodFilter.js    ← hook: simula dados por período
-    src/mocks/useCampaignFilters.js ← hook: filtra campanhas por status
-    src/mocks/useFormState.js       ← hook genérico de formulário controlado
-    src/styles/icons.js             ← mapeamento centralizado de ícones MUI
-
-### Referências externas
-
-    screens/Desktop/*  → fonte de verdade do design
-    projeto_escopo.xlsx → fonte de verdade de regra de negócio
+    - screens/ → referência visual (UI)
+    - XLSX na raiz → referência de regra de negócio
 
 Pendências do produto completo:
 

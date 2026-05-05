@@ -11,11 +11,10 @@ export const mockCampaigns = [
   {
     id: "ingles-arabe-mundo",
     name: "Ingles [ARABE-MUNDO]",
-    status: "Publicado",
+    status: "Rascunho",
     scopeLabel: "Global",
     generatedLabel: "6 campanhas geradas",
     createdAtLabel: "Criado em 2026-04-24",
     countryCodes: ["AE", "FR", "ES", "US", "BR", "MX"]
   }
 ];
-
