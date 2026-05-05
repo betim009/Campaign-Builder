@@ -54,13 +54,13 @@ Explica o objetivo e o resultado visível.
 
 ## Progress
 
-Última atualização: [2026-05-05 09:35]
+Última atualização: [2026-05-05 09:36]
 
 - [x] Entendimento inicial: o XLSX era usado como sistema manual do cliente.
 - [x] Entendimento inicial: o Figma representa a futura interface do sistema.
 - [x] Entendimento inicial: o projeto tem relação com campanhas de anúncios e API da Meta.
 - [x] Criar ou revisar a estrutura do projeto frontend.
-- [ ] Instalar e validar dependências necessárias.
+- [x] Instalar e validar dependências necessárias.
 - [ ] Criar layout base da aplicação.
 - [ ] Criar navegação entre telas.
 - [ ] Implementar Dashboard.
@@ -76,13 +76,14 @@ Explica o objetivo e o resultado visível.
 
 ## Data Progress
 
-Última atualização: [2026-05-05 09:35]
+Última atualização: [2026-05-05 09:36]
 
 - [2026-05-04] Entendimento do projeto baseado no XLSX
 - [2026-05-04] Definição do escopo do frontend
 - [x] [2026-05-04 22:10] Entendimento do XLSX como sistema
 - [x] [2026-05-05 09:33] Auditoria do repositório (estado real + screens + XLSX)
 - [x] [2026-05-05 09:35] Criar estrutura do projeto (Vite + React + pasta `src/`)
+- [x] [2026-05-05 09:36] `npm install` + `npm run build` (projeto compila)
 - [ ] Implementar dashboard
 - [ ] Implementar financeiro
 
@@ -93,13 +94,14 @@ Explica o objetivo e o resultado visível.
 - O projeto não é apenas um CRUD. Ele tende a envolver automação, relatórios, regras de campanha e integração externa com a Meta Ads API.
 - As informações de países, idiomas, objetivos de campanha e nomes de campanha precisam ser tratadas como regras importantes, não como textos soltos de interface.
 
-Última atualização: [2026-05-05 09:33]
+Última atualização: [2026-05-05 09:36]
 
 - [2026-05-04] O XLSX era o sistema principal do cliente
 - [2026-05-04] O projeto não é apenas CRUD, envolve automação
 - [2026-05-05 09:33] Repositório ainda não tem projeto frontend (sem `package.json`/`src`); contém apenas `.git`, `PLANS.md`, `PLANS.design.md`, `README.md`, `screens/` e `projeto_escopo.xlsx`.
 - [2026-05-05 09:33] Screens Desktop incluem tabela “Detalhamento por Campanha” no Financeiro (além de filtros/cards/gráfico); ExecPlan anterior mencionava apenas gráfico.
 - [2026-05-05 09:33] XLSX tem abas: `Observação`, `VISUALIZAÇÃO`, `BOTÃO`, `Parametro`, `Preencher`; campanhas do XLSX aparecem como “Ingles [PAÍS/REGIÃO]” e o exemplo visual “DirigirBTN4” não aparece no arquivo.
+- [2026-05-05 09:36] `npm install` reportou 2 vulnerabilidades moderadas via `npm audit` (não corrigido ainda para evitar alterações não relacionadas).
 
 ## Decision Log
 
