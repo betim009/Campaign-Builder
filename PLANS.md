@@ -54,7 +54,7 @@ Explica o objetivo e o resultado visível.
 
 ## Progress
 
-Última atualização: [2026-05-06 12:35]
+Última atualização: [2026-05-06 13:59]
 
 - [x] Entendimento inicial: o XLSX era usado como sistema manual do cliente.
 - [x] Entendimento inicial: o Figma representa a futura interface do sistema.
@@ -74,6 +74,7 @@ Explica o objetivo e o resultado visível.
 - [x] Registrar pendências para backend e Meta Ads API.
 - [x] Atualizar este ExecPlan com tudo que foi feito.
 - [x] Auditoria: padronizar referências de caminho `screens/Desktop/*` → `screens/desktop/*` (case-sensitive) para refletir o repo real.
+- [x] Escrever dentro do arquivo na raiz `SOBRE.md` o que voce entendeu o que é o projeto. E qual o fluxo do projeto. E o que o projeto faz.
 
 ### Fase 2 — Correções críticas (em andamento)
 
@@ -92,7 +93,7 @@ Explica o objetivo e o resultado visível.
 
 ## Data Progress
 
-Última atualização: [2026-05-06 12:35]
+Última atualização: [2026-05-06 13:59]
 
 - [2026-05-04] Entendimento do projeto baseado no XLSX
 - [2026-05-04] Definição do escopo do frontend
@@ -119,10 +120,11 @@ Explica o objetivo e o resultado visível.
 - [x] [2026-05-06 12:04] Auditoria: padronizado o ExecPlan para usar `screens/desktop/*` e `screens/mobile/*` (corrige referências `screens/Desktop/*`).
 - [x] [2026-05-06 12:23] Fase 3 (P3) — Refinados mocks do Dashboard: métricas calculadas a partir de `frontend/src/data/*` (sem números hardcoded).
 - [x] [2026-05-06 12:35] Fase 3 (P1) — Limpeza da raiz: removidos `dist/` e `node_modules/` da raiz (não necessários após mover frontend/backend).
+- [x] [2026-05-06 13:59] Documento `SOBRE.md` preenchido (visão geral do projeto, fluxo e como rodar).
 
 ## Pending Work (Pendências)
 
-Última atualização: [2026-05-06 12:35]
+Última atualização: [2026-05-06 13:59]
 
 Esta seção lista tudo que ainda NÃO foi implementado,
 mesmo que não esteja explicitamente no Progress.
@@ -330,7 +332,7 @@ Esta seção deve ser atualizada sempre que:
 - O projeto não é apenas um CRUD. Ele tende a envolver automação, relatórios, regras de campanha e integração externa com a Meta Ads API.
 - As informações de países, idiomas, objetivos de campanha e nomes de campanha precisam ser tratadas como regras importantes, não como textos soltos de interface.
 
-Última atualização: [2026-05-06 12:35]
+Última atualização: [2026-05-06 13:59]
 
 - [2026-05-04] O XLSX era o sistema principal do cliente
 - [2026-05-04] O projeto não é apenas CRUD, envolve automação
@@ -353,6 +355,7 @@ Esta seção deve ser atualizada sempre que:
 - [2026-05-06 12:08] Não existia `backend/` no repo; iniciado backend como pacote Node/Express independente em `backend/` com `GET /healthz`.
 - [2026-05-06 12:23] Inconsistência detectada: o Dashboard tinha métricas hardcoded (`Total de campanhas`, `Rascunhos`, `ROI (Ontem)`) enquanto `frontend/src/data/mockCampaigns.js` tinha dados divergentes; corrigido para derivar métricas dos mocks e alinhar `mockCampaigns` ao design (1 campanha publicada).
 - [2026-05-06 12:35] Foram encontrados artefatos locais na raiz (`dist/` e `node_modules/`) que não são necessários após a separação em `frontend/` e `backend/`; removidos para manter a raiz limpa.
+- [2026-05-06 13:59] `SOBRE.md` existia na raiz, mas estava vazio; preenchido para orientar rapidamente o objetivo, fluxo e como rodar o projeto.
 
 ## Decision Log
 
@@ -402,7 +405,7 @@ Esta seção deve ser atualizada sempre que:
   Motivo: o frontend deve ter interatividade real (filtros que filtram, períodos que mudam dados) mesmo sem backend. Hooks de mock centralizam essa lógica e facilitam a futura substituição por chamadas reais de API.
 
 
-Última atualização: [2026-05-06 12:35]
+Última atualização: [2026-05-06 13:59]
 
 - [2026-05-04] Decisão: iniciar pelo frontend
   Motivo: validar interface antes da API
@@ -438,12 +441,14 @@ Esta seção deve ser atualizada sempre que:
   Motivo: reduzir divergências entre UI e mocks e evitar números “soltos” desconectados dos dados.
 - [2026-05-06 12:35] Decisão: manter a raiz do repo enxuta após a separação full stack, removendo artefatos locais `dist/` e `node_modules/` da raiz.
   Motivo: evitar confusão (build/deps devem existir apenas em `frontend/` e `backend/`) e reduzir ruído no ambiente local.
+- [2026-05-06 13:59] Decisão: manter um documento curto (`SOBRE.md`) na raiz para orientar rapidamente o objetivo do produto, fluxos e como rodar.
+  Motivo: facilitar onboarding e reduzir dependência de contexto fora do `PLANS.md`.
 
 ## Outcomes & Retrospective
 
-Última atualização: [2026-05-06 11:52]
+Última atualização: [2026-05-06 13:59]
 
-Entregue nesta fase (frontend):
+Entregue até aqui (frontend):
 
 - SPA React + Vite rodando e buildando (sem backend).
 - Navegação entre `Dashboard (Mensal)`, `Financeiro` e `Configurações`.
@@ -451,12 +456,20 @@ Entregue nesta fase (frontend):
 - Financeiro com filtros visuais, cards de métricas, gráfico (SVG) e tabela de detalhamento.
 - Configurações com países fixos e “Outras Configurações”.
 - Dados mockados centralizados em `frontend/src/data/`.
-- Fase 3 (em andamento): frontend isolado em `frontend/` (build validado).
+- Fase 3: frontend isolado em `frontend/` (build validado).
+- Fase 3: backend iniciado em `backend/` com `GET /healthz` (healthcheck).
+- Fase 3: mocks do Dashboard refinados para evitar números hardcoded.
+- Documentação: `SOBRE.md` preenchido para orientação rápida.
 
 Pendências imediatas (frontend):
 
 - Substituir emojis por ícones/asset definitivos, se necessário para fidelidade.
 - Refinar “Mensal” (se existir tela própria no design).
+
+Pendências imediatas (full stack):
+
+- Fase 3 [P4]: iniciar modelagem do banco (entidades/migrations/seed).
+- Fase 3 [P5]: configurar Docker (frontend + backend + banco).
 
 Ao final da primeira fase, preencher esta seção com:
 
@@ -1274,7 +1287,11 @@ Para recuperação:
 
 ## Artifacts and Notes
 
-Última atualização: [2026-05-06 12:23]
+Última atualização: [2026-05-06 13:59]
+
+### Documentação de orientação
+
+    SOBRE.md
 
 ### Arquivos existentes (Fase 1 — entregues)
 
