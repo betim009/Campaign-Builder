@@ -63,12 +63,13 @@ function isRetryableStatus(status) {
 }
 
 async function fetchJson(url, { timeoutMs = 15000, retries = 2 } = {}) {
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), timeoutMs)
-  try {
-    let attempt = 0
-    while (attempt <= retries) {
-      attempt += 1
+  let attempt = 0
+  while (attempt <= retries) {
+    attempt += 1
+
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), timeoutMs)
+    try {
       try {
         const res = await fetch(url, { signal: controller.signal })
         const text = await res.text()
@@ -112,12 +113,12 @@ async function fetchJson(url, { timeoutMs = 15000, retries = 2 } = {}) {
 
         throw err
       }
+    } finally {
+      clearTimeout(timeout)
     }
-
-    throw new Error('Meta Graph request failed after retries')
-  } finally {
-    clearTimeout(timeout)
   }
+
+  throw new Error('Meta Graph request failed after retries')
 }
 
 export async function metaFetchCampaignInsightsDaily({
@@ -164,9 +165,28 @@ export async function metaFetchCampaignInsightsDaily({
     limit: 5000
   })
 
-  const json = await fetchJson(url, { retries: 3 })
-  const data = Array.isArray(json?.data) ? json.data : []
-  return data
+  const out = []
+  let nextUrl = url
+  let pages = 0
+
+  while (nextUrl && pages < 20) {
+    pages += 1
+    const json = await fetchJson(nextUrl, { retries: 3 })
+    const data = Array.isArray(json?.data) ? json.data : []
+    out.push(...data)
+    nextUrl = typeof json?.paging?.next === 'string' ? json.paging.next : null
+  }
+
+  return out
+}
+
+export async function metaFetchMe({ accessToken, fields = ['id', 'name'] } = {}) {
+  if (!accessToken) throw new Error('accessToken is required')
+  const url = buildUrl('me', {
+    access_token: accessToken,
+    fields: Array.isArray(fields) ? fields.join(',') : String(fields)
+  })
+  return fetchJson(url, { retries: 2 })
 }
 
 export function normalizeDailyInsightRow(row) {

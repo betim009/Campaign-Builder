@@ -4,6 +4,7 @@ import { asyncHandler } from '../lib/asyncHandler.js'
 import { jsonError } from '../lib/http.js'
 import { isUuid } from '../lib/validate.js'
 import { syncGeneratedCampaignMetrics } from '../meta/sync.js'
+import { metaFetchMe } from '../meta/graph.js'
 
 function coerceAccessToken(value) {
   if (typeof value !== 'string') return null
@@ -136,6 +137,29 @@ export function metaRouter() {
   )
 
   router.post(
+    '/validate',
+    asyncHandler(async (req, res) => {
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      const pool = getPool()
+      const accessToken = await resolveAccessToken(pool, req)
+      if (!accessToken) {
+        return jsonError(res, 400, 'Missing accessToken (provide body.accessToken, META_ACCESS_TOKEN, or save via /tokens)')
+      }
+
+      try {
+        const me = await metaFetchMe({ accessToken })
+        return res.json({ ok: true, me })
+      } catch (err) {
+        const status = typeof err?.status === 'number' ? err.status : 502
+        return jsonError(res, status, err?.message ?? 'Meta Graph validation failed', err?.details)
+      }
+    })
+  )
+
+  router.post(
     '/sync/generated-campaigns/:id',
     asyncHandler(async (req, res) => {
       if (!req.app.locals.dbEnabled) {
@@ -170,19 +194,23 @@ export function metaRouter() {
       }
 
       const accessToken = await resolveAccessToken(pool, req)
-      const result = await syncGeneratedCampaignMetrics({
-        pool,
-        generatedCampaignId,
-        metaCampaignId: metaCampaignId.trim(),
-        accessToken,
-        startDate,
-        endDate
-      })
+      try {
+        const result = await syncGeneratedCampaignMetrics({
+          pool,
+          generatedCampaignId,
+          metaCampaignId: metaCampaignId.trim(),
+          accessToken,
+          startDate,
+          endDate
+        })
 
-      return res.json({ ok: true, sync: result })
+        return res.json({ ok: true, sync: result })
+      } catch (err) {
+        const status = typeof err?.status === 'number' ? err.status : 502
+        return jsonError(res, status, err?.message ?? 'Meta sync failed', err?.details)
+      }
     })
   )
 
   return router
 }
-
