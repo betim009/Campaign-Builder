@@ -26,23 +26,23 @@ export function generatedCampaignsRouter() {
       }
       const pool = getPool()
 
-    const { rows } = await pool.query(
-      `
-        SELECT
-          gc.id,
-          gc.campaign_id,
-          gc.country_code,
-          gc.meta_campaign_id,
-          gc.name,
-          gc.status,
-          gc.created_at
-        FROM generated_campaigns gc
-        WHERE ($1::uuid IS NULL OR gc.campaign_id = $1::uuid)
-        ORDER BY gc.created_at DESC
-        LIMIT $2
-      `,
-      [campaignId, limit]
-    )
+      const { rows } = await pool.query(
+        `
+          SELECT
+            gc.id,
+            gc.campaign_id,
+            gc.country_code,
+            gc.meta_campaign_id,
+            gc.name,
+            gc.status,
+            gc.created_at
+          FROM generated_campaigns gc
+          WHERE ($1::uuid IS NULL OR gc.campaign_id = $1::uuid)
+          ORDER BY gc.created_at DESC
+          LIMIT $2
+        `,
+        [campaignId, limit]
+      )
 
       return res.json({ ok: true, generated_campaigns: rows })
     })
@@ -64,20 +64,20 @@ export function generatedCampaignsRouter() {
         return jsonError(res, 400, 'Invalid status', { allowed: [...ALLOWED_STATUSES] })
       }
 
-    const pool = getPool()
-    const { rows, rowCount } = await pool.query(
-      `
-        UPDATE generated_campaigns
-        SET status = $2
-        WHERE id = $1
-        RETURNING id, campaign_id, country_code, meta_campaign_id, name, status, created_at
-      `,
-      [req.params.id, status]
-    )
+      const pool = getPool()
+      const { rows, rowCount } = await pool.query(
+        `
+          UPDATE generated_campaigns
+          SET status = $2
+          WHERE id = $1
+          RETURNING id, campaign_id, country_code, meta_campaign_id, name, status, created_at
+        `,
+        [req.params.id, status]
+      )
 
-    if (rowCount === 0) {
-      return jsonError(res, 404, 'Generated campaign not found')
-    }
+      if (rowCount === 0) {
+        return jsonError(res, 404, 'Generated campaign not found')
+      }
 
       return res.json({ ok: true, generated_campaign: rows[0] })
     })
@@ -99,20 +99,20 @@ export function generatedCampaignsRouter() {
         return jsonError(res, 400, 'Invalid metaCampaignId')
       }
 
-    const pool = getPool()
-    const { rows, rowCount } = await pool.query(
-      `
-        UPDATE generated_campaigns
-        SET meta_campaign_id = $2, status = 'ACTIVE'
-        WHERE id = $1
-        RETURNING id, campaign_id, country_code, meta_campaign_id, name, status, created_at
-      `,
-      [req.params.id, metaCampaignId.trim()]
-    )
+      const pool = getPool()
+      const { rows, rowCount } = await pool.query(
+        `
+          UPDATE generated_campaigns
+          SET meta_campaign_id = $2, status = 'ACTIVE'
+          WHERE id = $1
+          RETURNING id, campaign_id, country_code, meta_campaign_id, name, status, created_at
+        `,
+        [req.params.id, metaCampaignId.trim()]
+      )
 
-    if (rowCount === 0) {
-      return jsonError(res, 404, 'Generated campaign not found')
-    }
+      if (rowCount === 0) {
+        return jsonError(res, 404, 'Generated campaign not found')
+      }
 
       return res.json({ ok: true, generated_campaign: rows[0] })
     })
