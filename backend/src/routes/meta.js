@@ -159,6 +159,24 @@ export function metaRouter() {
     })
   )
 
+  router.get(
+    '/status',
+    asyncHandler(async (req, res) => {
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      const pool = getPool()
+      const accessToken = await resolveAccessToken(pool, req)
+      return res.json({
+        ok: true,
+        provider: process.env.META_SYNC_PROVIDER ?? null,
+        graph_version: process.env.META_GRAPH_VERSION ?? null,
+        has_access_token: Boolean(accessToken)
+      })
+    })
+  )
+
   router.post(
     '/sync/generated-campaigns/:id',
     asyncHandler(async (req, res) => {
