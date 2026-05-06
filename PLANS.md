@@ -54,7 +54,7 @@ Explica o objetivo e o resultado visível.
 
 ## Progress
 
-Última atualização: [2026-05-06 11:56]
+Última atualização: [2026-05-06 12:04]
 
 - [x] Entendimento inicial: o XLSX era usado como sistema manual do cliente.
 - [x] Entendimento inicial: o Figma representa a futura interface do sistema.
@@ -73,6 +73,7 @@ Explica o objetivo e o resultado visível.
 - [x] Revisar fidelidade visual com o Figma.
 - [x] Registrar pendências para backend e Meta Ads API.
 - [x] Atualizar este ExecPlan com tudo que foi feito.
+- [x] Auditoria: padronizar referências de caminho `screens/Desktop/*` → `screens/desktop/*` (case-sensitive) para refletir o repo real.
 
 ### Fase 2 — Correções críticas (em andamento)
 
@@ -89,7 +90,7 @@ Explica o objetivo e o resultado visível.
 
 ## Data Progress
 
-Última atualização: [2026-05-06 11:56]
+Última atualização: [2026-05-06 12:04]
 
 - [2026-05-04] Entendimento do projeto baseado no XLSX
 - [2026-05-04] Definição do escopo do frontend
@@ -106,17 +107,18 @@ Explica o objetivo e o resultado visível.
 - [x] [2026-05-05 09:50] Dados mockados em `src/data/*` (campanhas/paises/financeiro)
 - [x] [2026-05-05 09:51] Componentização extra (Financeiro: filtros/metric cards/export button)
 - [x] [2026-05-05 09:53] Ajustes de responsividade (grids + overflow da tabela do Financeiro)
-- [x] [2026-05-05 09:54] Revisão de fidelidade visual (comparação com `screens/Desktop/*`)
+- [x] [2026-05-05 09:54] Revisão de fidelidade visual (comparação com `screens/desktop/*`)
 - [x] [2026-05-05 09:55] Registro de pendências (backend/db/Meta Ads API + telas futuras)
 - [x] [2026-05-05 09:55] ExecPlan atualizado e consistente com o código atual
 - [x] [2026-05-05 14:57] P4 — Ajuste de escala tipográfica e espaçamentos globais (base 14px + refinamentos)
-- [x] [2026-05-05 14:57] P5 — Tela Nova Campanha completada conforme `screens/Desktop/nova-campanha/*` (steps 1–5 + sidebar)
+- [x] [2026-05-05 14:57] P5 — Tela Nova Campanha completada conforme `screens/desktop/nova-campanha/*` (steps 1–5 + sidebar)
 - [x] [2026-05-05 14:57] P6 — Mocks comportamentais (período no Financeiro + filtro/ordenação na Home + selects reais)
 - [x] [2026-05-06 11:52] Fase 3 (P1) — Movido o frontend para `frontend/` e validado `npm run build`
+- [x] [2026-05-06 12:04] Auditoria: padronizado o ExecPlan para usar `screens/desktop/*` e `screens/mobile/*` (corrige referências `screens/Desktop/*`).
 
 ## Pending Work (Pendências)
 
-Última atualização: [2026-05-06 11:56]
+Última atualização: [2026-05-06 12:04]
 
 Esta seção lista tudo que ainda NÃO foi implementado,
 mesmo que não esteja explicitamente no Progress.
@@ -162,14 +164,14 @@ Causa provável: inputs com `value` sem `onChange` — React bloqueia a edição
 O Codex confundiu as telas HOME e MENSAL porque o botão "Mensal" aparece visualmente ativo no Figma da tela principal. Ele interpretou a HOME como sendo a página MENSAL. Isso está ERRADO.
 
 Regra correta:
-- `/` → Rota da HOME (Dashboard principal — `screens/Desktop/home/`)
-- `/mensal` → Rota separada MENSAL (`screens/Desktop/mensal/`)
+- `/` → Rota da HOME (Dashboard principal — `screens/desktop/home/`)
+- `/mensal` → Rota separada MENSAL (`screens/desktop/mensal/`)
 - O botão "Mensal" na navbar navega para `/mensal`, não é a página atual
 
 Tarefas:
-- [x] Consultar imagens em `screens/Desktop/home/` e `screens/Desktop/mensal/` para entender a diferença visual
+- [x] Consultar imagens em `screens/desktop/home/` e `screens/desktop/mensal/` para entender a diferença visual
 - [x] Corrigir a rota `/` para renderizar o Dashboard correto (Home) — não deve ser redirecionado para `/mensal`
-- [x] Corrigir `src/pages/Mensal.jsx` para refletir fielmente o design de `screens/Desktop/mensal/`
+- [x] Corrigir `src/pages/Mensal.jsx` para refletir fielmente o design de `screens/desktop/mensal/`
 - [x] Garantir que a navegação da navbar distingue Home de Mensal
 - [x] Commit: `fix: separa rotas home e mensal conforme design`
 
@@ -215,7 +217,7 @@ Tarefas:
   - Labels/badges: `11px`
 - [x] Revisar `padding` e `margin` dos componentes principais. Base: grid de 8px (`4px`, `8px`, `16px`, `24px`, `32px`)
 - [x] Revisar larguras de cards — contidas por `.container` e grids
-- [x] Comparar visualmente telas principais com `screens/Desktop/*` após ajuste
+- [x] Comparar visualmente telas principais com `screens/desktop/*` após ajuste
 - [x] Commit: `style: corrige escala tipográfica e espaçamentos conforme Figma`
 
 ---
@@ -225,7 +227,7 @@ Tarefas:
 A tela `nova-campanha` está incompleta. Não reflete o design do Figma.
 
 Tarefas:
-- [x] Consultar TODAS as imagens em `screens/Desktop/nova-campanha/`
+- [x] Consultar TODAS as imagens em `screens/desktop/nova-campanha/`
 - [x] Mapear cada seção visível no design (steps 1–5 + sidebar)
 - [x] Implementar Step 1 — Configuração (Nome, BM, Conta de anúncio, ID da Página, Pixel, Beneficiário)
 - [x] Implementar Step 2 — Link e Parâmetros (Domínio, Slug, URL final, Tracking automático, Parâmetro Nicho + campos gerados)
@@ -322,7 +324,7 @@ Esta seção deve ser atualizada sempre que:
 - O projeto não é apenas um CRUD. Ele tende a envolver automação, relatórios, regras de campanha e integração externa com a Meta Ads API.
 - As informações de países, idiomas, objetivos de campanha e nomes de campanha precisam ser tratadas como regras importantes, não como textos soltos de interface.
 
-Última atualização: [2026-05-06 11:52]
+Última atualização: [2026-05-06 12:04]
 
 - [2026-05-04] O XLSX era o sistema principal do cliente
 - [2026-05-04] O projeto não é apenas CRUD, envolve automação
@@ -332,7 +334,7 @@ Esta seção deve ser atualizada sempre que:
 - [2026-05-05 09:36] `npm install` reportou 2 vulnerabilidades moderadas via `npm audit` (não corrigido ainda para evitar alterações não relacionadas).
 - [2026-05-05 12:59] A seção `Pending Work` estava com data futura `[2026-05-05 23:00]` em relação ao horário real do sistema (corrigido para refletir o estado atual).
 - [2026-05-05 13:01] Arquivos locais de prompt (`PROMPT.*.txt`) estavam na raiz e apareciam como untracked; adicionados ao `.gitignore` para evitar commits acidentais.
-- [2026-05-05 00:00] ERRO DE INTERPRETAÇÃO (Codex — Fase 1): o botão “Mensal” aparece visualmente ativo no Figma da tela HOME, o que levou o Codex a tratar a HOME como sendo a página MENSAL. As duas são páginas distintas: `screens/Desktop/home/` ≠ `screens/Desktop/mensal/`. A rota `/` deve ser a Home; `/mensal` deve ser a Mensal. A decisão de redirecionar `/` para `/mensal` foi um erro e deve ser revertida.
+- [2026-05-05 00:00] ERRO DE INTERPRETAÇÃO (Codex — Fase 1): o botão “Mensal” aparece visualmente ativo no Figma da tela HOME, o que levou o Codex a tratar a HOME como sendo a página MENSAL. As duas são páginas distintas: `screens/desktop/home/` ≠ `screens/desktop/mensal/`. A rota `/` deve ser a Home; `/mensal` deve ser a Mensal. A decisão de redirecionar `/` para `/mensal` foi um erro e deve ser revertida.
 - [2026-05-05 00:00] O projeto usa emojis como substitutos de ícones — isso foi uma decisão temporária (Fase 1) que deve ser resolvida na Fase 2 com Material UI Icons.
 - [2026-05-05 00:00] Inputs de `NovaCampanha.jsx` não respondem à digitação — provável uso de `value` sem `onChange` (inputs controlados quebrados).
 - [2026-05-05 00:00] Layout visual está com escala aproximadamente 2x o esperado — fonte base provavelmente não foi definida corretamente em `global.css`, e os componentes herdaram tamanhos do browser default.
@@ -341,6 +343,7 @@ Esta seção deve ser atualizada sempre que:
 - [2026-05-05 14:57] O design completo de `Nova Campanha` inclui steps 3–5 (Copy Base, Orçamento/Programação, Upload + sidebar); a seção [P5] foi atualizada e implementada conforme `screens/desktop/nova-campanha/*`.
 - [2026-05-06 11:18] Divergência local detectada: o arquivo de design `screens/desktop/home/Captura de Tela 2026-05-05 às 08.25.14.png` estava removido no working tree; arquivo restaurado para preservar a fonte de verdade visual.
 - [2026-05-06 11:52] Após iniciar a Fase 3 (P1), o frontend deixou de ficar na raiz: todos os caminhos do app agora são relativos a `frontend/` (ex: `src/*` → `frontend/src/*`), e comandos passam a ser executados em `frontend/`.
+- [2026-05-06 12:04] O ExecPlan ainda tinha referências `screens/Desktop/*` em trechos do documento; padronizado para `screens/desktop/*` e `screens/mobile/*` para refletir o repo real (case-sensitive).
 
 ## Decision Log
 
@@ -390,7 +393,7 @@ Esta seção deve ser atualizada sempre que:
   Motivo: o frontend deve ter interatividade real (filtros que filtram, períodos que mudam dados) mesmo sem backend. Hooks de mock centralizam essa lógica e facilitam a futura substituição por chamadas reais de API.
 
 
-Última atualização: [2026-05-06 11:52]
+Última atualização: [2026-05-06 12:04]
 
 - [2026-05-04] Decisão: iniciar pelo frontend
   Motivo: validar interface antes da API
@@ -418,6 +421,8 @@ Esta seção deve ser atualizada sempre que:
 
 - [2026-05-06 11:52] Decisão: mover o frontend para `frontend/` (Fase 3 — P1) para preparar a evolução full stack com `backend/` e Docker.
   Motivo: isolar responsabilidades e evitar refactors maiores quando o backend for iniciado.
+- [2026-05-06 12:04] Decisão: padronizar a documentação para usar os caminhos reais do repo (`screens/desktop/*` e `screens/mobile/*`) e evitar referências com case incorreto.
+  Motivo: o filesystem é case-sensitive em muitos ambientes; referências incorretas geram divergência entre ExecPlan e estrutura real.
 
 ## Outcomes & Retrospective
 
@@ -499,14 +504,14 @@ Essa pasta contém as referências visuais oficiais do projeto.
 Estrutura:
 
     screens/
-        Desktop/
+        desktop/
             home/
             configuracoes/
             financeiro/
             mensal/
             nova-campanha
             roi
-        Mobile/
+        mobile/
             home/
             configuracoes/
             financeiro/
@@ -867,12 +872,12 @@ Ao final, registrar em `Artifacts and Notes` o que ainda precisa ser feito:
 
 ### F2-Fase 2 — Separar Home de Mensal (P2)
 
-1. Consultar `screens/Desktop/home/` → entender o que é exclusivo da Home
-2. Consultar `screens/Desktop/mensal/` → entender o que é exclusivo do Mensal
+1. Consultar `screens/desktop/home/` → entender o que é exclusivo da Home
+2. Consultar `screens/desktop/mensal/` → entender o que é exclusivo do Mensal
 3. Em `src/App.jsx`, garantir:
    - `<Route path="/" element={<Dashboard />} />` (sem redirect)
    - `<Route path="/mensal" element={<Mensal />} />`
-4. Implementar `Mensal.jsx` baseado no design de `screens/Desktop/mensal/`
+4. Implementar `Mensal.jsx` baseado no design de `screens/desktop/mensal/`
 5. Garantir que o Header/navbar mostra botão "Mensal" que navega para `/mensal`
 6. Commit: `fix: separa rotas home e mensal conforme design`
 
@@ -910,12 +915,12 @@ Ao final, registrar em `Artifacts and Notes` o que ainda precisa ser feito:
    ```
 3. Aplicar `font-size: var(--font-size-base)` no `body`
 4. Revisar cada componente que usa tamanhos hardcoded — substituir por variáveis
-5. Comparar visualmente com `screens/Desktop/*` após cada ajuste
+5. Comparar visualmente com `screens/desktop/*` após cada ajuste
 6. Commit: `style: aplica escala tipográfica baseada em grid 8px`
 
 ### F2-Fase 5 — Completar tela Nova Campanha (P5)
 
-1. Consultar todas as imagens em `screens/Desktop/nova-campanha/`
+1. Consultar todas as imagens em `screens/desktop/nova-campanha/`
 2. Identificar todos os campos visíveis
 3. Implementar layout completo da tela (não layout livre)
 4. Garantir que todos os campos são controlados (P1 resolvido antes)
