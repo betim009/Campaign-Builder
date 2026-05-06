@@ -54,7 +54,7 @@ Explica o objetivo e o resultado visível.
 
 ## Progress
 
-Última atualização: [2026-05-06 17:15]
+Última atualização: [2026-05-06 17:36]
 
 - [x] Entendimento inicial: o XLSX era usado como sistema manual do cliente.
 - [x] Entendimento inicial: o Figma representa a futura interface do sistema.
@@ -100,7 +100,7 @@ Explica o objetivo e o resultado visível.
 
 ## Backlog Ativo (Fase 4+)
 
-Última atualização: [2026-05-06 17:15]
+Última atualização: [2026-05-06 17:36]
 
 ### FASE 4 — Integração Real, ROI e Automação
 
@@ -130,7 +130,7 @@ Explica o objetivo e o resultado visível.
 - [x] Definir como campanhas serão duplicadas
 - [x] Definir como campanhas serão publicadas
 - [x] Definir persistência no banco
-- [ ] Definir sincronização com Meta Ads
+- [x] Definir sincronização com Meta Ads
 
 MVP (definição atual):
 
@@ -143,7 +143,7 @@ MVP (definição atual):
 
 ## Data Progress
 
-Última atualização: [2026-05-06 17:15]
+Última atualização: [2026-05-06 17:36]
 
 - [2026-05-04] Entendimento do projeto baseado no XLSX
 - [2026-05-04] Definição do escopo do frontend
@@ -176,6 +176,7 @@ MVP (definição atual):
 - [x] [2026-05-06 17:15] Fase 4 (P2) — Backend: API REST mínima em `/api/*` (countries/objectives/campaigns/generated-campaigns) para persistência e fluxo operacional.
 - [x] [2026-05-06 17:15] Smoke test sem DB: `/healthz` e `/api` ok; rotas que dependem de DB retornam `503` sem `DATABASE_URL`.
 - [x] [2026-05-06 17:15] Tentativa de validação com Postgres via Docker bloqueada: Docker daemon inacessível neste ambiente.
+- [x] [2026-05-06 17:36] Fase 4+ — Definida sincronização com Meta Ads: rotas `/api/meta/*` + sync manual de métricas diárias para `campaign_metrics` (provider Meta Graph com fallback `stub`).
 
 ## Pending Work (Pendências)
 
@@ -414,6 +415,7 @@ Esta seção deve ser atualizada sempre que:
 - [2026-05-06 14:12] XLSX validado via leitura local: abas (`Observação`, `VISUALIZAÇÃO`, `BOTÃO`, `Parametro`, `Preencher`) e colunas típicas de bulk export/import da Meta confirmadas (ex: `Campaign Objective`, `Campaign Status`).
 - [2026-05-06 14:15] Validação do `docker compose up` não foi possível neste ambiente: Docker daemon inacessível (erro de socket). O `docker-compose.yml` foi criado, mas precisa ser validado em máquina com Docker Desktop/daemon ativo.
 - [2026-05-06 17:15] Seção `Backlog Ativo (Fase 4+)` adicionada no topo do documento para guiar execução da fase atual e evitar divergência de status.
+- [2026-05-06 17:36] A tabela `meta_tokens` existia no schema, mas não havia rotas/fluxo de sync no backend; foi definido um sync manual via `/api/meta/sync/*` com provider Meta Graph (quando há token) e fallback `stub` para desenvolvimento sem credenciais.
 
 ## Decision Log
 
@@ -463,7 +465,7 @@ Esta seção deve ser atualizada sempre que:
   Motivo: o frontend deve ter interatividade real (filtros que filtram, períodos que mudam dados) mesmo sem backend. Hooks de mock centralizam essa lógica e facilitam a futura substituição por chamadas reais de API.
 
 
-Última atualização: [2026-05-06 14:15]
+Última atualização: [2026-05-06 17:36]
 
 - [2026-05-04] Decisão: iniciar pelo frontend
   Motivo: validar interface antes da API
@@ -509,9 +511,12 @@ Esta seção deve ser atualizada sempre que:
 - [2026-05-06 17:15] Decisão: expor uma API REST mínima no backend (`/api/*`) para materializar o fluxo operacional de campanhas (criar/duplicar/gerar/publicar stub) antes da integração real com a Meta Ads API.
   Motivo: permitir persistência real já na Fase 4 (P2), mantendo a integração com a Meta (P3) como etapa separada.
 
+- [2026-05-06 17:36] Decisão: definir sincronização com Meta Ads como um sync manual (trigger via endpoint) que persiste métricas diárias em `campaign_metrics`, usando Meta Graph quando houver token e fallback `stub` quando não houver.
+  Motivo: permitir evolução incremental e validação do fluxo end-to-end (rotas + persistência) sem bloquear o projeto por OAuth/credenciais, mantendo o contrato de dados compatível com a integração real.
+
 ## Outcomes & Retrospective
 
-Última atualização: [2026-05-06 17:15]
+Última atualização: [2026-05-06 17:36]
 
 Entregue até aqui (frontend):
 
@@ -528,6 +533,7 @@ Entregue até aqui (frontend):
 - Fase 3: mocks do Dashboard refinados para evitar números hardcoded.
 - Documentação: `SOBRE.md` preenchido para orientação rápida.
 - Fase 4+: backend com API REST mínima em `/api/*` (countries/objectives/campaigns/generated-campaigns) para fluxo real de campanhas (persistência + geração/duplicação/publicação stub).
+- Fase 4+: sync de métricas definido via `/api/meta/sync/*`, persistindo dados diários em `campaign_metrics` (provider Meta Graph + fallback `stub`).
 
 Pendências imediatas (frontend):
 

@@ -38,6 +38,11 @@ Esta seção deve ser atualizada sempre que:
   - Ação: iniciar o Docker Desktop/daemon e validar o stack com `docker compose up`.
   - Smoke test sugerido (com DB): `curl http://localhost:3001/healthz` e `curl http://localhost:3001/api/countries`.
 
+[2026-05-06 17:36]
+
+- Nota: sincronização de métricas Meta foi definida como um sync manual via endpoint `POST /api/meta/sync/generated-campaigns/:id`, persistindo dados em `campaign_metrics`.
+  - Provider: usa Meta Graph quando houver token (via `META_ACCESS_TOKEN`, body `accessToken` ou `meta_tokens`); caso contrário, usa `stub` para testar persistência sem credenciais.
+
 
 
 ## Concrete Steps
