@@ -5,6 +5,7 @@ import { getCampaign, generateCampaigns } from "../services/campaigns.js";
 import { listGeneratedCampaigns, markGeneratedPublished } from "../services/generatedCampaigns.js";
 import { countryCodeToFlag } from "../services/fallbacks.js";
 import StatusBadge from "../components/StatusBadge.jsx";
+import { syncGeneratedCampaign } from "../services/meta.js";
 
 export default function CampanhaDetalhes() {
   const { id } = useParams();
@@ -13,6 +14,7 @@ export default function CampanhaDetalhes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [lastSync, setLastSync] = useState(null);
 
   async function refresh() {
     setLoading(true);
@@ -120,6 +122,11 @@ export default function CampanhaDetalhes() {
             <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
               {loading ? "Carregando..." : `${generated.length} item(ns)`}
             </div>
+            {lastSync ? (
+              <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
+                Último sync: {lastSync}
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -174,9 +181,27 @@ export default function CampanhaDetalhes() {
                         Marcar publicada
                       </button>
                     ) : (
-                      <span className="muted" style={{ fontWeight: 800 }}>
-                        —
-                      </span>
+                      <button
+                        type="button"
+                        className="pillOutline"
+                        disabled={busy || loading}
+                        onClick={async () => {
+                          setBusy(true);
+                          setError("");
+                          try {
+                            const res = await syncGeneratedCampaign(gc.id);
+                            const inserted = res?.sync?.inserted ?? 0;
+                            const updated = res?.sync?.updated ?? 0;
+                            setLastSync(`${inserted} inseridos / ${updated} atualizados`);
+                          } catch (err) {
+                            setError(err?.message ? String(err.message) : "Falha ao sincronizar métricas.");
+                          } finally {
+                            setBusy(false);
+                          }
+                        }}
+                      >
+                        Sync métricas
+                      </button>
                     )}
                   </td>
                 </tr>
