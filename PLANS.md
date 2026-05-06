@@ -54,7 +54,7 @@ Explica o objetivo e o resultado visível.
 
 ## Progress
 
-Última atualização: [2026-05-06 12:23]
+Última atualização: [2026-05-06 12:35]
 
 - [x] Entendimento inicial: o XLSX era usado como sistema manual do cliente.
 - [x] Entendimento inicial: o Figma representa a futura interface do sistema.
@@ -92,7 +92,7 @@ Explica o objetivo e o resultado visível.
 
 ## Data Progress
 
-Última atualização: [2026-05-06 12:23]
+Última atualização: [2026-05-06 12:35]
 
 - [2026-05-04] Entendimento do projeto baseado no XLSX
 - [2026-05-04] Definição do escopo do frontend
@@ -118,10 +118,11 @@ Explica o objetivo e o resultado visível.
 - [x] [2026-05-06 11:52] Fase 3 (P1) — Movido o frontend para `frontend/` e validado `npm run build`
 - [x] [2026-05-06 12:04] Auditoria: padronizado o ExecPlan para usar `screens/desktop/*` e `screens/mobile/*` (corrige referências `screens/Desktop/*`).
 - [x] [2026-05-06 12:23] Fase 3 (P3) — Refinados mocks do Dashboard: métricas calculadas a partir de `frontend/src/data/*` (sem números hardcoded).
+- [x] [2026-05-06 12:35] Fase 3 (P1) — Limpeza da raiz: removidos `dist/` e `node_modules/` da raiz (não necessários após mover frontend/backend).
 
 ## Pending Work (Pendências)
 
-Última atualização: [2026-05-06 12:23]
+Última atualização: [2026-05-06 12:35]
 
 Esta seção lista tudo que ainda NÃO foi implementado,
 mesmo que não esteja explicitamente no Progress.
@@ -273,8 +274,8 @@ Tarefas:
 - [x] Ajustar caminhos, scripts e imports quebrados
 - [x] Garantir que o frontend continua buildando
 - [x] Commit: `refactor: move frontend para diretorio dedicado`
-- [ ] Verificar as pastas na raiz que nao ha necessidade de existir.
-- [ ] Senao houver necessidade de existir deletar as pastas.
+- [x] Verificar as pastas na raiz que nao ha necessidade de existir.
+- [x] Senao houver necessidade de existir deletar as pastas. (Removidos: `dist/` e `node_modules/` da raiz)
 
 #### [P2] Iniciar backend
 
@@ -329,7 +330,7 @@ Esta seção deve ser atualizada sempre que:
 - O projeto não é apenas um CRUD. Ele tende a envolver automação, relatórios, regras de campanha e integração externa com a Meta Ads API.
 - As informações de países, idiomas, objetivos de campanha e nomes de campanha precisam ser tratadas como regras importantes, não como textos soltos de interface.
 
-Última atualização: [2026-05-06 12:23]
+Última atualização: [2026-05-06 12:35]
 
 - [2026-05-04] O XLSX era o sistema principal do cliente
 - [2026-05-04] O projeto não é apenas CRUD, envolve automação
@@ -351,6 +352,7 @@ Esta seção deve ser atualizada sempre que:
 - [2026-05-06 12:04] O ExecPlan ainda tinha referências `screens/Desktop/*` em trechos do documento; padronizado para `screens/desktop/*` e `screens/mobile/*` para refletir o repo real (case-sensitive).
 - [2026-05-06 12:08] Não existia `backend/` no repo; iniciado backend como pacote Node/Express independente em `backend/` com `GET /healthz`.
 - [2026-05-06 12:23] Inconsistência detectada: o Dashboard tinha métricas hardcoded (`Total de campanhas`, `Rascunhos`, `ROI (Ontem)`) enquanto `frontend/src/data/mockCampaigns.js` tinha dados divergentes; corrigido para derivar métricas dos mocks e alinhar `mockCampaigns` ao design (1 campanha publicada).
+- [2026-05-06 12:35] Foram encontrados artefatos locais na raiz (`dist/` e `node_modules/`) que não são necessários após a separação em `frontend/` e `backend/`; removidos para manter a raiz limpa.
 
 ## Decision Log
 
@@ -400,7 +402,7 @@ Esta seção deve ser atualizada sempre que:
   Motivo: o frontend deve ter interatividade real (filtros que filtram, períodos que mudam dados) mesmo sem backend. Hooks de mock centralizam essa lógica e facilitam a futura substituição por chamadas reais de API.
 
 
-Última atualização: [2026-05-06 12:23]
+Última atualização: [2026-05-06 12:35]
 
 - [2026-05-04] Decisão: iniciar pelo frontend
   Motivo: validar interface antes da API
@@ -434,6 +436,8 @@ Esta seção deve ser atualizada sempre que:
   Motivo: manter o projeto simples neste início, facilitar Docker futuro e permitir healthcheck imediato sem introduzir ORM/banco prematuramente.
 - [2026-05-06 12:23] Decisão: remover métricas hardcoded do Dashboard e calcular `Total/Ativas/Rascunhos/Países` a partir de `frontend/src/data/*`; centralizar o ROI (Ontem) em mock compartilhado com a página `RoiOntem`.
   Motivo: reduzir divergências entre UI e mocks e evitar números “soltos” desconectados dos dados.
+- [2026-05-06 12:35] Decisão: manter a raiz do repo enxuta após a separação full stack, removendo artefatos locais `dist/` e `node_modules/` da raiz.
+  Motivo: evitar confusão (build/deps devem existir apenas em `frontend/` e `backend/`) e reduzir ruído no ambiente local.
 
 ## Outcomes & Retrospective
 
