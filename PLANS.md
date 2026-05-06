@@ -54,7 +54,7 @@ Explica o objetivo e o resultado visível.
 
 ## Progress
 
-Última atualização: [2026-05-06 12:08]
+Última atualização: [2026-05-06 12:23]
 
 - [x] Entendimento inicial: o XLSX era usado como sistema manual do cliente.
 - [x] Entendimento inicial: o Figma representa a futura interface do sistema.
@@ -88,10 +88,11 @@ Explica o objetivo e o resultado visível.
 
 - [x] P1 — Reorganizar estrutura do projeto (mover frontend para `frontend/`)
 - [x] P2 — Iniciar backend (criar `backend/` com servidor base + healthcheck)
+- [x] P3 — Refinar mocks do frontend (métricas do Dashboard derivadas dos mocks)
 
 ## Data Progress
 
-Última atualização: [2026-05-06 12:08]
+Última atualização: [2026-05-06 12:23]
 
 - [2026-05-04] Entendimento do projeto baseado no XLSX
 - [2026-05-04] Definição do escopo do frontend
@@ -116,10 +117,11 @@ Explica o objetivo e o resultado visível.
 - [x] [2026-05-05 14:57] P6 — Mocks comportamentais (período no Financeiro + filtro/ordenação na Home + selects reais)
 - [x] [2026-05-06 11:52] Fase 3 (P1) — Movido o frontend para `frontend/` e validado `npm run build`
 - [x] [2026-05-06 12:04] Auditoria: padronizado o ExecPlan para usar `screens/desktop/*` e `screens/mobile/*` (corrige referências `screens/Desktop/*`).
+- [x] [2026-05-06 12:23] Fase 3 (P3) — Refinados mocks do Dashboard: métricas calculadas a partir de `frontend/src/data/*` (sem números hardcoded).
 
 ## Pending Work (Pendências)
 
-Última atualização: [2026-05-06 12:08]
+Última atualização: [2026-05-06 12:23]
 
 Esta seção lista tudo que ainda NÃO foi implementado,
 mesmo que não esteja explicitamente no Progress.
@@ -271,6 +273,8 @@ Tarefas:
 - [x] Ajustar caminhos, scripts e imports quebrados
 - [x] Garantir que o frontend continua buildando
 - [x] Commit: `refactor: move frontend para diretorio dedicado`
+- [ ] Verificar as pastas na raiz que nao ha necessidade de existir.
+- [ ] Senao houver necessidade de existir deletar as pastas.
 
 #### [P2] Iniciar backend
 
@@ -283,11 +287,11 @@ Tarefas:
 
 #### [P3] Refinar mocks do frontend
 
-- [ ] Auditar mocks existentes
-- [ ] Corrigir inconsistências entre campanhas e dashboard
-- [ ] Garantir que métricas sejam calculadas a partir dos mocks
-- [ ] Evitar números fixos desconectados dos dados
-- [ ] Commit: `fix: corrige consistencia dos mocks do dashboard`
+- [x] Auditar mocks existentes
+- [x] Corrigir inconsistências entre campanhas e dashboard
+- [x] Garantir que métricas sejam calculadas a partir dos mocks
+- [x] Evitar números fixos desconectados dos dados
+- [x] Commit: `fix: corrige consistencia dos mocks do dashboard`
 
 #### [P4] Iniciar modelagem do banco de dados
 
@@ -325,7 +329,7 @@ Esta seção deve ser atualizada sempre que:
 - O projeto não é apenas um CRUD. Ele tende a envolver automação, relatórios, regras de campanha e integração externa com a Meta Ads API.
 - As informações de países, idiomas, objetivos de campanha e nomes de campanha precisam ser tratadas como regras importantes, não como textos soltos de interface.
 
-Última atualização: [2026-05-06 12:04]
+Última atualização: [2026-05-06 12:23]
 
 - [2026-05-04] O XLSX era o sistema principal do cliente
 - [2026-05-04] O projeto não é apenas CRUD, envolve automação
@@ -346,6 +350,7 @@ Esta seção deve ser atualizada sempre que:
 - [2026-05-06 11:52] Após iniciar a Fase 3 (P1), o frontend deixou de ficar na raiz: todos os caminhos do app agora são relativos a `frontend/` (ex: `src/*` → `frontend/src/*`), e comandos passam a ser executados em `frontend/`.
 - [2026-05-06 12:04] O ExecPlan ainda tinha referências `screens/Desktop/*` em trechos do documento; padronizado para `screens/desktop/*` e `screens/mobile/*` para refletir o repo real (case-sensitive).
 - [2026-05-06 12:08] Não existia `backend/` no repo; iniciado backend como pacote Node/Express independente em `backend/` com `GET /healthz`.
+- [2026-05-06 12:23] Inconsistência detectada: o Dashboard tinha métricas hardcoded (`Total de campanhas`, `Rascunhos`, `ROI (Ontem)`) enquanto `frontend/src/data/mockCampaigns.js` tinha dados divergentes; corrigido para derivar métricas dos mocks e alinhar `mockCampaigns` ao design (1 campanha publicada).
 
 ## Decision Log
 
@@ -395,7 +400,7 @@ Esta seção deve ser atualizada sempre que:
   Motivo: o frontend deve ter interatividade real (filtros que filtram, períodos que mudam dados) mesmo sem backend. Hooks de mock centralizam essa lógica e facilitam a futura substituição por chamadas reais de API.
 
 
-Última atualização: [2026-05-06 12:08]
+Última atualização: [2026-05-06 12:23]
 
 - [2026-05-04] Decisão: iniciar pelo frontend
   Motivo: validar interface antes da API
@@ -427,6 +432,8 @@ Esta seção deve ser atualizada sempre que:
   Motivo: o filesystem é case-sensitive em muitos ambientes; referências incorretas geram divergência entre ExecPlan e estrutura real.
 - [2026-05-06 12:08] Decisão: iniciar o backend com Node 22 + Express em `backend/` (package isolado), com `GET /healthz` e `PORT=3001` por padrão.
   Motivo: manter o projeto simples neste início, facilitar Docker futuro e permitir healthcheck imediato sem introduzir ORM/banco prematuramente.
+- [2026-05-06 12:23] Decisão: remover métricas hardcoded do Dashboard e calcular `Total/Ativas/Rascunhos/Países` a partir de `frontend/src/data/*`; centralizar o ROI (Ontem) em mock compartilhado com a página `RoiOntem`.
+  Motivo: reduzir divergências entre UI e mocks e evitar números “soltos” desconectados dos dados.
 
 ## Outcomes & Retrospective
 
@@ -1263,7 +1270,7 @@ Para recuperação:
 
 ## Artifacts and Notes
 
-Última atualização: [2026-05-06 12:08]
+Última atualização: [2026-05-06 12:23]
 
 ### Arquivos existentes (Fase 1 — entregues)
 
@@ -1294,6 +1301,7 @@ Para recuperação:
     frontend/src/data/mockCountries.js
     frontend/src/data/mockFinancial.js
     frontend/src/data/mockMonthly.js
+    frontend/src/data/mockRoiOntem.js
     frontend/src/styles/global.css
 
 ### Arquivos entregues na Fase 2

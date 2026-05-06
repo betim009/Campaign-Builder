@@ -5,6 +5,7 @@ import MetricCard from "../components/MetricCard.jsx";
 import { useNavigate } from "react-router-dom";
 import { mockCampaigns } from "../data/mockCampaigns.js";
 import { mockCountries } from "../data/mockCountries.js";
+import { mockRoiOntem } from "../data/mockRoiOntem.js";
 import useCampaignFilters from "../mocks/useCampaignFilters.js";
 import {
   AddIcon,
@@ -18,11 +19,18 @@ import {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const countriesCount = mockCountries.length;
   const flagByCode = Object.fromEntries(
     mockCountries.map((c) => [c.code, c.flag]),
   );
   const { campaigns, statusFilter, sortMode, cycleStatus, cycleSort } =
     useCampaignFilters(mockCampaigns);
+
+  const totals = {
+    campaigns: mockCampaigns.length,
+    published: mockCampaigns.filter((c) => c.status === "Publicado").length,
+    drafts: mockCampaigns.filter((c) => c.status === "Rascunho").length,
+  };
 
   return (
     <>
@@ -30,10 +38,10 @@ export default function Dashboard() {
       <main className="page">
         <div className="container">
           <section className="gridMetrics" aria-label="Métricas">
-            <MetricCard label="Total de campanhas" value="1" />
+            <MetricCard label="Total de campanhas" value={String(totals.campaigns)} />
             <MetricCard
               label="Campanhas ativas"
-              value="1"
+              value={String(totals.published)}
               valueTone="green"
               hint={
                 <>
@@ -42,10 +50,10 @@ export default function Dashboard() {
                 </>
               }
             />
-            <MetricCard label="Rascunhos" value="0" />
+            <MetricCard label="Rascunhos" value={String(totals.drafts)} />
             <MetricCard
               label="ROI (Ontem)"
-              value="132%"
+              value={mockRoiOntem.summary.roiOverall}
               valueTone="green"
               hint={
                 <span style={{ fontWeight: 700 }}>
@@ -53,7 +61,7 @@ export default function Dashboard() {
                 </span>
               }
             />
-            <MetricCard label="Países configurados" value="6" />
+            <MetricCard label="Países configurados" value={String(countriesCount)} />
           </section>
 
           <section className="gridActions" aria-label="Ações">
@@ -62,7 +70,10 @@ export default function Dashboard() {
               description="Crie campanhas globais em minutos com automação inteligente"
               items={[
                 { icon: <BoltIcon fontSize="small" />, text: "Automação completa" },
-                { icon: <LanguageIcon fontSize="small" />, text: "6 países simultâneos" },
+                {
+                  icon: <LanguageIcon fontSize="small" />,
+                  text: `${countriesCount} países simultâneos`,
+                },
               ]}
               buttonVariant="primary"
               buttonIcon={<AddIcon fontSize="small" />}
@@ -118,7 +129,7 @@ export default function Dashboard() {
                   name={campaign.name}
                   status={campaign.status}
                   scopeLabel={campaign.scopeLabel}
-                  generatedLabel={campaign.generatedLabel}
+                  generatedLabel={`${campaign.countryCodes.length} campanhas geradas`}
                   createdAtLabel={campaign.createdAtLabel}
                   countryFlags={campaign.countryCodes.map((code) => flagByCode[code])}
                 />
