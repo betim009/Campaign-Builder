@@ -54,7 +54,7 @@ Explica o objetivo e o resultado visível.
 
 ## Progress
 
-Última atualização: [2026-05-06 14:12]
+Última atualização: [2026-05-06 14:15]
 
 - [x] Entendimento inicial: o XLSX era usado como sistema manual do cliente.
 - [x] Entendimento inicial: o Figma representa a futura interface do sistema.
@@ -91,10 +91,11 @@ Explica o objetivo e o resultado visível.
 - [x] P2 — Iniciar backend (criar `backend/` com servidor base + healthcheck)
 - [x] P3 — Refinar mocks do frontend (métricas do Dashboard derivadas dos mocks)
 - [x] P4 — Iniciar modelagem do banco (Postgres + migrations + seed)
+- [x] P5 — Configurar Docker (docker-compose)
 
 ## Data Progress
 
-Última atualização: [2026-05-06 14:12]
+Última atualização: [2026-05-06 14:15]
 
 - [2026-05-04] Entendimento do projeto baseado no XLSX
 - [2026-05-04] Definição do escopo do frontend
@@ -123,10 +124,11 @@ Explica o objetivo e o resultado visível.
 - [x] [2026-05-06 12:35] Fase 3 (P1) — Limpeza da raiz: removidos `dist/` e `node_modules/` da raiz (não necessários após mover frontend/backend).
 - [x] [2026-05-06 13:59] Documento `SOBRE.md` preenchido (visão geral do projeto, fluxo e como rodar).
 - [x] [2026-05-06 14:12] Fase 3 (P4) — Iniciada modelagem do banco (Postgres): migrations SQL + seed + scripts `npm run migrate`/`npm run seed` no backend.
+- [x] [2026-05-06 14:15] Fase 3 (P5) — Ambiente Docker adicionado (Postgres + backend + frontend) com comandos documentados em `README.md`.
 
 ## Pending Work (Pendências)
 
-Última atualização: [2026-05-06 14:12]
+Última atualização: [2026-05-06 14:15]
 
 Esta seção lista tudo que ainda NÃO foi implementado,
 mesmo que não esteja explicitamente no Progress.
@@ -310,14 +312,14 @@ Tarefas:
 
 #### [P5] Configurar Docker
 
-- [ ] Criar `docker-compose.yml`
-- [ ] Configurar serviço do frontend
-- [ ] Configurar serviço do backend
-- [ ] Configurar serviço do banco
-- [ ] Definir portas sem conflito
-- [ ] Criar comandos documentados para subir, parar, retomar e reiniciar
-- [ ] Criar comando para limpar apenas o banco
-- [ ] Commit: `feat: adiciona ambiente docker`
+- [x] Criar `docker-compose.yml`
+- [x] Configurar serviço do frontend
+- [x] Configurar serviço do backend
+- [x] Configurar serviço do banco
+- [x] Definir portas sem conflito
+- [x] Criar comandos documentados para subir, parar, retomar e reiniciar
+- [x] Criar comando para limpar apenas o banco
+- [x] Commit: `feat: adiciona ambiente docker`
 
 ### Observação
 
@@ -334,7 +336,7 @@ Esta seção deve ser atualizada sempre que:
 - O projeto não é apenas um CRUD. Ele tende a envolver automação, relatórios, regras de campanha e integração externa com a Meta Ads API.
 - As informações de países, idiomas, objetivos de campanha e nomes de campanha precisam ser tratadas como regras importantes, não como textos soltos de interface.
 
-Última atualização: [2026-05-06 14:12]
+Última atualização: [2026-05-06 14:15]
 
 - [2026-05-04] O XLSX era o sistema principal do cliente
 - [2026-05-04] O projeto não é apenas CRUD, envolve automação
@@ -359,6 +361,7 @@ Esta seção deve ser atualizada sempre que:
 - [2026-05-06 12:35] Foram encontrados artefatos locais na raiz (`dist/` e `node_modules/`) que não são necessários após a separação em `frontend/` e `backend/`; removidos para manter a raiz limpa.
 - [2026-05-06 13:59] `SOBRE.md` existia na raiz, mas estava vazio; preenchido para orientar rapidamente o objetivo, fluxo e como rodar o projeto.
 - [2026-05-06 14:12] XLSX validado via leitura local: abas (`Observação`, `VISUALIZAÇÃO`, `BOTÃO`, `Parametro`, `Preencher`) e colunas típicas de bulk export/import da Meta confirmadas (ex: `Campaign Objective`, `Campaign Status`).
+- [2026-05-06 14:15] Validação do `docker compose up` não foi possível neste ambiente: Docker daemon inacessível (erro de socket). O `docker-compose.yml` foi criado, mas precisa ser validado em máquina com Docker Desktop/daemon ativo.
 
 ## Decision Log
 
@@ -408,7 +411,7 @@ Esta seção deve ser atualizada sempre que:
   Motivo: o frontend deve ter interatividade real (filtros que filtram, períodos que mudam dados) mesmo sem backend. Hooks de mock centralizam essa lógica e facilitam a futura substituição por chamadas reais de API.
 
 
-Última atualização: [2026-05-06 14:12]
+Última atualização: [2026-05-06 14:15]
 
 - [2026-05-04] Decisão: iniciar pelo frontend
   Motivo: validar interface antes da API
@@ -448,10 +451,12 @@ Esta seção deve ser atualizada sempre que:
   Motivo: facilitar onboarding e reduzir dependência de contexto fora do `PLANS.md`.
 - [2026-05-06 14:12] Decisão: iniciar o banco com Postgres + migrations SQL versionadas (runner simples em Node + `pg`) e seed idempotente para países/objetivos.
   Motivo: evitar dependência de ORM prematura, manter evolução incremental e garantir repetibilidade em ambiente Docker.
+- [2026-05-06 14:15] Decisão: configurar Docker via `docker-compose.yml` (Postgres + backend + frontend) usando imagens `node:22-alpine`, com Postgres exposto em `5433` no host.
+  Motivo: reduzir conflito com Postgres local (`5432`) e manter setup reproduzível sem Dockerfiles por enquanto.
 
 ## Outcomes & Retrospective
 
-Última atualização: [2026-05-06 14:12]
+Última atualização: [2026-05-06 14:15]
 
 Entregue até aqui (frontend):
 
@@ -464,6 +469,7 @@ Entregue até aqui (frontend):
 - Fase 3: frontend isolado em `frontend/` (build validado).
 - Fase 3: backend iniciado em `backend/` com `GET /healthz` (healthcheck).
 - Fase 3: banco iniciado com migrations/seed no backend (Postgres via `DATABASE_URL`).
+- Fase 3: ambiente Docker adicionado (Postgres + backend + frontend) via `docker-compose.yml`.
 - Fase 3: mocks do Dashboard refinados para evitar números hardcoded.
 - Documentação: `SOBRE.md` preenchido para orientação rápida.
 
@@ -474,7 +480,7 @@ Pendências imediatas (frontend):
 
 Pendências imediatas (full stack):
 
-- Fase 3 [P5]: configurar Docker (frontend + backend + banco).
+- Evoluir integração backend↔banco (endpoints e queries reais) conforme telas e API da Meta.
 
 Ao final da primeira fase, preencher esta seção com:
 
@@ -1292,11 +1298,13 @@ Para recuperação:
 
 ## Artifacts and Notes
 
-Última atualização: [2026-05-06 13:59]
+Última atualização: [2026-05-06 14:15]
 
 ### Documentação de orientação
 
     SOBRE.md
+    README.md
+    docker-compose.yml
 
 ### Arquivos existentes (Fase 1 — entregues)
 
