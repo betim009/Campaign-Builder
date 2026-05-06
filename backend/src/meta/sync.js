@@ -100,15 +100,17 @@ export async function syncGeneratedCampaignMetrics({
             impressions,
             clicks,
             cpc_cents,
-            cpm_cents
+            cpm_cents,
+            revenue_cents
           )
-          VALUES ($1, $2::date, $3, $4, $5, $6, $7)
+          VALUES ($1, $2::date, $3, $4, $5, $6, $7, $8)
           ON CONFLICT (generated_campaign_id, metric_date) DO UPDATE SET
             spend_cents = EXCLUDED.spend_cents,
             impressions = EXCLUDED.impressions,
             clicks = EXCLUDED.clicks,
             cpc_cents = EXCLUDED.cpc_cents,
-            cpm_cents = EXCLUDED.cpm_cents
+            cpm_cents = EXCLUDED.cpm_cents,
+            revenue_cents = EXCLUDED.revenue_cents
           RETURNING (xmax = 0) AS inserted
         `,
         [
@@ -118,7 +120,8 @@ export async function syncGeneratedCampaignMetrics({
           r.impressions,
           r.clicks,
           r.cpcCents,
-          r.cpmCents
+          r.cpmCents,
+          r.revenueCents
         ]
       )
       if (result.rows?.[0]?.inserted) inserted += 1
@@ -141,4 +144,3 @@ export async function syncGeneratedCampaignMetrics({
     client.release()
   }
 }
-

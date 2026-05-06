@@ -95,9 +95,10 @@ export async function metaFetchCampaignInsightsDaily({
     const days = eachDateInclusive(since, until)
     return days.map((date) => {
       const seed = hashString(`${metaCampaignId}:${date}`)
-      const spendCents = 800 + (seed % 12000) // 8.00–128.00
+      const spendCents = 80000 + (seed % 520000) // 800.00–6000.00
       const impressions = 500 + (seed % 90000)
       const clicks = Math.max(0, Math.round(impressions * (0.004 + ((seed % 25) / 10000))))
+      const revenueCents = Math.round(spendCents * (1.2 + ((seed % 180) / 100))) // 1.2x–3.0x
       const spend = (spendCents / 100).toFixed(2)
       const cpc = clicks > 0 ? (Number(spend) / clicks).toFixed(2) : null
       const cpm = impressions > 0 ? ((Number(spend) * 1000) / impressions).toFixed(2) : null
@@ -107,6 +108,7 @@ export async function metaFetchCampaignInsightsDaily({
         date_start: date,
         date_stop: date,
         spend,
+        revenue: (revenueCents / 100).toFixed(2),
         impressions: String(impressions),
         clicks: String(clicks),
         cpc,
@@ -139,6 +141,7 @@ export function normalizeDailyInsightRow(row) {
   if (!date) return null
 
   const spendCents = toCents(row?.spend) ?? 0
+  const revenueCents = toCents(row?.revenue)
   const impressions = toInt(row?.impressions) ?? 0
   const clicks = toInt(row?.clicks) ?? 0
   const cpcCents = toCents(row?.cpc)
@@ -147,6 +150,7 @@ export function normalizeDailyInsightRow(row) {
   return {
     metricDate: date,
     spendCents,
+    revenueCents,
     impressions,
     clicks,
     cpcCents,
