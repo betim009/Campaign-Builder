@@ -54,7 +54,7 @@ Explica o objetivo e o resultado visível.
 
 ## Progress
 
-Última atualização: [2026-05-06 13:59]
+Última atualização: [2026-05-06 14:12]
 
 - [x] Entendimento inicial: o XLSX era usado como sistema manual do cliente.
 - [x] Entendimento inicial: o Figma representa a futura interface do sistema.
@@ -90,10 +90,11 @@ Explica o objetivo e o resultado visível.
 - [x] P1 — Reorganizar estrutura do projeto (mover frontend para `frontend/`)
 - [x] P2 — Iniciar backend (criar `backend/` com servidor base + healthcheck)
 - [x] P3 — Refinar mocks do frontend (métricas do Dashboard derivadas dos mocks)
+- [x] P4 — Iniciar modelagem do banco (Postgres + migrations + seed)
 
 ## Data Progress
 
-Última atualização: [2026-05-06 13:59]
+Última atualização: [2026-05-06 14:12]
 
 - [2026-05-04] Entendimento do projeto baseado no XLSX
 - [2026-05-04] Definição do escopo do frontend
@@ -121,10 +122,11 @@ Explica o objetivo e o resultado visível.
 - [x] [2026-05-06 12:23] Fase 3 (P3) — Refinados mocks do Dashboard: métricas calculadas a partir de `frontend/src/data/*` (sem números hardcoded).
 - [x] [2026-05-06 12:35] Fase 3 (P1) — Limpeza da raiz: removidos `dist/` e `node_modules/` da raiz (não necessários após mover frontend/backend).
 - [x] [2026-05-06 13:59] Documento `SOBRE.md` preenchido (visão geral do projeto, fluxo e como rodar).
+- [x] [2026-05-06 14:12] Fase 3 (P4) — Iniciada modelagem do banco (Postgres): migrations SQL + seed + scripts `npm run migrate`/`npm run seed` no backend.
 
 ## Pending Work (Pendências)
 
-Última atualização: [2026-05-06 13:59]
+Última atualização: [2026-05-06 14:12]
 
 Esta seção lista tudo que ainda NÃO foi implementado,
 mesmo que não esteja explicitamente no Progress.
@@ -298,13 +300,13 @@ Tarefas:
 
 #### [P4] Iniciar modelagem do banco de dados
 
-- [ ] Analisar telas existentes
-- [ ] Analisar mocks
-- [ ] Analisar XLSX
-- [ ] Propor entidades principais
-- [ ] Criar migrations iniciais
-- [ ] Criar seeders iniciais
-- [ ] Commit: `feat: inicia modelagem do banco de dados`
+- [x] Analisar telas existentes
+- [x] Analisar mocks
+- [x] Analisar XLSX
+- [x] Propor entidades principais
+- [x] Criar migrations iniciais
+- [x] Criar seeders iniciais
+- [x] Commit: `feat: inicia modelagem do banco de dados`
 
 #### [P5] Configurar Docker
 
@@ -332,7 +334,7 @@ Esta seção deve ser atualizada sempre que:
 - O projeto não é apenas um CRUD. Ele tende a envolver automação, relatórios, regras de campanha e integração externa com a Meta Ads API.
 - As informações de países, idiomas, objetivos de campanha e nomes de campanha precisam ser tratadas como regras importantes, não como textos soltos de interface.
 
-Última atualização: [2026-05-06 13:59]
+Última atualização: [2026-05-06 14:12]
 
 - [2026-05-04] O XLSX era o sistema principal do cliente
 - [2026-05-04] O projeto não é apenas CRUD, envolve automação
@@ -356,6 +358,7 @@ Esta seção deve ser atualizada sempre que:
 - [2026-05-06 12:23] Inconsistência detectada: o Dashboard tinha métricas hardcoded (`Total de campanhas`, `Rascunhos`, `ROI (Ontem)`) enquanto `frontend/src/data/mockCampaigns.js` tinha dados divergentes; corrigido para derivar métricas dos mocks e alinhar `mockCampaigns` ao design (1 campanha publicada).
 - [2026-05-06 12:35] Foram encontrados artefatos locais na raiz (`dist/` e `node_modules/`) que não são necessários após a separação em `frontend/` e `backend/`; removidos para manter a raiz limpa.
 - [2026-05-06 13:59] `SOBRE.md` existia na raiz, mas estava vazio; preenchido para orientar rapidamente o objetivo, fluxo e como rodar o projeto.
+- [2026-05-06 14:12] XLSX validado via leitura local: abas (`Observação`, `VISUALIZAÇÃO`, `BOTÃO`, `Parametro`, `Preencher`) e colunas típicas de bulk export/import da Meta confirmadas (ex: `Campaign Objective`, `Campaign Status`).
 
 ## Decision Log
 
@@ -405,7 +408,7 @@ Esta seção deve ser atualizada sempre que:
   Motivo: o frontend deve ter interatividade real (filtros que filtram, períodos que mudam dados) mesmo sem backend. Hooks de mock centralizam essa lógica e facilitam a futura substituição por chamadas reais de API.
 
 
-Última atualização: [2026-05-06 13:59]
+Última atualização: [2026-05-06 14:12]
 
 - [2026-05-04] Decisão: iniciar pelo frontend
   Motivo: validar interface antes da API
@@ -443,10 +446,12 @@ Esta seção deve ser atualizada sempre que:
   Motivo: evitar confusão (build/deps devem existir apenas em `frontend/` e `backend/`) e reduzir ruído no ambiente local.
 - [2026-05-06 13:59] Decisão: manter um documento curto (`SOBRE.md`) na raiz para orientar rapidamente o objetivo do produto, fluxos e como rodar.
   Motivo: facilitar onboarding e reduzir dependência de contexto fora do `PLANS.md`.
+- [2026-05-06 14:12] Decisão: iniciar o banco com Postgres + migrations SQL versionadas (runner simples em Node + `pg`) e seed idempotente para países/objetivos.
+  Motivo: evitar dependência de ORM prematura, manter evolução incremental e garantir repetibilidade em ambiente Docker.
 
 ## Outcomes & Retrospective
 
-Última atualização: [2026-05-06 13:59]
+Última atualização: [2026-05-06 14:12]
 
 Entregue até aqui (frontend):
 
@@ -458,6 +463,7 @@ Entregue até aqui (frontend):
 - Dados mockados centralizados em `frontend/src/data/`.
 - Fase 3: frontend isolado em `frontend/` (build validado).
 - Fase 3: backend iniciado em `backend/` com `GET /healthz` (healthcheck).
+- Fase 3: banco iniciado com migrations/seed no backend (Postgres via `DATABASE_URL`).
 - Fase 3: mocks do Dashboard refinados para evitar números hardcoded.
 - Documentação: `SOBRE.md` preenchido para orientação rápida.
 
@@ -468,7 +474,6 @@ Pendências imediatas (frontend):
 
 Pendências imediatas (full stack):
 
-- Fase 3 [P4]: iniciar modelagem do banco (entidades/migrations/seed).
 - Fase 3 [P5]: configurar Docker (frontend + backend + banco).
 
 Ao final da primeira fase, preencher esta seção com:
@@ -1340,6 +1345,9 @@ Para recuperação:
     backend/src/server.js
     backend/src/routes/health.js
     backend/src/db.js
+    backend/src/migrate.js
+    backend/src/seed.js
+    backend/migrations/0001_init.sql
 
 ### Referências externas
 
