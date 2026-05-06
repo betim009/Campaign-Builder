@@ -46,6 +46,34 @@ try {
     )
   }
 
+  await pool.query(
+    `
+      INSERT INTO automation_rules (name, enabled, config)
+      SELECT $1, true, $2::jsonb
+      WHERE NOT EXISTS (
+        SELECT 1 FROM automation_rules WHERE name = $1
+      )
+    `,
+    [
+      'Pausar ROI negativo (D-1)',
+      JSON.stringify({ type: 'pause_negative_roi_d1', roiMinPercent: 100 })
+    ]
+  )
+
+  await pool.query(
+    `
+      INSERT INTO automation_rules (name, enabled, config)
+      SELECT $1, true, $2::jsonb
+      WHERE NOT EXISTS (
+        SELECT 1 FROM automation_rules WHERE name = $1
+      )
+    `,
+    [
+      'Reativar ROI positivo (D-1)',
+      JSON.stringify({ type: 'activate_positive_roi_d1', roiMinPercent: 140 })
+    ]
+  )
+
   await pool.query('COMMIT')
 } catch (err) {
   await pool.query('ROLLBACK')
@@ -54,4 +82,3 @@ try {
 
 console.log('[seed] done')
 await closeDb()
-

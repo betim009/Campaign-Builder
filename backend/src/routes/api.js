@@ -5,6 +5,7 @@ import { campaignsRouter } from './campaigns.js'
 import { generatedCampaignsRouter } from './generatedCampaigns.js'
 import { metaRouter } from './meta.js'
 import { financeRouter } from './finance.js'
+import { automationRouter } from './automation.js'
 
 export function apiRouter() {
   const router = Router()
@@ -19,6 +20,7 @@ export function apiRouter() {
   router.use('/generated-campaigns', generatedCampaignsRouter())
   router.use('/meta', metaRouter())
   router.use('/finance', financeRouter())
+  router.use('/automation', automationRouter())
 
   return router
 }
