@@ -20,6 +20,18 @@ function toCents(value) {
   return Math.round(n * 100)
 }
 
+function extractPurchaseValueCents(row) {
+  const list = Array.isArray(row?.action_values) ? row.action_values : []
+  for (const item of list) {
+    const type = typeof item?.action_type === 'string' ? item.action_type : ''
+    if (!type) continue
+    if (type === 'purchase' || type === 'omni_purchase') {
+      return toCents(item?.value)
+    }
+  }
+  return null
+}
+
 function toInt(value) {
   if (typeof value !== 'string' && typeof value !== 'number') return null
   const n = Number(value)
@@ -126,7 +138,17 @@ export async function metaFetchCampaignInsightsDaily({
   accessToken,
   since,
   until,
-  fields = ['spend', 'impressions', 'clicks', 'cpc', 'cpm', 'ctr', 'date_start', 'date_stop']
+  fields = [
+    'spend',
+    'impressions',
+    'clicks',
+    'cpc',
+    'cpm',
+    'ctr',
+    'action_values',
+    'date_start',
+    'date_stop'
+  ]
 }) {
   const provider = process.env.META_SYNC_PROVIDER
   if (provider === 'meta' && !accessToken) {
@@ -204,7 +226,7 @@ export function normalizeDailyInsightRow(row) {
   if (!date) return null
 
   const spendCents = toCents(row?.spend) ?? 0
-  const revenueCents = toCents(row?.revenue)
+  const revenueCents = toCents(row?.revenue) ?? extractPurchaseValueCents(row)
   const impressions = toInt(row?.impressions) ?? 0
   const clicks = toInt(row?.clicks) ?? 0
   const cpcCents = toCents(row?.cpc)
