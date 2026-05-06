@@ -1,6 +1,8 @@
-import { mockCountries } from "../data/mockCountries.js";
 import PageShell from "../components/PageShell.jsx";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getCountries } from "../services/reference.js";
+import { createCampaign, generateCampaigns } from "../services/campaigns.js";
 import {
   AddIcon,
   AutoAwesomeIcon,
@@ -122,6 +124,7 @@ function InfoLine({ icon, text, tone = "muted" }) {
 }
 
 export default function NovaCampanha() {
+  const navigate = useNavigate();
   const [campaignName, setCampaignName] = useState("");
   const [businessManager, setBusinessManager] = useState("");
   const [adAccount, setAdAccount] = useState("");
@@ -145,6 +148,25 @@ export default function NovaCampanha() {
   const [runContinuous, setRunContinuous] = useState(true);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const fileInputRef = useRef(null);
+  const [countries, setCountries] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    getCountries()
+      .then((res) => {
+        if (!alive) return;
+        setCountries(res.countries ?? []);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setCountries([]);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const businessManagerOptions = useMemo(
     () => [
@@ -205,6 +227,36 @@ export default function NovaCampanha() {
 
   function addVariation(setter) {
     setter((prev) => [...prev, ""]);
+  }
+
+  const targetCountryCodes = useMemo(
+    () => countries.map((c) => c.code).filter(Boolean),
+    [countries],
+  );
+
+  const canSubmit = !submitting && campaignName.trim() !== "" && targetCountryCodes.length > 0;
+
+  async function handleCreate({ generate }) {
+    if (!canSubmit) return;
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const created = await createCampaign({
+        name: campaignName.trim(),
+        scope: "global",
+        countryCodes: targetCountryCodes,
+      });
+
+      if (generate) {
+        await generateCampaigns(created.campaign.id);
+      }
+
+      navigate(`/campanhas/${created.campaign.id}`);
+    } catch (err) {
+      setSubmitError(err?.message ? String(err.message) : "Falha ao salvar campanha.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -883,7 +935,7 @@ export default function NovaCampanha() {
                 </p>
 
                 <div style={{ marginTop: 16, display: "grid", gap: 14 }}>
-                  {mockCountries.map((c) => (
+                  {countries.map((c) => (
                     <div
                       key={c.code}
                       style={{
@@ -911,7 +963,7 @@ export default function NovaCampanha() {
                 <div style={{ marginTop: 18, opacity: 0.9 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 900 }}>
                     <span>Total de países:</span>
-                    <span>6</span>
+                    <span>{countries.length}</span>
                   </div>
                   <div
                     style={{
@@ -927,8 +979,17 @@ export default function NovaCampanha() {
                 </div>
               </div>
 
+              {submitError ? (
+                <div className="card" style={{ padding: 16, borderColor: "#fecaca", color: "#991b1b" }}>
+                  <div style={{ fontWeight: 900 }}>Erro</div>
+                  <div style={{ marginTop: 6, fontWeight: 700 }}>{submitError}</div>
+                </div>
+              ) : null}
+
               <button
                 type="button"
+                disabled={!canSubmit}
+                onClick={() => handleCreate({ generate: true })}
                 style={{
                   width: "100%",
                   height: 56,
@@ -944,6 +1005,7 @@ export default function NovaCampanha() {
                   justifyContent: "center",
                   gap: 12,
                   boxShadow: "0 14px 28px rgba(37,99,235,0.22)",
+                  opacity: !canSubmit ? 0.6 : 1,
                 }}
                 >
                 <RocketLaunchIcon fontSize="small" />
@@ -952,6 +1014,8 @@ export default function NovaCampanha() {
 
               <button
                 type="button"
+                disabled={!canSubmit}
+                onClick={() => handleCreate({ generate: false })}
                 style={{
                   width: "100%",
                   height: 56,
@@ -965,6 +1029,7 @@ export default function NovaCampanha() {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 12,
+                  opacity: !canSubmit ? 0.6 : 1,
                 }}
               >
                 <SaveIcon fontSize="small" /> Salvar como rascunho

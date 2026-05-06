@@ -3,11 +3,11 @@ import FinanceMetricCard from "../components/FinanceMetricCard.jsx";
 import PeriodPills from "../components/PeriodPills.jsx";
 import SelectLike from "../components/SelectLike.jsx";
 import SpendLineChart from "../components/SpendLineChart.jsx";
-import { mockFinancial } from "../data/mockFinancial.js";
-import { mockCountries } from "../data/mockCountries.js";
 import PageShell from "../components/PageShell.jsx";
 import usePeriodFilter from "../mocks/usePeriodFilter.js";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getCountries } from "../services/reference.js";
+import { getFinancePeriodsViewModel } from "../services/finance.js";
 import {
   AdsClickIcon,
   AttachMoneyIcon,
@@ -22,20 +22,55 @@ import {
 } from "../styles/icons.js";
 
 export default function Financeiro() {
-  const { filters, periods } = mockFinancial;
+  const filters = {
+    accountOptions: ["Global Account", "Conta LATAM"],
+    businessManagerOptions: ["Main BM", "Secondary BM"],
+    account: "Global Account",
+    businessManager: "Main BM",
+    periodOptions: ["Hoje", "Ontem", "7 dias", "30 dias"],
+    activePeriod: "7 dias",
+  };
+  const periodOptions = filters.periodOptions;
+  const [periods, setPeriods] = useState(null);
+  const [countries, setCountries] = useState([]);
   const [account, setAccount] = useState(filters.account);
   const [businessManager, setBusinessManager] = useState(filters.businessManager);
   const { activePeriod, setActivePeriod, options, data } = usePeriodFilter({
-    options: filters.periodOptions,
+    options: periodOptions,
     initial: filters.activePeriod,
     dataByPeriod: periods,
   });
   const metrics = data?.metrics ?? {};
   const spendSeries = data?.spendSeries ?? [];
   const tableRows = data?.tableRows ?? [];
-  const flagByCode = Object.fromEntries(
-    mockCountries.map((c) => [c.code, c.flag]),
-  );
+
+  const countryMaps = useMemo(() => {
+    const nameByCode = Object.fromEntries(countries.map((c) => [c.code, c.name]));
+    const flagByCode = Object.fromEntries(countries.map((c) => [c.code, c.flag]));
+    return { nameByCode, flagByCode };
+  }, [countries]);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const countriesRes = await getCountries();
+      if (!alive) return;
+      const nextCountries = countriesRes.countries ?? [];
+      setCountries(nextCountries);
+
+      const nameByCode = Object.fromEntries(nextCountries.map((c) => [c.code, c.name]));
+      const financeRes = await getFinancePeriodsViewModel({ periodOptions, countryNameByCode: nameByCode });
+      if (!alive) return;
+      setPeriods(financeRes.periods ?? null);
+    })().catch(() => {
+      if (!alive) return;
+      setPeriods(null);
+    });
+
+    return () => {
+      alive = false;
+    };
+  }, [periodOptions]);
 
   return (
     <PageShell
@@ -173,7 +208,7 @@ export default function Financeiro() {
                       <td>
                         <span className="countryCell">
                           <span aria-hidden="true">
-                            {flagByCode[r.countryCode]}
+                            {countryMaps.flagByCode[r.countryCode]}
                           </span>
                           {r.country}
                         </span>

@@ -1,7 +1,26 @@
-import { mockCountries } from "../data/mockCountries.js";
 import PageShell from "../components/PageShell.jsx";
+import { useEffect, useState } from "react";
+import { getCountries } from "../services/reference.js";
 
 export default function Configuracoes() {
+  const [countries, setCountries] = useState([]);
+
+  useEffect(() => {
+    let alive = true;
+    getCountries()
+      .then((res) => {
+        if (!alive) return;
+        setCountries(res.countries ?? []);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setCountries([]);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const otherSettings = [
     { title: "Tradução automática", desc: "Ativada para todos os idiomas" },
     { title: "Detecção de idioma", desc: "Baseada em nome de arquivo" },
@@ -25,7 +44,7 @@ export default function Configuracoes() {
               </div>
 
               <div className="settingsList">
-                {mockCountries.map((c) => (
+                {countries.map((c) => (
                   <div key={c.code} className="settingsRow">
                     <div className="settingsLeft">
                       <div className="flagBox" aria-hidden="true">

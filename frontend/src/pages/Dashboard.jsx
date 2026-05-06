@@ -3,10 +3,11 @@ import ActionCard from "../components/ActionCard.jsx";
 import CampaignCard from "../components/CampaignCard.jsx";
 import MetricCard from "../components/MetricCard.jsx";
 import { useNavigate } from "react-router-dom";
-import { mockCampaigns } from "../data/mockCampaigns.js";
-import { mockCountries } from "../data/mockCountries.js";
 import { mockRoiOntem } from "../data/mockRoiOntem.js";
 import useCampaignFilters from "../mocks/useCampaignFilters.js";
+import { useEffect, useMemo, useState } from "react";
+import { getCountries } from "../services/reference.js";
+import { listCampaigns } from "../services/campaigns.js";
 import {
   AddIcon,
   BarChartIcon,
@@ -19,17 +20,41 @@ import {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const countriesCount = mockCountries.length;
-  const flagByCode = Object.fromEntries(
-    mockCountries.map((c) => [c.code, c.flag]),
+  const [countries, setCountries] = useState([]);
+  const [campaignsData, setCampaignsData] = useState([]);
+
+  useEffect(() => {
+    let alive = true;
+    Promise.all([getCountries(), listCampaigns()])
+      .then(([countriesRes, campaignsRes]) => {
+        if (!alive) return;
+        setCountries(countriesRes.countries ?? []);
+        setCampaignsData(campaignsRes.campaigns ?? []);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setCountries([]);
+        setCampaignsData([]);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const countriesCount = countries.length;
+  const flagByCode = useMemo(
+    () => Object.fromEntries(countries.map((c) => [c.code, c.flag])),
+    [countries],
   );
+
   const { campaigns, statusFilter, sortMode, cycleStatus, cycleSort } =
-    useCampaignFilters(mockCampaigns);
+    useCampaignFilters(campaignsData);
 
   const totals = {
-    campaigns: mockCampaigns.length,
-    published: mockCampaigns.filter((c) => c.status === "Publicado").length,
-    drafts: mockCampaigns.filter((c) => c.status === "Rascunho").length,
+    campaigns: campaignsData.length,
+    published: campaignsData.filter((c) => c.status === "Publicado").length,
+    drafts: campaignsData.filter((c) => c.status === "Rascunho").length,
   };
 
   return (
@@ -131,7 +156,7 @@ export default function Dashboard() {
                   scopeLabel={campaign.scopeLabel}
                   generatedLabel={`${campaign.countryCodes.length} campanhas geradas`}
                   createdAtLabel={campaign.createdAtLabel}
-                  countryFlags={campaign.countryCodes.map((code) => flagByCode[code])}
+                  countryFlags={campaign.countryCodes.map((code) => flagByCode[code] ?? code)}
                 />
               ))}
             </div>
