@@ -146,6 +146,7 @@ export async function metaCreateCampaign({
   params.set('objective', obj)
   params.set('status', forcedStatus)
   params.set('special_ad_categories', JSON.stringify(Array.isArray(specialAdCategories) ? specialAdCategories : []))
+  params.set('is_adset_budget_sharing_enabled', 'false')
 
   const json = await fetchJson(buildUrl(`act_${act.replace(/^act_/, '')}/campaigns`), {
     method: 'POST',
@@ -191,4 +192,3 @@ export async function metaFetchCampaign({
 
   return fetchJson(url, { retries: 2 })
 }
-
