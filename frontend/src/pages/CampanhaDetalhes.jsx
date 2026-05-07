@@ -146,8 +146,10 @@ export default function CampanhaDetalhes() {
               <tr>
                 <th>País</th>
                 <th>Nome</th>
+                <th>Modo</th>
                 <th>Status</th>
                 <th>Meta Campaign ID</th>
+                <th>Status Meta</th>
                 <th>Ação</th>
               </tr>
             </thead>
@@ -162,13 +164,21 @@ export default function CampanhaDetalhes() {
                   </td>
                   <td style={{ fontWeight: 900 }}>{gc.name}</td>
                   <td className="muted" style={{ fontWeight: 900 }}>
+                    {String(gc.meta_campaign_id || "").startsWith("stub-") || !gc.meta_campaign_id ? "STUB" : "REAL"}
+                  </td>
+                  <td className="muted" style={{ fontWeight: 900 }}>
                     {gc.status}
                   </td>
                   <td className="muted" style={{ fontWeight: 800 }}>
                     {gc.meta_campaign_id || "—"}
                   </td>
+                  <td className="muted" style={{ fontWeight: 800 }}>
+                    {gc.meta_status || gc.meta_effective_status
+                      ? `${gc.meta_status || "—"}${gc.meta_effective_status && gc.meta_effective_status !== gc.meta_status ? ` / ${gc.meta_effective_status}` : ""}`
+                      : "—"}
+                  </td>
                   <td>
-                    {!gc.meta_campaign_id ? (
+                    {!gc.meta_campaign_id || String(gc.meta_campaign_id).startsWith("stub-") ? (
                       <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                         <input
                           value={metaIdDraftByGeneratedId[gc.id] ?? ""}
@@ -264,7 +274,7 @@ export default function CampanhaDetalhes() {
               ))}
               {!generated.length ? (
                 <tr>
-                  <td colSpan={5} className="muted" style={{ fontWeight: 800 }}>
+                  <td colSpan={7} className="muted" style={{ fontWeight: 800 }}>
                     {loading ? "Carregando..." : "Nenhuma campanha gerada ainda. Clique em “Gerar por país”."}
                   </td>
                 </tr>
