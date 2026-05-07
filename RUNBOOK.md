@@ -71,6 +71,51 @@ Esta seção deve ser atualizada sempre que:
   - Rodar executor (dry-run): `curl -X POST http://localhost:3001/api/automation/run -H 'Content-Type: application/json' -d '{"dryRun":true}'`
   - Rodar executor (persistindo logs): `curl -X POST http://localhost:3001/api/automation/run -H 'Content-Type: application/json' -d '{}'`
 
+[2026-05-07 13:54]
+
+- Criação real de campanhas Meta Ads validada:
+  
+  - Endpoint:
+    
+    `POST /api/meta/campaigns`
+
+  - Estratégia operacional:
+    
+    Toda campanha criada durante desenvolvimento deve nascer obrigatoriamente com:
+    
+    ```json
+    {
+      "status": "PAUSED"
+    }
+    ```
+
+    Observação: mesmo que o cliente envie outro valor no payload, o backend deve forçar `PAUSED` durante o desenvolvimento.
+
+  - Fluxo validado:
+    
+    Frontend
+    → Backend
+    → Meta Marketing API
+    → Recebe `meta_campaign_id`
+    → Persistência local
+    → Sincronização futura
+
+  - Campos confirmados pela API:
+    
+    - `id`
+    - `name`
+    - `status`
+    - `effective_status`
+    - `objective`
+
+  - Exemplo validado:
+    
+    - `meta_campaign_id`: `120246720768940596`
+    - `meta_ad_account_id`: `act_259174718403969`
+
+  - Consulta validada:
+    
+    `GET /{meta_campaign_id}?fields=id,name,status,effective_status,objective`
 
 
 ## Concrete Steps
