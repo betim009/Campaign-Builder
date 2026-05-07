@@ -39,6 +39,10 @@ export function asUiCampaign(apiCampaign) {
     : "Criado —";
 
   const countryCodes = Array.isArray(apiCampaign.country_codes) ? apiCampaign.country_codes : [];
+  const config =
+    apiCampaign.config && typeof apiCampaign.config === "object" && !Array.isArray(apiCampaign.config)
+      ? apiCampaign.config
+      : {};
 
   return {
     id: apiCampaign.id,
@@ -48,10 +52,10 @@ export function asUiCampaign(apiCampaign) {
     scopeLabel,
     createdAtLabel,
     countryCodes,
+    config,
   };
 }
 
 export function fallbackCampaigns() {
   return mockCampaigns.slice();
 }
-

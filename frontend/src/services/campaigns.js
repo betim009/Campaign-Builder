@@ -1,4 +1,4 @@
-import { apiGet, apiPost, HttpError } from "./http.js";
+import { apiGet, apiPost, apiPatch, HttpError } from "./http.js";
 import { asUiCampaign, fallbackCampaigns } from "./fallbacks.js";
 
 export async function listCampaigns({ limit = 50, status } = {}) {
@@ -23,13 +23,32 @@ export async function getCampaign(id) {
   return { ok: true, campaign: asUiCampaign(data?.campaign) };
 }
 
-export async function createCampaign({ name, scope = "global", objectiveKey = null, countryCodes = [] }) {
+export async function createCampaign({
+  name,
+  scope = "global",
+  objectiveKey = null,
+  countryCodes = [],
+  config,
+} = {}) {
   const data = await apiPost("/api/campaigns", {
     name,
     scope,
     objectiveKey,
     countryCodes,
+    ...(config !== undefined ? { config } : null),
   });
+  return { ok: true, campaign: asUiCampaign(data?.campaign) };
+}
+
+export async function updateCampaign(id, { name, scope, objectiveKey, countryCodes, config } = {}) {
+  const body = {
+    ...(name !== undefined ? { name } : null),
+    ...(scope !== undefined ? { scope } : null),
+    ...(objectiveKey !== undefined ? { objectiveKey } : null),
+    ...(countryCodes !== undefined ? { countryCodes } : null),
+    ...(config !== undefined ? { config } : null),
+  };
+  const data = await apiPatch(`/api/campaigns/${encodeURIComponent(String(id))}`, body);
   return { ok: true, campaign: asUiCampaign(data?.campaign) };
 }
 
@@ -43,4 +62,3 @@ export async function generateCampaigns(id) {
   const list = Array.isArray(data?.generated_campaigns) ? data.generated_campaigns : [];
   return { ok: true, generatedCampaigns: list };
 }
-

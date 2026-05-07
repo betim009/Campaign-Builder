@@ -23,6 +23,12 @@ function normalizeCountryCodes(value) {
   return [...new Set(list.map((c) => String(c).trim().toUpperCase()).filter(Boolean))]
 }
 
+function normalizeConfig(value) {
+  if (value === null || value === undefined) return {}
+  if (typeof value !== 'object' || Array.isArray(value)) return null
+  return value
+}
+
 export function campaignsRouter() {
   const router = Router()
 
@@ -46,6 +52,7 @@ export function campaignsRouter() {
             c.status,
             c.scope,
             c.objective_key,
+            c.config,
             o.label AS objective_label,
             o.meta_value AS objective_meta_value,
             c.created_by_user_id,
@@ -91,6 +98,7 @@ export function campaignsRouter() {
             c.status,
             c.scope,
             c.objective_key,
+            c.config,
             o.label AS objective_label,
             o.meta_value AS objective_meta_value,
             c.created_by_user_id,
@@ -138,9 +146,13 @@ export function campaignsRouter() {
       const objectiveKey = req.body?.objectiveKey ?? null
       const createdByUserId = req.body?.createdByUserId ?? null
       const countryCodes = normalizeCountryCodes(req.body?.countryCodes)
+      const config = normalizeConfig(req.body?.config)
 
       if (typeof name !== 'string' || !name.trim()) {
         return jsonError(res, 400, 'Invalid name')
+      }
+      if (config === null) {
+        return jsonError(res, 400, 'Invalid config (expected object)')
       }
 
       const pool = getPool()
@@ -151,11 +163,11 @@ export function campaignsRouter() {
         const slug = await createUniqueSlug(client, name)
         const insertResult = await client.query(
           `
-            INSERT INTO campaigns (slug, name, status, scope, objective_key, created_by_user_id)
-            VALUES ($1, $2, 'draft', $3, $4, $5)
-            RETURNING id, slug, name, status, scope, objective_key, created_by_user_id, created_at
+            INSERT INTO campaigns (slug, name, status, scope, objective_key, created_by_user_id, config)
+            VALUES ($1, $2, 'draft', $3, $4, $5, $6::jsonb)
+            RETURNING id, slug, name, status, scope, objective_key, created_by_user_id, config, created_at
           `,
-          [slug, name.trim(), scope, objectiveKey, createdByUserId]
+          [slug, name.trim(), scope, objectiveKey, createdByUserId, JSON.stringify(config)]
         )
 
         const campaign = insertResult.rows[0]
@@ -203,7 +215,7 @@ export function campaignsRouter() {
 
         const originalResult = await client.query(
           `
-            SELECT id, name, scope, objective_key, created_by_user_id
+            SELECT id, name, scope, objective_key, created_by_user_id, config
             FROM campaigns
             WHERE id = $1
           `,
@@ -223,11 +235,18 @@ export function campaignsRouter() {
         const slug = await createUniqueSlug(client, newName)
         const inserted = await client.query(
           `
-            INSERT INTO campaigns (slug, name, status, scope, objective_key, created_by_user_id)
-            VALUES ($1, $2, 'draft', $3, $4, $5)
-            RETURNING id, slug, name, status, scope, objective_key, created_by_user_id, created_at
+            INSERT INTO campaigns (slug, name, status, scope, objective_key, created_by_user_id, config)
+            VALUES ($1, $2, 'draft', $3, $4, $5, $6::jsonb)
+            RETURNING id, slug, name, status, scope, objective_key, created_by_user_id, config, created_at
           `,
-          [slug, newName, original.scope, original.objective_key, original.created_by_user_id]
+          [
+            slug,
+            newName,
+            original.scope,
+            original.objective_key,
+            original.created_by_user_id,
+            JSON.stringify(original.config ?? {})
+          ]
         )
         const campaign = inserted.rows[0]
 
@@ -256,6 +275,140 @@ export function campaignsRouter() {
         return res
           .status(201)
           .json({ ok: true, campaign: { ...campaign, country_codes: countryCodes } })
+      } catch (err) {
+        await client.query('ROLLBACK')
+        throw err
+      } finally {
+        client.release()
+      }
+    })
+  )
+
+  router.patch(
+    '/:id',
+    asyncHandler(async (req, res) => {
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      const campaignId = req.params.id
+      if (!isUuid(campaignId)) {
+        return jsonError(res, 400, 'Invalid campaign id')
+      }
+
+      const name = typeof req.body?.name === 'string' ? req.body.name.trim() : null
+      const scope = typeof req.body?.scope === 'string' ? req.body.scope : null
+      const objectiveKey = req.body?.objectiveKey ?? null
+      const countryCodes = normalizeCountryCodes(req.body?.countryCodes)
+      const hasConfig = Object.prototype.hasOwnProperty.call(req.body ?? {}, 'config')
+      const config = hasConfig ? normalizeConfig(req.body?.config) : undefined
+
+      if (req.body?.name !== undefined && (!name || !name.trim())) {
+        return jsonError(res, 400, 'Invalid name')
+      }
+      if (hasConfig && config === null) {
+        return jsonError(res, 400, 'Invalid config (expected object)')
+      }
+
+      const pool = getPool()
+      const client = await pool.connect()
+      try {
+        await client.query('BEGIN')
+
+        if (name) {
+          await client.query(
+            `
+              UPDATE campaigns
+              SET name = $2
+              WHERE id = $1
+            `,
+            [campaignId, name]
+          )
+        }
+
+        if (scope) {
+          await client.query(
+            `
+              UPDATE campaigns
+              SET scope = $2
+              WHERE id = $1
+            `,
+            [campaignId, scope]
+          )
+        }
+
+        if (req.body?.objectiveKey !== undefined) {
+          await client.query(
+            `
+              UPDATE campaigns
+              SET objective_key = $2
+              WHERE id = $1
+            `,
+            [campaignId, objectiveKey]
+          )
+        }
+
+        if (hasConfig) {
+          await client.query(
+            `
+              UPDATE campaigns
+              SET config = $2::jsonb
+              WHERE id = $1
+            `,
+            [campaignId, JSON.stringify(config ?? {})]
+          )
+        }
+
+        if (req.body?.countryCodes !== undefined) {
+          await client.query('DELETE FROM campaign_country_targets WHERE campaign_id = $1', [
+            campaignId
+          ])
+          for (const code of countryCodes) {
+            await client.query(
+              `
+                INSERT INTO campaign_country_targets (campaign_id, country_code)
+                VALUES ($1, $2)
+                ON CONFLICT DO NOTHING
+              `,
+              [campaignId, code]
+            )
+          }
+        }
+
+        const updated = await client.query(
+          `
+            SELECT
+              c.id,
+              c.slug,
+              c.name,
+              c.status,
+              c.scope,
+              c.objective_key,
+              c.config,
+              o.label AS objective_label,
+              o.meta_value AS objective_meta_value,
+              c.created_by_user_id,
+              c.created_at,
+              COALESCE(
+                json_agg(ct.country_code ORDER BY ct.country_code) FILTER (WHERE ct.country_code IS NOT NULL),
+                '[]'::json
+              ) AS country_codes
+            FROM campaigns c
+            LEFT JOIN campaign_objectives o ON o.key = c.objective_key
+            LEFT JOIN campaign_country_targets ct ON ct.campaign_id = c.id
+            WHERE c.id = $1
+            GROUP BY c.id, o.label, o.meta_value
+          `,
+          [campaignId]
+        )
+
+        if (updated.rowCount === 0) {
+          await client.query('ROLLBACK')
+          return jsonError(res, 404, 'Campaign not found')
+        }
+
+        await client.query('COMMIT')
+        return res.json({ ok: true, campaign: updated.rows[0] })
       } catch (err) {
         await client.query('ROLLBACK')
         throw err

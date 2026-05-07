@@ -91,7 +91,7 @@ Contratos atuais (mínimo):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-06 20:08]
+Última atualização: [2026-05-07 09:03]
 
 Regras:
 
@@ -111,12 +111,115 @@ Regras:
 ### Fase 6 — Meta Ads real + Automação (quando Fase 5 estabilizar)
 
 - [x] Definir estratégia de autenticação/token (escopo por usuário, expiração/refresh) e registrar decisão.
-- [ ] Substituir gradualmente `stub` por sync real da Meta (mantendo `stub` para dev).
+- [x] Substituir gradualmente `stub` por sync real da Meta (mantendo `stub` para dev).
   - [x] `POST /api/meta/validate` para validar token (Graph `/me`)
   - [x] `GET /api/meta/status` para diagnóstico (provider + token presente)
   - [x] Retry/backoff + paginação (`paging.next`) no fetch de insights
   - [x] Extrair `revenue_cents` quando disponível (ex: `action_values.purchase` / `omni_purchase`)
 - [x] Definir 1–2 regras MVP de automação e implementar executor + logs.
+
+### P0 — Consolidar dados reais (remover divergência mock vs API)
+
+Última atualização: [2026-05-07 09:14]
+
+Objetivo:
+Eliminar inconsistências entre frontend mockado e backend real, fortalecendo a confiabilidade do dashboard financeiro e ROI.
+
+#### [x] Remover mock da página Mensal (`frontend/src/pages/Mensal.jsx`)
+
+Objetivo:
+Substituir `mockMonthly` por dados reais vindos do backend.
+
+Escopo:
+
+* Criar endpoint:
+
+  * `GET /api/finance/monthly?month=YYYY-MM`
+* Retornar:
+
+  * `totals`
+  * `daily`
+  * `bestDay`
+  * `worstDay`
+  * `roiSeries`
+* Utilizar `campaign_metrics` como fonte principal
+* Manter compatibilidade com provider `stub`
+* Criar loading/error states
+* Preservar layout atual
+
+Critérios de aceite:
+
+* Página renderiza sem `mockMonthly`
+* Troca de mês funciona corretamente
+* Tela possui loading/error states
+* Build frontend/backend funcionando
+
+#### [x] Remover mock da página ROI Ontem (`frontend/src/pages/RoiOntem.jsx`)
+
+Objetivo:
+Substituir `mockRoiOntem` por dados reais do backend baseados em `campaign_metrics`.
+
+Escopo:
+
+* Criar endpoint:
+
+  * `GET /api/finance/roi-d1?date=YYYY-MM-DD`
+* Retornar:
+
+  * `summary`
+  * `rows`
+  * métricas agregadas
+* Preparar integração futura com automação (`dryRun`)
+* Corrigir textos hardcoded de data/hora
+
+Critérios de aceite:
+
+* Página renderiza sem mocks
+* Data D-1 calculada dinamicamente
+* Tela possui loading/error states
+* Backend retorna agregações reais
+
+### P1 — Persistência real da Nova Campanha
+
+Última atualização: [2026-05-07 09:19]
+
+Objetivo:
+Persistir de forma real todos os dados do formulário de Nova Campanha.
+
+#### [x] Persistir formulário completo da Nova Campanha
+
+Escopo:
+
+* Salvar:
+
+  * BM
+  * Ad Account
+  * Pixel
+  * Budget
+  * Datas
+  * Copy
+  * Uploads
+  * Configurações
+* Definir modelagem:
+
+  * novas colunas
+  * ou tabelas normalizadas
+* Permitir:
+
+  * salvar draft
+  * reabrir draft
+  * editar draft
+  * continuar geração por país
+
+Critérios de aceite:
+
+* Draft pode ser reaberto
+* Dados permanecem persistidos
+* Campos obrigatórios possuem validação
+* Frontend deixa de depender de estado temporário local
+
+
+
 
 ## Decision Log (Ativo)
 

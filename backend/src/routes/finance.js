@@ -7,8 +7,16 @@ function isYyyyMmDd(value) {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
 }
 
+function isYyyyMm(value) {
+  return typeof value === 'string' && /^\d{4}-\d{2}$/.test(value)
+}
+
 function todayUtcYyyyMmDd() {
   return new Date().toISOString().slice(0, 10)
+}
+
+function thisMonthUtcYyyyMm() {
+  return new Date().toISOString().slice(0, 7)
 }
 
 function addDaysUtc(yyyyMmDd, days) {
@@ -18,9 +26,31 @@ function addDaysUtc(yyyyMmDd, days) {
   return date.toISOString().slice(0, 10)
 }
 
+function monthRangeUtc(yyyyMm) {
+  const [yRaw, mRaw] = String(yyyyMm).split('-')
+  const year = Number(yRaw)
+  const month = Number(mRaw)
+  if (!Number.isFinite(year) || !Number.isFinite(month) || month < 1 || month > 12) return null
+
+  const since = `${yRaw}-${mRaw}-01`
+  const lastDay = new Date(Date.UTC(year, month, 0)).toISOString().slice(8, 10)
+  const until = `${yRaw}-${mRaw}-${lastDay}`
+  if (!isYyyyMmDd(since) || !isYyyyMmDd(until)) return null
+  return { since, until }
+}
+
 function parseDateOrNull(value) {
   if (!isYyyyMmDd(value)) return null
   return value
+}
+
+function parseMonthOrNull(value) {
+  if (!isYyyyMm(value)) return null
+  const [y, m] = String(value).split('-')
+  const month = Number(m)
+  if (!Number.isFinite(month) || month < 1 || month > 12) return null
+  if (!/^\d{4}$/.test(y)) return null
+  return `${y}-${m}`
 }
 
 function toInt(value) {
@@ -54,6 +84,182 @@ function computeRoiPercent({ spendCents, revenueCents }) {
 
 export function financeRouter() {
   const router = Router()
+
+  router.get(
+    '/monthly',
+    asyncHandler(async (req, res) => {
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      const month = parseMonthOrNull(req.query.month) ?? thisMonthUtcYyyyMm()
+      const range = monthRangeUtc(month)
+      if (!range) {
+        return jsonError(res, 400, 'Invalid month. Use YYYY-MM.')
+      }
+
+      const { since, until } = range
+      const pool = getPool()
+
+      const totalsResult = await pool.query(
+        `
+          SELECT
+            COALESCE(SUM(cm.spend_cents), 0) AS spend_cents,
+            COALESCE(SUM(cm.impressions), 0) AS impressions,
+            COALESCE(SUM(cm.clicks), 0) AS clicks,
+            SUM(cm.revenue_cents) AS revenue_cents
+          FROM campaign_metrics cm
+          WHERE cm.metric_date BETWEEN $1::date AND $2::date
+        `,
+        [since, until]
+      )
+
+      const totalsRow = totalsResult.rows?.[0] ?? {}
+      const spendCents = toInt(totalsRow.spend_cents)
+      const impressions = toInt(totalsRow.impressions)
+      const clicks = toInt(totalsRow.clicks)
+      const revenueCents = toNullableInt(totalsRow.revenue_cents)
+      const profitCents = revenueCents === null ? null : revenueCents - spendCents
+
+      const dailyResult = await pool.query(
+        `
+          SELECT
+            cm.metric_date::text AS metric_date,
+            COALESCE(SUM(cm.spend_cents), 0) AS spend_cents,
+            SUM(cm.revenue_cents) AS revenue_cents,
+            COALESCE(SUM(cm.impressions), 0) AS impressions,
+            COALESCE(SUM(cm.clicks), 0) AS clicks
+          FROM campaign_metrics cm
+          WHERE cm.metric_date BETWEEN $1::date AND $2::date
+          GROUP BY cm.metric_date
+          ORDER BY cm.metric_date ASC
+        `,
+        [since, until]
+      )
+
+      const daily = dailyResult.rows.map((r) => {
+        const spend = toInt(r.spend_cents)
+        const revenue = toNullableInt(r.revenue_cents)
+        const profit = revenue === null ? null : revenue - spend
+        return {
+          date: r.metric_date,
+          spend_cents: spend,
+          revenue_cents: revenue,
+          profit_cents: profit,
+          roi_percent: computeRoiPercent({ spendCents: spend, revenueCents: revenue }),
+          impressions: toInt(r.impressions),
+          clicks: toInt(r.clicks)
+        }
+      })
+
+      const ranked = daily.filter((d) => typeof d.roi_percent === 'number')
+      const bestDay = ranked.length
+        ? ranked.reduce((best, cur) => (cur.roi_percent > best.roi_percent ? cur : best), ranked[0])
+        : null
+      const worstDay = ranked.length
+        ? ranked.reduce((best, cur) => (cur.roi_percent < best.roi_percent ? cur : best), ranked[0])
+        : null
+
+      const roiSeries = daily.map((d) => ({
+        date: d.date,
+        roi_percent: d.roi_percent
+      }))
+
+      return res.json({
+        ok: true,
+        month,
+        range: { since, until },
+        totals: {
+          spend_cents: spendCents,
+          revenue_cents: revenueCents,
+          profit_cents: profitCents,
+          impressions,
+          clicks,
+          roi_percent: computeRoiPercent({ spendCents, revenueCents })
+        },
+        daily,
+        bestDay,
+        worstDay,
+        roiSeries
+      })
+    })
+  )
+
+  router.get(
+    '/roi-d1',
+    asyncHandler(async (req, res) => {
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      const date = parseDateOrNull(req.query.date) ?? addDaysUtc(todayUtcYyyyMmDd(), -1)
+      if (!isYyyyMmDd(date)) {
+        return jsonError(res, 400, 'Invalid date. Use YYYY-MM-DD.')
+      }
+
+      const pool = getPool()
+
+      const totalsResult = await pool.query(
+        `
+          SELECT
+            COALESCE(SUM(cm.spend_cents), 0) AS spend_cents,
+            SUM(cm.revenue_cents) AS revenue_cents
+          FROM campaign_metrics cm
+          WHERE cm.metric_date = $1::date
+        `,
+        [date]
+      )
+      const totalsRow = totalsResult.rows?.[0] ?? {}
+      const spendCents = toInt(totalsRow.spend_cents)
+      const revenueCents = toNullableInt(totalsRow.revenue_cents)
+      const profitCents = revenueCents === null ? null : revenueCents - spendCents
+
+      const rowsResult = await pool.query(
+        `
+          SELECT
+            c.name AS campaign_name,
+            gc.country_code,
+            gc.status AS generated_status,
+            COALESCE(SUM(cm.spend_cents), 0) AS spend_cents,
+            SUM(cm.revenue_cents) AS revenue_cents
+          FROM campaign_metrics cm
+          JOIN generated_campaigns gc ON gc.id = cm.generated_campaign_id
+          JOIN campaigns c ON c.id = gc.campaign_id
+          WHERE cm.metric_date = $1::date
+          GROUP BY c.name, gc.country_code, gc.status
+          ORDER BY COALESCE(SUM(cm.revenue_cents), 0) - COALESCE(SUM(cm.spend_cents), 0) DESC, c.name ASC
+        `,
+        [date]
+      )
+
+      const rows = rowsResult.rows.map((r) => {
+        const spend = toInt(r.spend_cents)
+        const revenue = toNullableInt(r.revenue_cents)
+        const profit = revenue === null ? null : revenue - spend
+        return {
+          campaign_name: r.campaign_name,
+          country_code: r.country_code,
+          status: r.generated_status,
+          spend_cents: spend,
+          revenue_cents: revenue,
+          profit_cents: profit,
+          roi_percent: computeRoiPercent({ spendCents: spend, revenueCents: revenue })
+        }
+      })
+
+      return res.json({
+        ok: true,
+        date,
+        summary: {
+          spend_cents: spendCents,
+          revenue_cents: revenueCents,
+          profit_cents: profitCents,
+          roi_percent: computeRoiPercent({ spendCents, revenueCents })
+        },
+        rows
+      })
+    })
+  )
 
   router.get(
     '/overview',
@@ -233,4 +439,3 @@ export function financeRouter() {
 
   return router
 }
-

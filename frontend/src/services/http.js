@@ -61,3 +61,6 @@ export function apiPost(path, body, opts) {
   return apiRequest(path, { ...(opts ?? null), method: "POST", body });
 }
 
+export function apiPatch(path, body, opts) {
+  return apiRequest(path, { ...(opts ?? null), method: "PATCH", body });
+}

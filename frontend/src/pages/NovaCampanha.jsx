@@ -2,7 +2,8 @@ import PageShell from "../components/PageShell.jsx";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCountries } from "../services/reference.js";
-import { createCampaign, generateCampaigns } from "../services/campaigns.js";
+import { useLocation } from "react-router-dom";
+import { createCampaign, generateCampaigns, getCampaign, updateCampaign } from "../services/campaigns.js";
 import {
   AddIcon,
   AutoAwesomeIcon,
@@ -124,7 +125,14 @@ function InfoLine({ icon, text, tone = "muted" }) {
 }
 
 export default function NovaCampanha() {
+  const location = useLocation();
   const navigate = useNavigate();
+  const draftId = useMemo(() => {
+    const params = new URLSearchParams(location.search || "");
+    const id = params.get("draft");
+    return id && id.trim() ? id.trim() : null;
+  }, [location.search]);
+
   const [campaignName, setCampaignName] = useState("");
   const [businessManager, setBusinessManager] = useState("");
   const [adAccount, setAdAccount] = useState("");
@@ -151,6 +159,59 @@ export default function NovaCampanha() {
   const [countries, setCountries] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+
+  useEffect(() => {
+    if (!draftId) return;
+    let alive = true;
+    setSubmitting(true);
+    setSubmitError("");
+
+    getCampaign(draftId)
+      .then((res) => {
+        if (!alive) return;
+        const cfg = res?.campaign?.config ?? {};
+        setCampaignName(res?.campaign?.name ?? "");
+
+        setBusinessManager(cfg.businessManager ?? "");
+        setAdAccount(cfg.adAccount ?? "");
+        setPageId(cfg.pageId ?? "");
+        setPixel(cfg.pixel ?? "");
+        setBeneficiary(cfg.beneficiary ?? "");
+
+        setDomain(cfg.domain ?? "");
+        setSlug(cfg.slug ?? "");
+        setNicheParam(cfg.nicheParam ?? "");
+        setLibraryNiche(cfg.libraryNiche ?? "");
+
+        if (Array.isArray(cfg.primaryTexts)) setPrimaryTexts(cfg.primaryTexts);
+        if (Array.isArray(cfg.titles)) setTitles(cfg.titles);
+        if (Array.isArray(cfg.descriptions)) setDescriptions(cfg.descriptions);
+
+        if (cfg.dailyBudget !== undefined) setDailyBudget(String(cfg.dailyBudget));
+        if (cfg.budgetType) setBudgetType(cfg.budgetType);
+        if (cfg.startDate) setStartDate(cfg.startDate);
+        if (cfg.startTime) setStartTime(cfg.startTime);
+        if (cfg.endDate) setEndDate(cfg.endDate);
+        if (cfg.endTime) setEndTime(cfg.endTime);
+        if (typeof cfg.runContinuous === "boolean") setRunContinuous(cfg.runContinuous);
+
+        if (Array.isArray(cfg.uploads)) {
+          setUploadedFiles(cfg.uploads);
+        }
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setSubmitError(err?.message ? String(err.message) : "Falha ao carregar rascunho.");
+      })
+      .finally(() => {
+        if (!alive) return;
+        setSubmitting(false);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [draftId]);
 
   useEffect(() => {
     let alive = true;
@@ -234,18 +295,69 @@ export default function NovaCampanha() {
     [countries],
   );
 
-  const canSubmit = !submitting && campaignName.trim() !== "" && targetCountryCodes.length > 0;
+  const canSubmit =
+    !submitting &&
+    campaignName.trim() !== "" &&
+    businessManager.trim() !== "" &&
+    adAccount.trim() !== "" &&
+    targetCountryCodes.length > 0;
+
+  function buildConfig() {
+    const uploads =
+      Array.isArray(uploadedFiles) && uploadedFiles.length
+        ? uploadedFiles.map((f) => {
+            if (!f) return null;
+            if (typeof f === "object" && "name" in f && "size" in f) {
+              return {
+                name: f.name,
+                size: f.size,
+                type: f.type ?? null,
+                lastModified: f.lastModified ?? null,
+              };
+            }
+            return f;
+          }).filter(Boolean)
+        : [];
+
+    return {
+      businessManager,
+      adAccount,
+      pageId,
+      pixel,
+      beneficiary,
+      domain,
+      slug,
+      nicheParam,
+      libraryNiche,
+      primaryTexts,
+      titles,
+      descriptions,
+      dailyBudget,
+      budgetType,
+      startDate,
+      startTime,
+      endDate,
+      endTime,
+      runContinuous,
+      uploads,
+    };
+  }
 
   async function handleCreate({ generate }) {
     if (!canSubmit) return;
     setSubmitting(true);
     setSubmitError("");
     try {
-      const created = await createCampaign({
+      const payload = {
         name: campaignName.trim(),
         scope: "global",
         countryCodes: targetCountryCodes,
-      });
+        config: buildConfig(),
+      };
+
+      const created = draftId
+        ? await updateCampaign(draftId, payload)
+        : await createCampaign(payload);
 
       if (generate) {
         await generateCampaigns(created.campaign.id);

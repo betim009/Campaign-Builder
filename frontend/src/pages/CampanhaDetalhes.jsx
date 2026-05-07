@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import PageShell from "../components/PageShell.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { getCampaign, generateCampaigns } from "../services/campaigns.js";
@@ -9,6 +9,7 @@ import { syncGeneratedCampaign } from "../services/meta.js";
 
 export default function CampanhaDetalhes() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [campaign, setCampaign] = useState(null);
   const [generated, setGenerated] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,6 +67,14 @@ export default function CampanhaDetalhes() {
           <div style={{ display: "flex", gap: 10 }}>
             <button type="button" className="pillOutline" onClick={refresh} disabled={busy || loading}>
               Atualizar
+            </button>
+            <button
+              type="button"
+              className="pillOutline"
+              disabled={busy || loading || !campaign}
+              onClick={() => navigate(`/nova-campanha?draft=${encodeURIComponent(String(id))}`)}
+            >
+              Editar rascunho
             </button>
             <button
               type="button"

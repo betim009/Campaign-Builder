@@ -1,5 +1,7 @@
 import PageShell from "../components/PageShell.jsx";
-import { mockRoiOntem } from "../data/mockRoiOntem.js";
+import { useEffect, useMemo, useState } from "react";
+import { getFinanceRoiD1, toFinanceRoiD1ViewModel } from "../services/finance.js";
+import { runAutomation } from "../services/automation.js";
 import {
   BoltIcon,
   PauseCircleOutlineIcon,
@@ -158,14 +160,71 @@ function ActionPill({ tone, children }) {
 }
 
 export default function RoiOntem() {
-  const rows = mockRoiOntem.rows;
+  function todayUtcYyyyMmDd() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function addDaysUtc(yyyyMmDd, days) {
+    const [y, m, d] = String(yyyyMmDd).split("-").map((v) => Number(v));
+    const date = new Date(Date.UTC(y, m - 1, d));
+    date.setUTCDate(date.getUTCDate() + days);
+    return date.toISOString().slice(0, 10);
+  }
+
+  const dateD1 = useMemo(() => addDaysUtc(todayUtcYyyyMmDd(), -1), []);
+  const [viewModel, setViewModel] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState(null);
+  const [lastAutomation, setLastAutomation] = useState(null);
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setError("");
+    getFinanceRoiD1({ date: dateD1 })
+      .then((data) => {
+        if (!alive) return;
+        setViewModel(toFinanceRoiD1ViewModel(data));
+        setLastUpdatedAt(new Date());
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setViewModel(null);
+        setError(err?.message ? String(err.message) : "Falha ao carregar ROI (D-1).");
+      })
+      .finally(() => {
+        if (!alive) return;
+        setLoading(false);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [dateD1]);
+
+  const rows = viewModel?.rows ?? [];
+  const summary = viewModel?.summary ?? {};
+
+  const automationCounts = useMemo(() => {
+    const scale = rows.filter((r) => r?.acao?.tone === "green").length;
+    const pause = rows.filter((r) => r?.acao?.tone === "red").length;
+    return { scale, pause };
+  }, [rows]);
+
+  const updatedTimeLabel = useMemo(() => {
+    if (!lastUpdatedAt) return null;
+    const hhmm = lastUpdatedAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    return `Hoje às ${hhmm}`;
+  }, [lastUpdatedAt]);
 
   return (
     <PageShell
       title="ROI - Dia Anterior (D-1)"
       subtitle={
         <>
-          Última atualização: <b>Hoje</b> às 09:00 • Facebook Ads + Google Analytics
+          Última atualização: <b>{updatedTimeLabel ?? "—"}</b> • Meta Ads + Google Analytics
         </>
       }
       backLabel="Voltar ao Dashboard"
@@ -173,6 +232,19 @@ export default function RoiOntem() {
       headerRight={
         <button
           type="button"
+          disabled={busy || loading}
+          onClick={async () => {
+            setBusy(true);
+            setError("");
+            try {
+              const res = await runAutomation({ date: dateD1, dryRun: true });
+              setLastAutomation(res?.automation ?? null);
+            } catch (err) {
+              setError(err?.message ? String(err.message) : "Falha ao executar automação (dry-run).");
+            } finally {
+              setBusy(false);
+            }
+          }}
           style={{
             height: 44,
             padding: "0 16px",
@@ -185,12 +257,32 @@ export default function RoiOntem() {
             alignItems: "center",
             gap: 10,
             fontSize: 14,
+            opacity: busy || loading ? 0.7 : 1,
           }}
         >
           <BoltIcon fontSize="small" /> Aplicar Otimização Geral
         </button>
       }
     >
+      {error ? (
+        <div className="card" style={{ padding: 18, borderColor: "#fecaca", color: "#991b1b" }}>
+          <div style={{ fontWeight: 900 }}>Erro</div>
+          <div style={{ marginTop: 6, fontWeight: 700 }}>{error}</div>
+        </div>
+      ) : null}
+
+      {lastAutomation ? (
+        <div className="card" style={{ padding: 18, marginTop: 18 }}>
+          <div style={{ fontWeight: 900 }}>Automação (dry-run)</div>
+          <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
+            {lastAutomation?.dryRun ? "Dry-run" : "Executado"} •{" "}
+            {Array.isArray(lastAutomation?.rules)
+              ? `${lastAutomation.rules.length} regra(s)`
+              : "Resultado disponível"}
+          </div>
+        </div>
+      ) : null}
+
       <section
         style={{
           display: "grid",
@@ -199,14 +291,14 @@ export default function RoiOntem() {
         }}
         aria-label="Métricas ROI"
       >
-            <MetricCard label="Gasto Total" value={mockRoiOntem.summary.spendTotal} tone="red" />
-            <MetricCard label="Receita Total" value={mockRoiOntem.summary.revenueTotal} />
-            <MetricCard label="Lucro" value={mockRoiOntem.summary.profitTotal} tone="green" />
+            <MetricCard label="Gasto Total" value={loading ? "—" : summary.spendTotal} tone="red" />
+            <MetricCard label="Receita Total" value={loading ? "—" : summary.revenueTotal} />
+            <MetricCard label="Lucro" value={loading ? "—" : summary.profitTotal} tone="green" />
             <MetricCard
               label="ROI Geral"
-              value={mockRoiOntem.summary.roiOverall}
+              value={loading ? "—" : summary.roiOverall}
               tone="green"
-              hint="Retorno total sobre investimento"
+              hint={`Data base: ${dateD1}`}
             />
       </section>
 
@@ -239,12 +331,12 @@ export default function RoiOntem() {
               <div style={{ fontWeight: 900, marginBottom: 14 }}>
                 Ações em Massa
               </div>
-              <div style={{ display: "grid", gap: 12 }}>
+            <div style={{ display: "grid", gap: 12 }}>
                 <ActionPill tone="green">
-                  <TrendingUpIcon fontSize="small" /> Escalar Positivos (7)
+                  <TrendingUpIcon fontSize="small" /> Escalar Positivos ({automationCounts.scale})
                 </ActionPill>
                 <ActionPill tone="red">
-                  <PauseCircleOutlineIcon fontSize="small" /> Pausar Negativos (2)
+                  <PauseCircleOutlineIcon fontSize="small" /> Pausar Negativos ({automationCounts.pause})
                 </ActionPill>
               </div>
               <div style={{ marginTop: 12, color: "#6b7280", fontWeight: 700 }}>
@@ -269,7 +361,9 @@ export default function RoiOntem() {
                 <ChipButton>Nicho</ChipButton>
               </div>
             </div>
-            <div style={{ color: "#6b7280", fontWeight: 800 }}>12 resultados</div>
+            <div style={{ color: "#6b7280", fontWeight: 800 }}>
+              {loading ? "Carregando…" : `${rows.length} resultado(s)`}
+            </div>
       </div>
 
       <div className="card" style={{ padding: 0, marginTop: 18 }}>
@@ -288,68 +382,83 @@ export default function RoiOntem() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
-                <tr key={r.campanha}>
-                  <td style={{ fontWeight: 900 }}>{r.campanha}</td>
-                  <td className="muted" style={{ fontWeight: 800 }}>
-                    {r.nicho}
-                  </td>
-                  <td>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span aria-hidden="true" style={{ color: "#2563eb", fontWeight: 900 }}>
-                        ƒ
-                      </span>
-                      <div>
-                        <div style={{ fontWeight: 900 }}>{r.conta}</div>
-                        <div className="muted" style={{ fontWeight: 800, fontSize: 14 }}>
-                          {r.act}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="muted" style={{ fontWeight: 900 }}>
-                    {r.gasto}
-                  </td>
-                  <td style={{ fontWeight: 900 }}>{r.receita}</td>
-                  <td style={{ fontWeight: 900, fontSize: 22 }}>{r.roi}</td>
-                  <td>
-                    <StatusChip tone={r.status.tone}>{r.status.label}</StatusChip>
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      style={{
-                        height: 36,
-                        padding: "0 14px",
-                        borderRadius: 12,
-                        border: 0,
-                        background:
-                          r.acao.tone === "green"
-                            ? "#16a34a"
-                            : r.acao.tone === "red"
-                              ? "#dc2626"
-                              : "#b45309",
-                        color: "#ffffff",
-                        fontWeight: 900,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 10,
-                        minWidth: 110,
-                        justifyContent: "center",
-                      }}
-                    >
-                      {r.acao.tone === "green" ? (
-                        <TrendingUpIcon fontSize="small" />
-                      ) : r.acao.tone === "red" ? (
-                        <PauseCircleOutlineIcon fontSize="small" />
-                      ) : (
-                        <VisibilityIcon fontSize="small" />
-                      )}
-                      {r.acao.label}
-                    </button>
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="muted" style={{ fontWeight: 800 }}>
+                    Carregando…
                   </td>
                 </tr>
-              ))}
+              ) : rows.length ? (
+                rows.map((r) => (
+                  <tr key={r.campanha}>
+                    <td style={{ fontWeight: 900 }}>{r.campanha}</td>
+                    <td className="muted" style={{ fontWeight: 800 }}>
+                      {r.nicho}
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <span aria-hidden="true" style={{ color: "#2563eb", fontWeight: 900 }}>
+                          ƒ
+                        </span>
+                        <div>
+                          <div style={{ fontWeight: 900 }}>{r.conta}</div>
+                          <div className="muted" style={{ fontWeight: 800, fontSize: 14 }}>
+                            {r.act}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="muted" style={{ fontWeight: 900 }}>
+                      {r.gasto}
+                    </td>
+                    <td style={{ fontWeight: 900 }}>{r.receita}</td>
+                    <td style={{ fontWeight: 900, fontSize: 22 }}>{r.roi}</td>
+                    <td>
+                      <StatusChip tone={r.status.tone}>{r.status.label}</StatusChip>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        style={{
+                          height: 36,
+                          padding: "0 14px",
+                          borderRadius: 12,
+                          border: 0,
+                          background:
+                            r.acao.tone === "green"
+                              ? "#16a34a"
+                              : r.acao.tone === "red"
+                                ? "#dc2626"
+                                : "#b45309",
+                          color: "#ffffff",
+                          fontWeight: 900,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 10,
+                          minWidth: 110,
+                          justifyContent: "center",
+                        }}
+                        disabled={busy}
+                      >
+                        {r.acao.tone === "green" ? (
+                          <TrendingUpIcon fontSize="small" />
+                        ) : r.acao.tone === "red" ? (
+                          <PauseCircleOutlineIcon fontSize="small" />
+                        ) : (
+                          <VisibilityIcon fontSize="small" />
+                        )}
+                        {r.acao.label}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={8} className="muted" style={{ fontWeight: 800 }}>
+                    Nenhum dado encontrado para D-1.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
