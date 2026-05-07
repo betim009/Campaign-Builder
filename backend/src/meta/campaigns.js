@@ -192,3 +192,59 @@ export async function metaFetchCampaign({
 
   return fetchJson(url, { retries: 2 })
 }
+
+function normalizeMetaAdAccountId(metaAdAccountId) {
+  const raw = normalizeNonEmptyString(metaAdAccountId)
+  if (!raw) return null
+  const stripped = raw.replace(/^act_/, '')
+  if (!/^\d+$/.test(stripped)) return null
+  return `act_${stripped}`
+}
+
+export async function metaListAdAccountCampaigns({
+  metaAdAccountId,
+  accessToken,
+  limit = 50,
+  effectiveStatus = ['PAUSED'],
+  fields = ['id', 'name', 'status', 'effective_status', 'objective']
+} = {}) {
+  const act = normalizeMetaAdAccountId(metaAdAccountId)
+  if (!act) {
+    const err = new Error('metaAdAccountId is required (expected act_<digits>)')
+    err.status = 400
+    throw err
+  }
+
+  const token = normalizeNonEmptyString(accessToken)
+  if (!token) {
+    const err = new Error('accessToken is required')
+    err.status = 400
+    throw err
+  }
+
+  const safeLimit = Number.isFinite(Number(limit)) ? Math.max(1, Math.min(200, Number(limit))) : 50
+  const statuses = Array.isArray(effectiveStatus)
+    ? effectiveStatus.map((s) => normalizeNonEmptyString(s)).filter(Boolean)
+    : []
+
+  const firstUrl = buildUrl(`${act}/campaigns`, {
+    access_token: token,
+    fields: Array.isArray(fields) ? fields.join(',') : String(fields),
+    limit: safeLimit,
+    ...(statuses.length ? { effective_status: JSON.stringify(statuses) } : null)
+  })
+
+  const out = []
+  let nextUrl = firstUrl
+  let pages = 0
+
+  while (nextUrl && pages < 20) {
+    pages += 1
+    const json = await fetchJson(nextUrl, { retries: 3 })
+    const data = Array.isArray(json?.data) ? json.data : []
+    out.push(...data)
+    nextUrl = typeof json?.paging?.next === 'string' ? json.paging.next : null
+  }
+
+  return out
+}

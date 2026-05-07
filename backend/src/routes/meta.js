@@ -6,7 +6,7 @@ import { isUuid } from '../lib/validate.js'
 import { syncGeneratedCampaignMetrics } from '../meta/sync.js'
 import { metaFetchMe } from '../meta/graph.js'
 import { coerceAccessToken, resolveAccessToken } from '../meta/accessToken.js'
-import { metaCreateCampaign, metaFetchCampaign } from '../meta/campaigns.js'
+import { metaCreateCampaign, metaFetchCampaign, metaListAdAccountCampaigns } from '../meta/campaigns.js'
 
 function parseDateOrNull(value) {
   if (typeof value !== 'string' || !value.trim()) return null
@@ -345,6 +345,47 @@ export function metaRouter() {
       } catch (err) {
         const status = typeof err?.status === 'number' ? err.status : 502
         return jsonError(res, status, err?.message ?? 'Meta campaign fetch failed', err?.details)
+      }
+    })
+  )
+
+  router.get(
+    '/ad-accounts/:id/campaigns',
+    asyncHandler(async (req, res) => {
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      const metaAdAccountId = normalizeMetaAdAccountId(req.params.id)
+      if (!metaAdAccountId) {
+        return jsonError(res, 400, 'Invalid meta ad account id (expected act_<digits>)')
+      }
+
+      const pausedOnly = req.query.pausedOnly === undefined ? true : String(req.query.pausedOnly) !== 'false'
+      const limitRaw = req.query.limit
+      const limit = typeof limitRaw === 'string' && limitRaw.trim() ? Number(limitRaw) : 50
+
+      const pool = getPool()
+      const accessToken = await resolveAccessToken(pool, req)
+      if (!accessToken) {
+        return jsonError(
+          res,
+          400,
+          'Missing accessToken (provide body.accessToken, META_ACCESS_TOKEN, or save via /tokens)'
+        )
+      }
+
+      try {
+        const campaigns = await metaListAdAccountCampaigns({
+          metaAdAccountId,
+          accessToken,
+          limit,
+          effectiveStatus: pausedOnly ? ['PAUSED'] : []
+        })
+        return res.json({ ok: true, meta_campaigns: campaigns })
+      } catch (err) {
+        const status = typeof err?.status === 'number' ? err.status : 502
+        return jsonError(res, status, err?.message ?? 'Meta ad account campaigns fetch failed', err?.details)
       }
     })
   )
