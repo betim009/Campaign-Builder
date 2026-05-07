@@ -1,7 +1,7 @@
 import PageShell from "../components/PageShell.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { listGeneratedCampaigns } from "../services/generatedCampaigns.js";
-import { createMetaCampaign } from "../services/meta.js";
+import { createMetaCampaign, listMetaAdAccountCampaigns } from "../services/meta.js";
 import StatusBadge from "../components/StatusBadge.jsx";
 import { countryCodeToFlag } from "../services/fallbacks.js";
 
@@ -28,6 +28,9 @@ export default function MetaPausedTest() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [generated, setGenerated] = useState([]);
+  const [metaLoading, setMetaLoading] = useState(false);
+  const [metaError, setMetaError] = useState("");
+  const [metaCampaigns, setMetaCampaigns] = useState([]);
 
   const [metaAdAccountId, setMetaAdAccountId] = useState("");
   const [objective, setObjective] = useState("OUTCOME_TRAFFIC");
@@ -152,6 +155,101 @@ export default function MetaPausedTest() {
             </select>
           </label>
         </div>
+
+        <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+          <button
+            type="button"
+            className="pillOutline"
+            disabled={normalizeNonEmptyString(metaAdAccountId) === "" || metaLoading}
+            onClick={async () => {
+              setMetaLoading(true);
+              setMetaError("");
+              try {
+                const res = await listMetaAdAccountCampaigns({
+                  metaAdAccountId: metaAdAccountId.trim(),
+                  limit: 100,
+                  pausedOnly: true,
+                });
+                setMetaCampaigns(res.metaCampaigns ?? []);
+              } catch (err) {
+                setMetaError(
+                  err?.message ? String(err.message) : "Falha ao listar campanhas na Meta (PAUSED).",
+                );
+                setMetaCampaigns([]);
+              } finally {
+                setMetaLoading(false);
+              }
+            }}
+          >
+            {metaLoading ? "Listando..." : "Listar PAUSED na Meta"}
+          </button>
+          <div className="muted" style={{ fontWeight: 800 }}>
+            Mostra campanhas que já existem no Ads Manager (não depende do banco local).
+          </div>
+        </div>
+
+        {metaError ? (
+          <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
+            <div style={{ fontWeight: 900 }}>Erro (Meta)</div>
+            <div style={{ marginTop: 6, fontWeight: 700 }}>{metaError}</div>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="card" style={{ padding: 0, marginTop: 16 }}>
+        <div style={{ padding: 16, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+          <div>
+            <div style={{ fontWeight: 900, fontSize: 16 }}>Campanhas PAUSED na Meta (Ads Manager)</div>
+            <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
+              {metaLoading ? "Carregando..." : `${metaCampaigns.length} item(ns)`}
+            </div>
+          </div>
+          <div className="muted" style={{ fontWeight: 800 }}>
+            Token continua apenas no backend.
+          </div>
+        </div>
+
+        <div style={{ borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
+          <table className="dataTable" style={{ marginTop: 0 }}>
+            <thead>
+              <tr>
+                <th>Meta Campaign ID</th>
+                <th>Nome</th>
+                <th>Status</th>
+                <th>Effective</th>
+                <th>Objective</th>
+              </tr>
+            </thead>
+            <tbody>
+              {metaCampaigns.map((c) => (
+                <tr key={c.id}>
+                  <td className="muted" style={{ fontWeight: 800 }}>
+                    {c.id}
+                  </td>
+                  <td style={{ fontWeight: 900 }}>{c.name || "—"}</td>
+                  <td className="muted" style={{ fontWeight: 900 }}>
+                    {c.status || "—"}
+                  </td>
+                  <td className="muted" style={{ fontWeight: 900 }}>
+                    {c.effective_status || "—"}
+                  </td>
+                  <td className="muted" style={{ fontWeight: 800 }}>
+                    {c.objective || "—"}
+                  </td>
+                </tr>
+              ))}
+              {!metaCampaigns.length ? (
+                <tr>
+                  <td colSpan={5} className="muted" style={{ fontWeight: 800 }}>
+                    {metaLoading
+                      ? "Carregando..."
+                      : "Vazio. Preencha `act_...` e clique em “Listar PAUSED na Meta”."}
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className="card" style={{ padding: 0, marginTop: 16 }}>
@@ -163,7 +261,7 @@ export default function MetaPausedTest() {
             </div>
           </div>
           <div className="muted" style={{ fontWeight: 800 }}>
-            Clique em “Criar REAL (PAUSED)” para criar na Meta via backend.
+            Clique em “Criar REAL (PAUSED)” para criar na Meta via backend (e persistir no banco local).
           </div>
         </div>
 
@@ -295,4 +393,3 @@ export default function MetaPausedTest() {
     </PageShell>
   );
 }
-

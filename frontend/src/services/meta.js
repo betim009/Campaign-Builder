@@ -1,4 +1,4 @@
-import { apiPost } from "./http.js";
+import { apiGet, apiPost } from "./http.js";
 
 export async function syncGeneratedCampaign(generatedCampaignId, { startDate, endDate, accessToken, userId } = {}) {
   const body = {
@@ -36,4 +36,17 @@ export async function createMetaCampaign({
     metaCampaign: data?.meta_campaign ?? null,
     generatedCampaign: data?.generated_campaign ?? null,
   };
+}
+
+export async function listMetaAdAccountCampaigns({ metaAdAccountId, limit = 50, pausedOnly = true } = {}) {
+  const id = String(metaAdAccountId || "").trim();
+  const query = new URLSearchParams();
+  if (limit) query.set("limit", String(limit));
+  query.set("pausedOnly", pausedOnly ? "true" : "false");
+
+  const data = await apiGet(
+    `/api/meta/ad-accounts/${encodeURIComponent(id)}/campaigns?${query.toString()}`,
+  );
+  const list = Array.isArray(data?.meta_campaigns) ? data.meta_campaigns : [];
+  return { ok: true, metaCampaigns: list };
 }
