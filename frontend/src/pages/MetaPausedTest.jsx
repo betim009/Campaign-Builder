@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { getCountries } from "../services/reference.js";
 import {
   createMetaCampaignSimple,
+  createMetaAd,
+  createMetaAdSet,
   getMetaCampaign,
   getMetaStatus,
   listMetaAdAccountCampaigns,
@@ -77,10 +79,15 @@ export default function MetaPausedTest() {
   const [validateError, setValidateError] = useState("");
   const [validateMe, setValidateMe] = useState(null);
 
-  // AdSet/Ad scaffolding (UI only, endpoints not implemented yet)
+  // AdSet/Ad (fluxo mínimo incremental)
   const [adSetName, setAdSetName] = useState("");
   const [adSetDailyBudget, setAdSetDailyBudget] = useState("1000"); // cents placeholder
+  const [adSetBillingEvent, setAdSetBillingEvent] = useState("IMPRESSIONS");
+  const [adSetOptimizationGoal, setAdSetOptimizationGoal] = useState("LINK_CLICKS");
+  const [adSetCreating, setAdSetCreating] = useState(false);
   const [adName, setAdName] = useState("");
+  const [adCreativeId, setAdCreativeId] = useState("");
+  const [adCreating, setAdCreating] = useState(false);
 
   // Batch (Campaign por país)
   const [batchMode, setBatchMode] = useState("REAL");
@@ -157,11 +164,6 @@ export default function MetaPausedTest() {
   }, []);
 
   const countryOptions = useMemo(() => countries ?? [], [countries]);
-  const selectedCountry = useMemo(
-    () => countryOptions.find((c) => c.code === countryCode) ?? null,
-    [countryOptions, countryCode],
-  );
-
   const countryNameByCode = useMemo(
     () => Object.fromEntries(countryOptions.map((c) => [c.code, c.name])),
     [countryOptions],
@@ -179,6 +181,33 @@ export default function MetaPausedTest() {
   const runModeLabel = mode === "STUB" ? "STUB" : "REAL";
   const dataModeLabel = countriesSource === "fallback" ? "FALLBACK" : "API";
   const metaReadyLabel = backendStatus?.hasAccessToken ? "REAL" : "STUB";
+  const flowMode = (created?.mode ?? mode) === "STUB" ? "STUB" : "REAL";
+  const createdGeneratedCampaignId = normalizeNonEmptyString(created?.generatedCampaign?.id);
+  const createdMetaCampaignId = normalizeNonEmptyString(created?.metaCampaign?.id);
+  const createdMetaCampaignIdIsReal = isRealMetaId(createdMetaCampaignId);
+  const createdMetaAdSetId = normalizeNonEmptyString(created?.generatedCampaign?.meta_adset_id);
+  const createdCountryCode = normalizeNonEmptyString(created?.generatedCampaign?.country_code) || countryCode;
+
+  const canCreateAdSet =
+    !loading &&
+    !busy &&
+    !adSetCreating &&
+    createdGeneratedCampaignId !== "" &&
+    normalizeNonEmptyString(adSetName) !== "" &&
+    Number.isFinite(Number(adSetDailyBudget)) &&
+    Math.trunc(Number(adSetDailyBudget)) > 0 &&
+    normalizeNonEmptyString(adSetBillingEvent) !== "" &&
+    normalizeNonEmptyString(adSetOptimizationGoal) !== "" &&
+    (flowMode === "STUB" || (Boolean(backendStatus?.hasAccessToken) && createdMetaCampaignIdIsReal));
+
+  const canCreateAd =
+    !loading &&
+    !busy &&
+    !adCreating &&
+    createdGeneratedCampaignId !== "" &&
+    createdMetaAdSetId !== "" &&
+    normalizeNonEmptyString(adName) !== "" &&
+    (flowMode === "STUB" || (Boolean(backendStatus?.hasAccessToken) && normalizeNonEmptyString(adCreativeId) !== ""));
 
   const canBatch =
     !loading &&
@@ -710,7 +739,7 @@ export default function MetaPausedTest() {
           <div>
             <div style={{ fontWeight: 900, fontSize: 16 }}>Persistência local (DB) — generated_campaigns</div>
             <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
-              Evidência de persistência de `meta_campaign_id` + `meta_status/meta_effective_status` no Postgres.
+              Evidência de persistência de IDs/status Meta (Campaign/AdSet/Ad) no Postgres.
             </div>
           </div>
           <button
@@ -741,6 +770,8 @@ export default function MetaPausedTest() {
                 <th>Meta Campaign ID</th>
                 <th>Status Meta</th>
                 <th>Effective</th>
+                <th>AdSet (Meta)</th>
+                <th>Ad (Meta)</th>
               </tr>
             </thead>
             <tbody>
@@ -777,12 +808,24 @@ export default function MetaPausedTest() {
                     <td className="muted" style={{ fontWeight: 900 }}>
                       {gc.meta_effective_status || "—"}
                     </td>
+                    <td className="muted" style={{ fontWeight: 800 }}>
+                      <div>{gc.meta_adset_id || "—"}</div>
+                      <div style={{ marginTop: 4, fontWeight: 900 }}>
+                        {(gc.meta_adset_status || "—") + " / " + (gc.meta_adset_effective_status || "—")}
+                      </div>
+                    </td>
+                    <td className="muted" style={{ fontWeight: 800 }}>
+                      <div>{gc.meta_ad_id || "—"}</div>
+                      <div style={{ marginTop: 4, fontWeight: 900 }}>
+                        {(gc.meta_ad_status || "—") + " / " + (gc.meta_ad_effective_status || "—")}
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
               {!localGenerated.length ? (
                 <tr>
-                  <td colSpan={7} className="muted" style={{ fontWeight: 800 }}>
+                  <td colSpan={9} className="muted" style={{ fontWeight: 800 }}>
                     {localLoading
                       ? "Carregando..."
                       : "Vazio. Clique em “Atualizar lista” ou crie Campaigns acima para gerar registros."}
@@ -794,7 +837,7 @@ export default function MetaPausedTest() {
         </div>
 
         <div className="muted" style={{ padding: 16, fontWeight: 800 }}>
-          Nota: país é parte do modelo operacional local (será aplicado como targeting real no AdSet na etapa futura).
+          Nota: país local é aplicado no targeting do AdSet (geo_locations.countries).
         </div>
       </div>
 
@@ -1143,7 +1186,7 @@ export default function MetaPausedTest() {
                 País
               </div>
               <div style={{ marginTop: 6, fontWeight: 900 }}>
-                {selectedCountry ? `${countryCodeToFlag(selectedCountry.code)} ${selectedCountry.code}` : countryCode}
+                {createdCountryCode ? `${countryCodeToFlag(createdCountryCode)} ${createdCountryCode}` : "—"}
               </div>
             </div>
             <div className="card" style={{ padding: 14 }}>
@@ -1172,6 +1215,12 @@ export default function MetaPausedTest() {
             <div style={{ marginTop: 6 }}>
               `generated_campaigns.meta_campaign_id`:{" "}
               <b>{created.generatedCampaign?.meta_campaign_id || "—"}</b>
+            </div>
+            <div style={{ marginTop: 6 }}>
+              `generated_campaigns.meta_adset_id`: <b>{created.generatedCampaign?.meta_adset_id || "—"}</b>
+            </div>
+            <div style={{ marginTop: 6 }}>
+              `generated_campaigns.meta_ad_id`: <b>{created.generatedCampaign?.meta_ad_id || "—"}</b>
             </div>
           </div>
 
@@ -1270,10 +1319,9 @@ export default function MetaPausedTest() {
       </div>
 
       <div className="card" style={{ padding: 18, marginTop: 16 }}>
-        <div style={{ fontWeight: 900, fontSize: 16 }}>Etapa 2 — AdSet (preparação)</div>
+        <div style={{ fontWeight: 900, fontSize: 16 }}>Etapa 2 — AdSet (PAUSED)</div>
         <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
-          Estrutura preparada no backend para `POST /api/meta/adsets` (ainda não implementado).
-          Esta seção é UI/contrato mínimo para evoluir incrementalmente sem “formulário gigante”.
+          Criação incremental via `POST /api/meta/adsets` (REAL/STUB). Sempre PAUSED.
         </div>
 
         <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -1282,7 +1330,7 @@ export default function MetaPausedTest() {
               Meta Campaign ID (origem)
             </span>
             <input
-              value={created?.metaCampaign?.id ?? ""}
+              value={createdMetaCampaignId}
               readOnly
               placeholder="Crie uma Campaign acima para preencher automaticamente"
               style={{
@@ -1321,10 +1369,10 @@ export default function MetaPausedTest() {
 
           <label style={{ display: "grid", gap: 6 }}>
             <span className="muted" style={{ fontWeight: 900 }}>
-              País (targeting real será no AdSet)
+              País (targeting)
             </span>
             <input
-              value={countryCode}
+              value={created?.generatedCampaign?.country_code ?? countryCode}
               readOnly
               style={{
                 height: 38,
@@ -1341,7 +1389,7 @@ export default function MetaPausedTest() {
 
           <label style={{ display: "grid", gap: 6 }}>
             <span className="muted" style={{ fontWeight: 900 }}>
-              Daily budget (cents) — placeholder
+              Daily budget (cents)
             </span>
             <input
               value={adSetDailyBudget}
@@ -1360,27 +1408,121 @@ export default function MetaPausedTest() {
               }}
             />
           </label>
+
+          <label style={{ display: "grid", gap: 6 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>
+              Billing event
+            </span>
+            <input
+              value={adSetBillingEvent}
+              onChange={(e) => setAdSetBillingEvent(e.target.value)}
+              placeholder="Ex: IMPRESSIONS"
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 700,
+                outline: "none",
+                background: "#ffffff",
+              }}
+            />
+          </label>
+
+          <label style={{ display: "grid", gap: 6 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>
+              Optimization goal
+            </span>
+            <input
+              value={adSetOptimizationGoal}
+              onChange={(e) => setAdSetOptimizationGoal(e.target.value)}
+              placeholder="Ex: LINK_CLICKS"
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 700,
+                outline: "none",
+                background: "#ffffff",
+              }}
+            />
+          </label>
         </div>
 
         <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-          <button type="button" className="pillOutline" disabled>
-            Criar AdSet (em breve)
+          <button
+            type="button"
+            className="pillOutline"
+            disabled={!canCreateAdSet}
+            onClick={async () => {
+              setBusy(true);
+              setAdSetCreating(true);
+              setError("");
+              setSuccess("");
+              try {
+                const payload = {
+                  generatedCampaignId: createdGeneratedCampaignId,
+                  name: adSetName.trim(),
+                  countryCode: created?.generatedCampaign?.country_code ?? countryCode,
+                  dailyBudgetCents: Math.trunc(Number(adSetDailyBudget)),
+                  billingEvent: adSetBillingEvent.trim(),
+                  optimizationGoal: adSetOptimizationGoal.trim(),
+                  mode: flowMode,
+                };
+                const res = await createMetaAdSet(payload);
+                setCreated((prev) => ({
+                  ...(prev ?? {}),
+                  mode: res.mode ?? prev?.mode ?? flowMode,
+                  metaAdSet: res.metaAdSet ?? prev?.metaAdSet ?? null,
+                  generatedCampaign: res.generatedCampaign ?? prev?.generatedCampaign ?? null,
+                }));
+                pushLog({
+                  action: "adset.create",
+                  ok: true,
+                  details: {
+                    mode: res.mode ?? flowMode,
+                    generatedCampaignId: createdGeneratedCampaignId,
+                    metaAdSetId: res?.metaAdSet?.id ?? null,
+                  },
+                });
+                setSuccess(`AdSet criado (${res.mode || flowMode}) — status obrigatório: PAUSED.`);
+                await refreshLocalGenerated();
+              } catch (err) {
+                setError(err?.message ? String(err.message) : "Falha ao criar AdSet.");
+                pushLog({
+                  action: "adset.create",
+                  ok: false,
+                  error: err?.message ? String(err.message) : "error",
+                  details: { mode: flowMode, generatedCampaignId: createdGeneratedCampaignId },
+                });
+              } finally {
+                setAdSetCreating(false);
+                setBusy(false);
+              }
+            }}
+          >
+            {adSetCreating ? "Criando..." : `Criar AdSet ${flowMode} (PAUSED)`}
           </button>
           <div className="muted" style={{ fontWeight: 800 }}>
-            Endpoint existe, mas retorna `501` por enquanto. Sem automação ativa.
+            Requer Campaign criada acima. REAL exige token no backend.
           </div>
         </div>
 
         <details style={{ marginTop: 12 }}>
-          <summary style={{ cursor: "pointer", fontWeight: 900 }}>Preview do payload (planejado)</summary>
+          <summary style={{ cursor: "pointer", fontWeight: 900 }}>Preview do payload</summary>
           <pre style={{ marginTop: 10, background: "#0b1220", color: "#e5e7eb", padding: 12, borderRadius: 12, overflowX: "auto" }}>
 {JSON.stringify(
   {
-    metaCampaignId: created?.metaCampaign?.id ?? null,
+    generatedCampaignId: createdGeneratedCampaignId || null,
     name: normalizeNonEmptyString(adSetName) || null,
-    countryCode: normalizeNonEmptyString(countryCode) || null,
-    dailyBudgetCents: normalizeNonEmptyString(adSetDailyBudget) || null,
-    status: "PAUSED",
+    countryCode: created?.generatedCampaign?.country_code ?? countryCode ?? null,
+    dailyBudgetCents: Number(adSetDailyBudget) ? Math.trunc(Number(adSetDailyBudget)) : null,
+    billingEvent: normalizeNonEmptyString(adSetBillingEvent) || null,
+    optimizationGoal: normalizeNonEmptyString(adSetOptimizationGoal) || null,
+    mode: flowMode,
   },
   null,
   2,
@@ -1390,10 +1532,9 @@ export default function MetaPausedTest() {
       </div>
 
       <div className="card" style={{ padding: 18, marginTop: 16 }}>
-        <div style={{ fontWeight: 900, fontSize: 16 }}>Etapa 3 — Ad (preparação)</div>
+        <div style={{ fontWeight: 900, fontSize: 16 }}>Etapa 3 — Ad (PAUSED)</div>
         <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
-          Estrutura preparada no backend para `POST /api/meta/ads` (ainda não implementado).
-          Sem upload complexo nesta fase (apenas contrato mínimo).
+          Criação incremental via `POST /api/meta/ads` (REAL/STUB). Sempre PAUSED. REAL requer `creativeId` existente.
         </div>
 
         <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -1402,7 +1543,7 @@ export default function MetaPausedTest() {
               Meta AdSet ID (origem)
             </span>
             <input
-              value=""
+              value={createdMetaAdSetId}
               readOnly
               placeholder="Será preenchido quando AdSet existir"
               style={{
@@ -1438,32 +1579,95 @@ export default function MetaPausedTest() {
               }}
             />
           </label>
+
+          <label style={{ display: "grid", gap: 6 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>
+              Creative ID (somente REAL)
+            </span>
+            <input
+              value={adCreativeId}
+              onChange={(e) => setAdCreativeId(e.target.value)}
+              placeholder="Ex: 1234567890"
+              disabled={flowMode === "STUB"}
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 700,
+                outline: "none",
+                background: flowMode === "STUB" ? "#f9fafb" : "#ffffff",
+              }}
+            />
+          </label>
         </div>
 
         <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-          <button type="button" className="pillOutline" disabled>
-            Criar Ad (em breve)
+          <button
+            type="button"
+            className="pillOutline"
+            disabled={!canCreateAd}
+            onClick={async () => {
+              setBusy(true);
+              setAdCreating(true);
+              setError("");
+              setSuccess("");
+              try {
+                const payload = {
+                  generatedCampaignId: createdGeneratedCampaignId,
+                  name: adName.trim(),
+                  ...(flowMode === "REAL" ? { creativeId: adCreativeId.trim() } : null),
+                  mode: flowMode,
+                };
+                const res = await createMetaAd(payload);
+                setCreated((prev) => ({
+                  ...(prev ?? {}),
+                  mode: res.mode ?? prev?.mode ?? flowMode,
+                  metaAd: res.metaAd ?? prev?.metaAd ?? null,
+                  generatedCampaign: res.generatedCampaign ?? prev?.generatedCampaign ?? null,
+                }));
+                pushLog({
+                  action: "ad.create",
+                  ok: true,
+                  details: {
+                    mode: res.mode ?? flowMode,
+                    generatedCampaignId: createdGeneratedCampaignId,
+                    metaAdId: res?.metaAd?.id ?? null,
+                  },
+                });
+                setSuccess(`Ad criado (${res.mode || flowMode}) — status obrigatório: PAUSED.`);
+                await refreshLocalGenerated();
+              } catch (err) {
+                setError(err?.message ? String(err.message) : "Falha ao criar Ad.");
+                pushLog({
+                  action: "ad.create",
+                  ok: false,
+                  error: err?.message ? String(err.message) : "error",
+                  details: { mode: flowMode, generatedCampaignId: createdGeneratedCampaignId },
+                });
+              } finally {
+                setAdCreating(false);
+                setBusy(false);
+              }
+            }}
+          >
+            {adCreating ? "Criando..." : `Criar Ad ${flowMode} (PAUSED)`}
           </button>
           <div className="muted" style={{ fontWeight: 800 }}>
-            Endpoint existe, mas retorna `501` por enquanto.
+            Requer AdSet criado acima. REAL exige token no backend e `creativeId`.
           </div>
         </div>
 
         <details style={{ marginTop: 12 }}>
-          <summary style={{ cursor: "pointer", fontWeight: 900 }}>Preview do payload (planejado)</summary>
+          <summary style={{ cursor: "pointer", fontWeight: 900 }}>Preview do payload</summary>
           <pre style={{ marginTop: 10, background: "#0b1220", color: "#e5e7eb", padding: 12, borderRadius: 12, overflowX: "auto" }}>
 {JSON.stringify(
   {
-    metaAdSetId: null,
+    generatedCampaignId: createdGeneratedCampaignId || null,
     name: normalizeNonEmptyString(adName) || null,
-    status: "PAUSED",
-    creative: {
-      primaryText: null,
-      headline: null,
-      image: null,
-      video: null,
-      cta: null,
-    },
+    creativeId: flowMode === "REAL" ? normalizeNonEmptyString(adCreativeId) || null : undefined,
+    mode: flowMode,
   },
   null,
   2,

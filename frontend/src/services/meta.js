@@ -101,10 +101,20 @@ export async function getMetaCampaign(metaCampaignId) {
 
 export async function createMetaAdSet(payload) {
   const data = await apiPost("/api/meta/adsets", payload ?? {});
-  return { ok: true, metaAdSet: data?.meta_adset ?? null };
+  return {
+    ok: true,
+    mode: data?.mode ?? null,
+    metaAdSet: data?.meta_adset ?? null,
+    generatedCampaign: data?.generated_campaign ?? null,
+  };
 }
 
 export async function createMetaAd(payload) {
   const data = await apiPost("/api/meta/ads", payload ?? {});
-  return { ok: true, metaAd: data?.meta_ad ?? null };
+  return {
+    ok: true,
+    mode: data?.mode ?? null,
+    metaAd: data?.meta_ad ?? null,
+    generatedCampaign: data?.generated_campaign ?? null,
+  };
 }
