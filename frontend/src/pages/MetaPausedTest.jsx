@@ -10,6 +10,7 @@ import {
   validateMetaToken,
 } from "../services/meta.js";
 import { countryCodeToFlag } from "../services/fallbacks.js";
+import { listGeneratedCampaigns } from "../services/generatedCampaigns.js";
 
 const OBJECTIVE_OPTIONS = [
   { value: "OUTCOME_TRAFFIC", label: "OUTCOME_TRAFFIC" },
@@ -69,6 +70,19 @@ export default function MetaPausedTest() {
   const [adSetDailyBudget, setAdSetDailyBudget] = useState("1000"); // cents placeholder
   const [adName, setAdName] = useState("");
 
+  // Batch (Campaign por país)
+  const [batchMode, setBatchMode] = useState("REAL");
+  const [selectedCountryCodes, setSelectedCountryCodes] = useState([]);
+  const [batchRunning, setBatchRunning] = useState(false);
+  const [batchProgress, setBatchProgress] = useState(null);
+  const [batchResults, setBatchResults] = useState([]);
+  const [batchErrors, setBatchErrors] = useState([]);
+
+  // Evidência de persistência local
+  const [localLoading, setLocalLoading] = useState(false);
+  const [localError, setLocalError] = useState("");
+  const [localGenerated, setLocalGenerated] = useState([]);
+
   async function refresh() {
     setLoading(true);
     setError("");
@@ -109,6 +123,11 @@ export default function MetaPausedTest() {
     [countryOptions, countryCode],
   );
 
+  const countryNameByCode = useMemo(
+    () => Object.fromEntries(countryOptions.map((c) => [c.code, c.name])),
+    [countryOptions],
+  );
+
   const canCreate =
     !loading &&
     !busy &&
@@ -121,6 +140,33 @@ export default function MetaPausedTest() {
   const runModeLabel = mode === "STUB" ? "STUB" : "REAL";
   const dataModeLabel = countriesSource === "fallback" ? "FALLBACK" : "API";
   const metaReadyLabel = backendStatus?.hasAccessToken ? "REAL" : "STUB";
+
+  const canBatch =
+    !loading &&
+    !busy &&
+    !batchRunning &&
+    normalizeNonEmptyString(name) !== "" &&
+    normalizeNonEmptyString(objective) !== "" &&
+    normalizeNonEmptyString(adAccountNormalized) !== "" &&
+    selectedCountryCodes.length > 0 &&
+    countriesSource !== "fallback" &&
+    (batchMode === "STUB" || Boolean(backendStatus?.hasAccessToken));
+
+  async function refreshLocalGenerated() {
+    setLocalLoading(true);
+    setLocalError("");
+    try {
+      const res = await listGeneratedCampaigns({ limit: 50 });
+      setLocalGenerated(res.generatedCampaigns ?? []);
+    } catch (err) {
+      setLocalGenerated([]);
+      setLocalError(
+        err?.message ? String(err.message) : "Falha ao carregar `generated_campaigns` (DB/API indisponível).",
+      );
+    } finally {
+      setLocalLoading(false);
+    }
+  }
 
   return (
     <PageShell
@@ -221,6 +267,233 @@ export default function MetaPausedTest() {
           <div style={{ marginTop: 6, fontWeight: 800 }}>{success}</div>
         </div>
       ) : null}
+
+      <div className="card" style={{ padding: 18, marginTop: 16 }}>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+          <div>
+            <div style={{ fontWeight: 900, fontSize: 16 }}>Batch — Campaign por país</div>
+            <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
+              Gera Campaigns independentes por país (todas nascem `PAUSED`).
+            </div>
+          </div>
+          <button
+            type="button"
+            className="pillOutline"
+            onClick={() => setSelectedCountryCodes(countryOptions.map((c) => c.code))}
+            disabled={loading || batchRunning || !countryOptions.length}
+          >
+            Selecionar todos
+          </button>
+        </div>
+
+        <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "end" }}>
+          <label style={{ display: "grid", gap: 6, minWidth: 220 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>
+              Modo (batch)
+            </span>
+            <select
+              value={batchMode}
+              onChange={(e) => setBatchMode(e.target.value)}
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 900,
+                outline: "none",
+                background: "#ffffff",
+              }}
+            >
+              <option value="REAL">REAL</option>
+              <option value="STUB">STUB</option>
+            </select>
+          </label>
+
+          <button
+            type="button"
+            className="pillOutline"
+            disabled={!canBatch}
+            onClick={async () => {
+              setBatchRunning(true);
+              setBatchProgress(null);
+              setBatchResults([]);
+              setBatchErrors([]);
+              setError("");
+              setSuccess("");
+
+              const total = selectedCountryCodes.length;
+              const results = [];
+              const errors = [];
+
+              try {
+                for (let i = 0; i < selectedCountryCodes.length; i += 1) {
+                  const code = selectedCountryCodes[i];
+                  setBatchProgress({ current: i + 1, total, countryCode: code });
+
+                  try {
+                    const res = await createMetaCampaignSimple({
+                      name: name.trim(),
+                      objective,
+                      metaAdAccountId: adAccountNormalized,
+                      countryCode: code,
+                      mode: batchMode,
+                    });
+                    results.push({
+                      countryCode: code,
+                      mode: res.mode ?? batchMode,
+                      metaCampaignId: res?.metaCampaign?.id ?? null,
+                      status: res?.metaCampaign?.status ?? null,
+                      effectiveStatus: res?.metaCampaign?.effective_status ?? null,
+                      generatedCampaignId: res?.generatedCampaign?.id ?? null,
+                    });
+                  } catch (err) {
+                    errors.push({
+                      countryCode: code,
+                      message: err?.message ? String(err.message) : "Falha ao criar Campaign.",
+                    });
+                  }
+                }
+
+                setBatchResults(results);
+                setBatchErrors(errors);
+                setSuccess(
+                  `Batch concluído: ${results.length} sucesso(s) / ${errors.length} erro(s). Todas as Campaigns permanecem PAUSED.`,
+                );
+                await refreshBackendStatus();
+                await refreshLocalGenerated();
+              } finally {
+                setBatchRunning(false);
+                setBatchProgress(null);
+              }
+            }}
+          >
+            {batchRunning ? "Gerando..." : "Gerar Campaigns por país (PAUSED)"}
+          </button>
+
+          {!backendStatus?.hasAccessToken && batchMode === "REAL" ? (
+            <div className="muted" style={{ fontWeight: 800 }}>
+              Token ausente no backend → batch REAL indisponível (mude para STUB ou configure token).
+            </div>
+          ) : null}
+          {countriesSource === "fallback" ? (
+            <div className="muted" style={{ fontWeight: 800 }}>
+              DATA=FALLBACK → DB/API provavelmente indisponível; batch desabilitado.
+            </div>
+          ) : null}
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <div className="muted" style={{ fontWeight: 900, marginBottom: 8 }}>
+            Países selecionados ({selectedCountryCodes.length})
+          </div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            {countryOptions.map((c) => {
+              const active = selectedCountryCodes.includes(c.code);
+              return (
+                <button
+                  key={c.code}
+                  type="button"
+                  className="pillOutline"
+                  disabled={batchRunning}
+                  onClick={() => {
+                    setSelectedCountryCodes((prev) => {
+                      const has = prev.includes(c.code);
+                      if (has) return prev.filter((x) => x !== c.code);
+                      return [...prev, c.code];
+                    });
+                  }}
+                  style={{
+                    borderColor: active ? "#2563eb" : undefined,
+                    background: active ? "#dbeafe" : undefined,
+                    fontWeight: 900,
+                  }}
+                >
+                  {countryCodeToFlag(c.code)} {c.code}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {batchProgress ? (
+          <div className="card" style={{ padding: 14, marginTop: 12 }}>
+            <div className="muted" style={{ fontWeight: 900 }}>
+              Progresso
+            </div>
+            <div style={{ marginTop: 6, fontWeight: 900 }}>
+              {batchProgress.current}/{batchProgress.total} — {batchProgress.countryCode}
+            </div>
+          </div>
+        ) : null}
+
+        {batchErrors.length ? (
+          <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
+            <div style={{ fontWeight: 900 }}>Erros ({batchErrors.length})</div>
+            <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
+              {batchErrors.slice(0, 8).map((e) => (
+                <div key={e.countryCode} style={{ fontWeight: 800 }}>
+                  {e.countryCode}: {e.message}
+                </div>
+              ))}
+              {batchErrors.length > 8 ? (
+                <div className="muted" style={{ fontWeight: 800 }}>
+                  +{batchErrors.length - 8} erro(s) ocultos…
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
+        {batchResults.length ? (
+          <div className="card" style={{ padding: 0, marginTop: 12 }}>
+            <div style={{ padding: 14 }}>
+              <div style={{ fontWeight: 900 }}>Resultados ({batchResults.length})</div>
+              <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
+                Evidência de criação + IDs (Meta + DB).
+              </div>
+            </div>
+            <div style={{ borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
+              <table className="dataTable" style={{ marginTop: 0 }}>
+                <thead>
+                  <tr>
+                    <th>País</th>
+                    <th>Modo</th>
+                    <th>Meta Campaign ID</th>
+                    <th>Status</th>
+                    <th>Effective</th>
+                    <th>Generated ID</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {batchResults.map((r) => (
+                    <tr key={`${r.countryCode}-${r.generatedCampaignId}`}>
+                      <td style={{ fontWeight: 900 }}>
+                        {countryCodeToFlag(r.countryCode)} {r.countryCode}
+                      </td>
+                      <td className="muted" style={{ fontWeight: 900 }}>
+                        {r.mode}
+                      </td>
+                      <td className="muted" style={{ fontWeight: 800 }}>
+                        {r.metaCampaignId || "—"}
+                      </td>
+                      <td className="muted" style={{ fontWeight: 900 }}>
+                        {r.status || "—"}
+                      </td>
+                      <td className="muted" style={{ fontWeight: 900 }}>
+                        {r.effectiveStatus || "—"}
+                      </td>
+                      <td className="muted" style={{ fontWeight: 800 }}>
+                        {r.generatedCampaignId || "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : null}
+      </div>
 
       <div className="card" style={{ padding: 18, marginTop: 16 }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
