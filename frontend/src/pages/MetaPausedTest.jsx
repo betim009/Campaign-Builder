@@ -428,20 +428,38 @@ export default function MetaPausedTest() {
             <div className="muted" style={{ fontWeight: 900 }}>
               AdSet (Meta)
             </div>
-            <div style={{ marginTop: 6, fontWeight: 900 }}>—</div>
-            <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
-              Targeting (país/posicionamentos) + budget
+            <div style={{ marginTop: 6, fontWeight: 900 }}>
+              {created?.metaAdSet?.id ?? created?.generatedCampaign?.meta_adset_id ?? "—"}
             </div>
+            <div className="muted" style={{ marginTop: 8, fontWeight: 900 }}>
+              {(created?.metaAdSet?.status ?? created?.generatedCampaign?.meta_adset_status ?? "—") +
+                " / " +
+                (created?.metaAdSet?.effective_status ?? created?.generatedCampaign?.meta_adset_effective_status ?? "—")}
+            </div>
+            {!created?.generatedCampaign?.meta_adset_id ? (
+              <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
+                Targeting (país/posicionamentos) + budget
+              </div>
+            ) : null}
           </div>
 
           <div className="card" style={{ padding: 14 }}>
             <div className="muted" style={{ fontWeight: 900 }}>
               Ad (Meta)
             </div>
-            <div style={{ marginTop: 6, fontWeight: 900 }}>—</div>
-            <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
-              Creative (sem upload complexo)
+            <div style={{ marginTop: 6, fontWeight: 900 }}>
+              {created?.metaAd?.id ?? created?.generatedCampaign?.meta_ad_id ?? "—"}
             </div>
+            <div className="muted" style={{ marginTop: 8, fontWeight: 900 }}>
+              {(created?.metaAd?.status ?? created?.generatedCampaign?.meta_ad_status ?? "—") +
+                " / " +
+                (created?.metaAd?.effective_status ?? created?.generatedCampaign?.meta_ad_effective_status ?? "—")}
+            </div>
+            {!created?.generatedCampaign?.meta_ad_id ? (
+              <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
+                Creative (sem upload complexo)
+              </div>
+            ) : null}
           </div>
         </div>
 

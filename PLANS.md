@@ -146,7 +146,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-08 11:05]
+Última atualização: [2026-05-08 11:06]
 
 Regras:
 
@@ -179,6 +179,7 @@ Regras:
 - [ ] Melhorar timeline/log operacional
 - [x] `/meta-test`: logs exibem `error` + `details` em falhas
 - [ ] Melhorar visualização da estrutura Meta
+- [x] `/meta-test`: estrutura Meta exibe IDs/status de AdSet/Ad quando disponíveis
 - [ ] Melhorar estados de sucesso/erro
 - [ ] Melhorar navegação operacional
 - [ ] Melhorar percepção REAL vs STUB
