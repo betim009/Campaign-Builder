@@ -188,10 +188,10 @@ export default function MetaPausedTest() {
 
   const adAccountNormalized = useMemo(() => normalizeMetaAdAccountId(metaAdAccountId), [metaAdAccountId]);
   const runModeLabel = mode === "STUB" ? "STUB" : "REAL";
-  const dataModeLabel = countriesSource === "fallback" ? "FALLBACK" : "API";
-  const dbModeLabel = localError ? "FALLBACK" : "API";
-  const metaReadyLabel = backendStatus?.hasAccessToken ? "REAL" : "STUB";
-  const syncProviderLabel = normalizeNonEmptyString(backendStatus?.provider) || "—";
+  const dataModeLabel = loading ? "LOADING" : countriesSource === "fallback" ? "FALLBACK" : "API";
+  const dbModeLabel = localLoading ? "LOADING" : localError ? "FALLBACK" : "API";
+  const metaReadyLabel = backendStatus ? (backendStatus.hasAccessToken ? "REAL" : "STUB") : "LOADING";
+  const syncProviderLabel = backendStatus ? normalizeNonEmptyString(backendStatus?.provider) || "—" : "LOADING";
   const flowMode = (created?.mode ?? mode) === "STUB" ? "STUB" : "REAL";
   const createdGeneratedCampaignId = normalizeNonEmptyString(created?.generatedCampaign?.id);
   const createdMetaCampaignId = normalizeNonEmptyString(created?.metaCampaign?.id);
@@ -282,7 +282,7 @@ export default function MetaPausedTest() {
               padding: "8px 12px",
               fontWeight: 900,
               border: "1px solid #e5e7eb",
-              background: dataModeLabel === "FALLBACK" ? "#fee2e2" : "#dbeafe",
+              background: dataModeLabel === "LOADING" ? "#f3f4f6" : dataModeLabel === "FALLBACK" ? "#fee2e2" : "#dbeafe",
               color: "#111827",
             }}
           >
@@ -297,7 +297,7 @@ export default function MetaPausedTest() {
               padding: "8px 12px",
               fontWeight: 900,
               border: "1px solid #e5e7eb",
-              background: metaReadyLabel === "REAL" ? "#dcfce7" : "#fef3c7",
+              background: metaReadyLabel === "LOADING" ? "#f3f4f6" : metaReadyLabel === "REAL" ? "#dcfce7" : "#fef3c7",
               color: "#111827",
             }}
           >
@@ -312,11 +312,13 @@ export default function MetaPausedTest() {
               padding: "8px 12px",
               fontWeight: 900,
               border: "1px solid #e5e7eb",
-              background: dbModeLabel === "FALLBACK" ? "#fee2e2" : "#dbeafe",
+              background: dbModeLabel === "LOADING" ? "#f3f4f6" : dbModeLabel === "FALLBACK" ? "#fee2e2" : "#dbeafe",
               color: "#111827",
             }}
             title={
-              dbModeLabel === "FALLBACK"
+              dbModeLabel === "LOADING"
+                ? "Carregando lista de generated_campaigns..."
+                : dbModeLabel === "FALLBACK"
                 ? "DB/API indisponível (lista de generated_campaigns falhou)."
                 : "DB/API OK (lista de generated_campaigns carregou)."
             }
@@ -332,7 +334,8 @@ export default function MetaPausedTest() {
               padding: "8px 12px",
               fontWeight: 900,
               border: "1px solid #e5e7eb",
-              background: syncProviderLabel === "meta" ? "#dcfce7" : "#fef3c7",
+              background:
+                syncProviderLabel === "LOADING" ? "#f3f4f6" : syncProviderLabel === "meta" ? "#dcfce7" : "#fef3c7",
               color: "#111827",
             }}
             title="Valor reportado pelo backend em /api/meta/status (META_SYNC_PROVIDER)."

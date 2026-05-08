@@ -146,7 +146,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-08 11:02]
+Última atualização: [2026-05-08 11:03]
 
 Regras:
 
@@ -171,6 +171,7 @@ Regras:
 ### P1 — UX operacional
 
 - [ ] Melhorar loading states
+- [x] `/meta-test`: exibir `LOADING` nos indicadores (DATA/DB/META/SYNC)
 - [ ] Melhorar error states
 - [ ] Melhorar feedback visual de persistência
 - [x] Exibir provider/fallback no resultado do sync (Campanha Detalhes)
