@@ -133,9 +133,20 @@ Fontes únicas (para reduzir drift):
 - Preservar fallback `STUB` e sinalização explícita de `REAL/STUB/FALLBACK` na UI para evitar “dado falso”.
 - Mudanças pequenas e verificáveis (evidência via curl/DB quando aplicável) com commit incremental + timestamps.
 
+## Execution Rules
+
+Última atualização: [2026-05-08 10:47]
+
+- Sempre ler primeiro: Snapshot, Operational Priorities, Backlog Ativo, Decision Log, Architecture Rules, Blockers e Risks.
+- Nunca executar backlog legado do `ARCHIVE.md` (histórico apenas).
+- Prioridade de execução: P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7 (P6 aplicado continuamente).
+- Sempre priorizar `/meta-test`; “Nova Campanha” é legado e deve apenas ser mantido compatível.
+- Guardrails Meta: criação REAL sempre `PAUSED`; token nunca no frontend; nunca remover fallback `STUB`.
+- Por item: implementar incrementalmente → validar → atualizar docs/timestamps → marcar progresso no `PLANS.md` → registrar decisão relevante → commit incremental claro.
+
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-08 10:43]
+Última atualização: [2026-05-08 10:47]
 
 Regras:
 
@@ -213,11 +224,11 @@ Regras:
 
 ### P6 — Governança operacional leve
 
-- [ ] Adicionar Operational Priorities
-- [ ] Adicionar Execution Rules
+- [x] Adicionar Operational Priorities
+- [x] Adicionar Execution Rules
 - [ ] Adicionar Technical Debt
 - [ ] Adicionar Known Problems
-- [ ] Separar Blockers de Risks
+- [x] Separar Blockers de Risks
 - [ ] Padronizar timestamps
 - [ ] Melhorar rastreabilidade
 - [ ] Melhorar logs de decisão
@@ -238,7 +249,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-08 10:46]
+Última atualização: [2026-05-08 10:47]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -275,6 +286,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-08 10:43] Decisão: sync de métricas tolera falhas do Meta Graph com fallback `stub` quando `META_SYNC_PROVIDER` não for `meta` (retorna `fallback` no payload); para fail-fast, usar `META_SYNC_PROVIDER=meta`.
 - [2026-05-08 10:46] Decisão: adicionar `Operational Priorities` no `PLANS.md` para orientar execução contínua e reduzir drift.
 - [2026-05-08 10:46] Decisão: separar `Blockers` de `Risks` em seções distintas para rastreabilidade e priorização mais claras.
+- [2026-05-08 10:47] Decisão: documentar `Execution Rules` no `PLANS.md` para orientar execução contínua e reduzir ambiguidades operacionais.
 
 ## Blockers
 
