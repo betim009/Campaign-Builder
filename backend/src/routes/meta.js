@@ -8,6 +8,8 @@ import { metaFetchMe } from '../meta/graph.js'
 import { coerceAccessToken, resolveAccessToken } from '../meta/accessToken.js'
 import { metaCreateCampaign, metaFetchCampaign, metaListAdAccountCampaigns } from '../meta/campaigns.js'
 import { slugify } from '../lib/slugify.js'
+import { metaCreateAdSet, metaCreateAdSetStub } from '../meta/adsets.js'
+import { metaCreateAd, metaCreateAdStub } from '../meta/ads.js'
 
 function parseDateOrNull(value) {
   if (typeof value !== 'string' || !value.trim()) return null
@@ -519,22 +521,256 @@ export function metaRouter() {
   router.post(
     '/adsets',
     asyncHandler(async (req, res) => {
-      return jsonError(
-        res,
-        501,
-        'Not implemented yet (planned: create AdSet for a Meta Campaign). Use /meta-test roadmap.'
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      const generatedCampaignId = req.body?.generatedCampaignId
+      if (typeof generatedCampaignId !== 'string' || !isUuid(generatedCampaignId)) {
+        return jsonError(res, 400, 'Invalid generatedCampaignId')
+      }
+
+      const name = normalizeNonEmptyString(req.body?.name)
+      if (!name) {
+        return jsonError(res, 400, 'Invalid name')
+      }
+
+      const dailyBudgetCents = Number(req.body?.dailyBudgetCents)
+      if (!Number.isFinite(dailyBudgetCents) || Math.trunc(dailyBudgetCents) <= 0) {
+        return jsonError(res, 400, 'Invalid dailyBudgetCents (expected positive integer)')
+      }
+
+      const billingEvent = normalizeNonEmptyString(req.body?.billingEvent)
+      if (!billingEvent) {
+        return jsonError(res, 400, 'Missing billingEvent')
+      }
+
+      const optimizationGoal = normalizeNonEmptyString(req.body?.optimizationGoal)
+      if (!optimizationGoal) {
+        return jsonError(res, 400, 'Missing optimizationGoal')
+      }
+
+      const modeRaw = normalizeNonEmptyString(req.body?.mode)
+      const mode = modeRaw === 'STUB' ? 'STUB' : 'REAL'
+
+      const pool = getPool()
+      const { rows: gcRows, rowCount } = await pool.query(
+        `
+          SELECT
+            id,
+            country_code,
+            meta_campaign_id,
+            meta_ad_account_id,
+            meta_adset_id
+          FROM generated_campaigns
+          WHERE id = $1
+        `,
+        [generatedCampaignId]
       )
+
+      if (rowCount === 0) {
+        return jsonError(res, 404, 'Generated campaign not found')
+      }
+
+      const gc = gcRows[0]
+      const metaCampaignId = normalizeNonEmptyString(gc.meta_campaign_id)
+      if (!metaCampaignId) {
+        return jsonError(res, 400, 'Generated campaign is not linked to Meta (missing meta_campaign_id)')
+      }
+
+      const metaAdAccountId = normalizeNonEmptyString(gc.meta_ad_account_id) ?? normalizeMetaAdAccountId(req.body?.metaAdAccountId)
+      if (!metaAdAccountId) {
+        return jsonError(res, 400, 'Missing metaAdAccountId (expected act_<digits>)')
+      }
+
+      const accessToken = await resolveAccessToken(pool, req)
+      if (mode === 'REAL' && !accessToken) {
+        return jsonError(
+          res,
+          400,
+          'Missing accessToken (provide body.accessToken, META_ACCESS_TOKEN, or save via /tokens)'
+        )
+      }
+
+      const countryCode = normalizeCountryCode(gc.country_code) ?? normalizeCountryCode(req.body?.countryCode)
+      if (!countryCode) {
+        return jsonError(res, 400, 'Missing countryCode')
+      }
+
+      try {
+        const created =
+          mode === 'REAL'
+            ? await metaCreateAdSet({
+                metaAdAccountId,
+                metaCampaignId,
+                name,
+                countryCode,
+                dailyBudgetCents: Math.trunc(dailyBudgetCents),
+                billingEvent,
+                optimizationGoal,
+                accessToken
+              })
+            : metaCreateAdSetStub({ stubId: `stub-adset-${generatedCampaignId}`, name, campaign_id: metaCampaignId })
+
+        const updated = await pool.query(
+          `
+            UPDATE generated_campaigns
+            SET
+              meta_adset_id = $2,
+              meta_adset_status = $3,
+              meta_adset_effective_status = $4
+            WHERE id = $1
+            RETURNING
+              id,
+              campaign_id,
+              country_code,
+              meta_campaign_id,
+              meta_ad_account_id,
+              meta_user_id,
+              meta_status,
+              meta_effective_status,
+              meta_objective,
+              meta_adset_id,
+              meta_adset_status,
+              meta_adset_effective_status,
+              meta_ad_id,
+              meta_ad_status,
+              meta_ad_effective_status,
+              name,
+              status,
+              created_at
+          `,
+          [
+            generatedCampaignId,
+            String(created.id),
+            normalizeNonEmptyString(created?.status),
+            normalizeNonEmptyString(created?.effective_status)
+          ]
+        )
+
+        return res.status(201).json({ ok: true, mode, meta_adset: created, generated_campaign: updated.rows[0] })
+      } catch (err) {
+        const status = typeof err?.status === 'number' ? err.status : 502
+        return jsonError(res, status, err?.message ?? 'Meta ad set creation failed', err?.details)
+      }
     })
   )
 
   router.post(
     '/ads',
     asyncHandler(async (req, res) => {
-      return jsonError(
-        res,
-        501,
-        'Not implemented yet (planned: create Ad for a Meta AdSet). Use /meta-test roadmap.'
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      const generatedCampaignId = req.body?.generatedCampaignId
+      if (typeof generatedCampaignId !== 'string' || !isUuid(generatedCampaignId)) {
+        return jsonError(res, 400, 'Invalid generatedCampaignId')
+      }
+
+      const name = normalizeNonEmptyString(req.body?.name)
+      if (!name) {
+        return jsonError(res, 400, 'Invalid name')
+      }
+
+      const modeRaw = normalizeNonEmptyString(req.body?.mode)
+      const mode = modeRaw === 'STUB' ? 'STUB' : 'REAL'
+
+      const creativeId = normalizeNonEmptyString(req.body?.creativeId)
+      if (mode === 'REAL' && !creativeId) {
+        return jsonError(res, 400, 'Missing creativeId (expected existing creative id)')
+      }
+
+      const pool = getPool()
+      const { rows: gcRows, rowCount } = await pool.query(
+        `
+          SELECT
+            id,
+            meta_ad_account_id,
+            meta_adset_id
+          FROM generated_campaigns
+          WHERE id = $1
+        `,
+        [generatedCampaignId]
       )
+
+      if (rowCount === 0) {
+        return jsonError(res, 404, 'Generated campaign not found')
+      }
+
+      const gc = gcRows[0]
+      const metaAdAccountId = normalizeNonEmptyString(gc.meta_ad_account_id) ?? normalizeMetaAdAccountId(req.body?.metaAdAccountId)
+      if (!metaAdAccountId) {
+        return jsonError(res, 400, 'Missing metaAdAccountId (expected act_<digits>)')
+      }
+
+      const metaAdSetId = normalizeNonEmptyString(gc.meta_adset_id)
+      if (!metaAdSetId) {
+        return jsonError(res, 400, 'Missing meta_adset_id (create AdSet first)')
+      }
+
+      const accessToken = await resolveAccessToken(pool, req)
+      if (mode === 'REAL' && !accessToken) {
+        return jsonError(
+          res,
+          400,
+          'Missing accessToken (provide body.accessToken, META_ACCESS_TOKEN, or save via /tokens)'
+        )
+      }
+
+      try {
+        const created =
+          mode === 'REAL'
+            ? await metaCreateAd({
+                metaAdAccountId,
+                metaAdSetId,
+                name,
+                creativeId,
+                accessToken
+              })
+            : metaCreateAdStub({ stubId: `stub-ad-${generatedCampaignId}`, name, adset_id: metaAdSetId })
+
+        const updated = await pool.query(
+          `
+            UPDATE generated_campaigns
+            SET
+              meta_ad_id = $2,
+              meta_ad_status = $3,
+              meta_ad_effective_status = $4
+            WHERE id = $1
+            RETURNING
+              id,
+              campaign_id,
+              country_code,
+              meta_campaign_id,
+              meta_ad_account_id,
+              meta_user_id,
+              meta_status,
+              meta_effective_status,
+              meta_objective,
+              meta_adset_id,
+              meta_adset_status,
+              meta_adset_effective_status,
+              meta_ad_id,
+              meta_ad_status,
+              meta_ad_effective_status,
+              name,
+              status,
+              created_at
+          `,
+          [
+            generatedCampaignId,
+            String(created.id),
+            normalizeNonEmptyString(created?.status),
+            normalizeNonEmptyString(created?.effective_status)
+          ]
+        )
+
+        return res.status(201).json({ ok: true, mode, meta_ad: created, generated_campaign: updated.rows[0] })
+      } catch (err) {
+        const status = typeof err?.status === 'number' ? err.status : 502
+        return jsonError(res, status, err?.message ?? 'Meta ad creation failed', err?.details)
+      }
     })
   )
 
