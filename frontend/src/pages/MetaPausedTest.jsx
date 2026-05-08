@@ -64,6 +64,11 @@ export default function MetaPausedTest() {
   const [validateError, setValidateError] = useState("");
   const [validateMe, setValidateMe] = useState(null);
 
+  // AdSet/Ad scaffolding (UI only, endpoints not implemented yet)
+  const [adSetName, setAdSetName] = useState("");
+  const [adSetDailyBudget, setAdSetDailyBudget] = useState("1000"); // cents placeholder
+  const [adName, setAdName] = useState("");
+
   async function refresh() {
     setLoading(true);
     setError("");
@@ -678,14 +683,203 @@ export default function MetaPausedTest() {
         <div style={{ fontWeight: 900, fontSize: 16 }}>Etapa 2 — AdSet (preparação)</div>
         <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
           Estrutura preparada no backend para `POST /api/meta/adsets` (ainda não implementado).
+          Esta seção é UI/contrato mínimo para evoluir incrementalmente sem “formulário gigante”.
         </div>
+
+        <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <label style={{ display: "grid", gap: 6 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>
+              Meta Campaign ID (origem)
+            </span>
+            <input
+              value={created?.metaCampaign?.id ?? ""}
+              readOnly
+              placeholder="Crie uma Campaign acima para preencher automaticamente"
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 800,
+                outline: "none",
+                background: "#f9fafb",
+              }}
+            />
+          </label>
+
+          <label style={{ display: "grid", gap: 6 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>
+              Nome do AdSet
+            </span>
+            <input
+              value={adSetName}
+              onChange={(e) => setAdSetName(e.target.value)}
+              placeholder="Ex: AdSet BR — Broad"
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 700,
+                outline: "none",
+                background: "#ffffff",
+              }}
+            />
+          </label>
+
+          <label style={{ display: "grid", gap: 6 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>
+              País (targeting real será no AdSet)
+            </span>
+            <input
+              value={countryCode}
+              readOnly
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 800,
+                outline: "none",
+                background: "#f9fafb",
+              }}
+            />
+          </label>
+
+          <label style={{ display: "grid", gap: 6 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>
+              Daily budget (cents) — placeholder
+            </span>
+            <input
+              value={adSetDailyBudget}
+              onChange={(e) => setAdSetDailyBudget(e.target.value)}
+              placeholder="1000"
+              inputMode="numeric"
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 700,
+                outline: "none",
+                background: "#ffffff",
+              }}
+            />
+          </label>
+        </div>
+
+        <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+          <button type="button" className="pillOutline" disabled>
+            Criar AdSet (em breve)
+          </button>
+          <div className="muted" style={{ fontWeight: 800 }}>
+            Endpoint existe, mas retorna `501` por enquanto. Sem automação ativa.
+          </div>
+        </div>
+
+        <details style={{ marginTop: 12 }}>
+          <summary style={{ cursor: "pointer", fontWeight: 900 }}>Preview do payload (planejado)</summary>
+          <pre style={{ marginTop: 10, background: "#0b1220", color: "#e5e7eb", padding: 12, borderRadius: 12, overflowX: "auto" }}>
+{JSON.stringify(
+  {
+    metaCampaignId: created?.metaCampaign?.id ?? null,
+    name: normalizeNonEmptyString(adSetName) || null,
+    countryCode: normalizeNonEmptyString(countryCode) || null,
+    dailyBudgetCents: normalizeNonEmptyString(adSetDailyBudget) || null,
+    status: "PAUSED",
+  },
+  null,
+  2,
+)}
+          </pre>
+        </details>
       </div>
 
       <div className="card" style={{ padding: 18, marginTop: 16 }}>
         <div style={{ fontWeight: 900, fontSize: 16 }}>Etapa 3 — Ad (preparação)</div>
         <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
           Estrutura preparada no backend para `POST /api/meta/ads` (ainda não implementado).
+          Sem upload complexo nesta fase (apenas contrato mínimo).
         </div>
+
+        <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <label style={{ display: "grid", gap: 6 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>
+              Meta AdSet ID (origem)
+            </span>
+            <input
+              value=""
+              readOnly
+              placeholder="Será preenchido quando AdSet existir"
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 800,
+                outline: "none",
+                background: "#f9fafb",
+              }}
+            />
+          </label>
+
+          <label style={{ display: "grid", gap: 6 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>
+              Nome do Ad
+            </span>
+            <input
+              value={adName}
+              onChange={(e) => setAdName(e.target.value)}
+              placeholder="Ex: Ad BR — Image 1"
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 700,
+                outline: "none",
+                background: "#ffffff",
+              }}
+            />
+          </label>
+        </div>
+
+        <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+          <button type="button" className="pillOutline" disabled>
+            Criar Ad (em breve)
+          </button>
+          <div className="muted" style={{ fontWeight: 800 }}>
+            Endpoint existe, mas retorna `501` por enquanto.
+          </div>
+        </div>
+
+        <details style={{ marginTop: 12 }}>
+          <summary style={{ cursor: "pointer", fontWeight: 900 }}>Preview do payload (planejado)</summary>
+          <pre style={{ marginTop: 10, background: "#0b1220", color: "#e5e7eb", padding: 12, borderRadius: 12, overflowX: "auto" }}>
+{JSON.stringify(
+  {
+    metaAdSetId: null,
+    name: normalizeNonEmptyString(adName) || null,
+    status: "PAUSED",
+    creative: {
+      primaryText: null,
+      headline: null,
+      image: null,
+      video: null,
+      cta: null,
+    },
+  },
+  null,
+  2,
+)}
+          </pre>
+        </details>
       </div>
     </PageShell>
   );
