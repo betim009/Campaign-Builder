@@ -982,7 +982,9 @@ export default function MetaPausedTest() {
                     {l.ok ? "SIM" : "NÃO"}
                   </td>
                   <td className="muted" style={{ fontWeight: 800, maxWidth: 520 }}>
-                    {l.ok ? safeJson(l.details ?? null) : l.error || "—"}
+                    {l.ok
+                      ? safeJson(l.details ?? null)
+                      : `${l.error || "—"}${l.details ? `\n${safeJson(l.details)}` : ""}`}
                   </td>
                 </tr>
               ))}

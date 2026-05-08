@@ -146,7 +146,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-08 11:04]
+Última atualização: [2026-05-08 11:05]
 
 Regras:
 
@@ -177,6 +177,7 @@ Regras:
 - [x] `/meta-test`: destacar registro recém-criado/atualizado em `generated_campaigns`
 - [x] Exibir provider/fallback no resultado do sync (Campanha Detalhes)
 - [ ] Melhorar timeline/log operacional
+- [x] `/meta-test`: logs exibem `error` + `details` em falhas
 - [ ] Melhorar visualização da estrutura Meta
 - [ ] Melhorar estados de sucesso/erro
 - [ ] Melhorar navegação operacional
