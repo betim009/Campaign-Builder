@@ -56,6 +56,7 @@ export default function MetaPausedTest() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [errorDetails, setErrorDetails] = useState(null);
 
   const [countries, setCountries] = useState([]);
   const [countriesSource, setCountriesSource] = useState("api");
@@ -124,6 +125,14 @@ export default function MetaPausedTest() {
       }
       return next;
     });
+  }
+
+  function captureError(err, fallbackMessage) {
+    const message = err?.message ? String(err.message) : fallbackMessage || "Erro";
+    const details = err?.body?.error?.details ?? err?.body ?? null;
+    setError(message);
+    setErrorDetails(details);
+    return { message, details };
   }
 
   async function refresh() {
@@ -328,6 +337,21 @@ export default function MetaPausedTest() {
         <div className="card" style={{ padding: 18, marginTop: 16, borderColor: "#fecaca", color: "#991b1b" }}>
           <div style={{ fontWeight: 900 }}>Erro</div>
           <div style={{ marginTop: 6, fontWeight: 700 }}>{error}</div>
+          {errorDetails ? (
+            <pre
+              style={{
+                marginTop: 12,
+                background: "#0b1220",
+                color: "#e5e7eb",
+                padding: 12,
+                borderRadius: 12,
+                overflowX: "auto",
+                whiteSpace: "pre-wrap",
+              }}
+            >
+{safeJson(errorDetails)}
+            </pre>
+          ) : null}
         </div>
       ) : null}
 
@@ -430,18 +454,19 @@ export default function MetaPausedTest() {
             type="button"
             className="pillOutline"
             disabled={!canBatch}
-            onClick={async () => {
-              pushLog({
-                action: "campaign.batch.start",
-                ok: true,
-                details: { mode: batchMode, countries: selectedCountryCodes.slice(), total: selectedCountryCodes.length },
-              });
-              setBatchRunning(true);
-              setBatchProgress(null);
-              setBatchResults([]);
-              setBatchErrors([]);
-              setError("");
-              setSuccess("");
+	            onClick={async () => {
+	              pushLog({
+	                action: "campaign.batch.start",
+	                ok: true,
+	                details: { mode: batchMode, countries: selectedCountryCodes.slice(), total: selectedCountryCodes.length },
+	              });
+	              setBatchRunning(true);
+	              setBatchProgress(null);
+	              setBatchResults([]);
+	              setBatchErrors([]);
+	              setError("");
+	              setErrorDetails(null);
+	              setSuccess("");
 
               const total = selectedCountryCodes.length;
               const results = [];
@@ -478,18 +503,19 @@ export default function MetaPausedTest() {
                       effectiveStatus: res?.metaCampaign?.effective_status ?? null,
                       generatedCampaignId: res?.generatedCampaign?.id ?? null,
                     });
-                  } catch (err) {
-                    pushLog({
-                      action: "campaign.create.simple",
-                      ok: false,
-                      error: err?.message ? String(err.message) : "error",
-                      details: { mode: batchMode, countryCode: code },
-                    });
-                    errors.push({
-                      countryCode: code,
-                      message: err?.message ? String(err.message) : "Falha ao criar Campaign.",
-                    });
-                  }
+	                  } catch (err) {
+	                    const captured = { message: err?.message ? String(err.message) : "error", details: err?.body?.error?.details ?? err?.body ?? null };
+	                    pushLog({
+	                      action: "campaign.create.simple",
+	                      ok: false,
+	                      error: captured.message,
+	                      details: { mode: batchMode, countryCode: code, errorDetails: captured.details },
+	                    });
+	                    errors.push({
+	                      countryCode: code,
+	                      message: captured.message || "Falha ao criar Campaign.",
+	                    });
+	                  }
                 }
 
                 setBatchResults(results);
@@ -1069,13 +1095,14 @@ export default function MetaPausedTest() {
             type="button"
             className="pillOutline"
             disabled={!canCreate}
-	            onClick={async () => {
-	              setBusy(true);
-	              setCreatedLoading(true);
-	              setError("");
-	              setSuccess("");
-	              setCreated(null);
-	              try {
+		            onClick={async () => {
+		              setBusy(true);
+		              setCreatedLoading(true);
+		              setError("");
+		              setErrorDetails(null);
+		              setSuccess("");
+		              setCreated(null);
+		              try {
 	                const res = await createMetaCampaignSimple({
 	                  name: name.trim(),
 	                  objective,
@@ -1097,15 +1124,15 @@ export default function MetaPausedTest() {
 	                setSuccess(`Campaign criada (${res.mode || mode}) — status obrigatório: PAUSED.`);
 	                await refreshBackendStatus();
 	                await refreshLocalGenerated();
-	              } catch (err) {
-	                setError(err?.message ? String(err.message) : "Falha ao criar Campaign.");
-	                pushLog({
-	                  action: "campaign.create.simple",
-	                  ok: false,
-	                  error: err?.message ? String(err.message) : "error",
-	                  details: { mode, countryCode },
-	                });
-	              } finally {
+		              } catch (err) {
+		                const captured = captureError(err, "Falha ao criar Campaign.");
+		                pushLog({
+		                  action: "campaign.create.simple",
+		                  ok: false,
+		                  error: captured.message || "error",
+		                  details: { mode, countryCode, errorDetails: captured.details },
+		                });
+		              } finally {
 	                setCreatedLoading(false);
 	                setBusy(false);
 	              }
@@ -1457,12 +1484,13 @@ export default function MetaPausedTest() {
             type="button"
             className="pillOutline"
             disabled={!canCreateAdSet}
-            onClick={async () => {
-              setBusy(true);
-              setAdSetCreating(true);
-              setError("");
-              setSuccess("");
-              try {
+	            onClick={async () => {
+	              setBusy(true);
+	              setAdSetCreating(true);
+	              setError("");
+	              setErrorDetails(null);
+	              setSuccess("");
+	              try {
                 const payload = {
                   generatedCampaignId: createdGeneratedCampaignId,
                   name: adSetName.trim(),
@@ -1490,15 +1518,15 @@ export default function MetaPausedTest() {
                 });
                 setSuccess(`AdSet criado (${res.mode || flowMode}) — status obrigatório: PAUSED.`);
                 await refreshLocalGenerated();
-              } catch (err) {
-                setError(err?.message ? String(err.message) : "Falha ao criar AdSet.");
-                pushLog({
-                  action: "adset.create",
-                  ok: false,
-                  error: err?.message ? String(err.message) : "error",
-                  details: { mode: flowMode, generatedCampaignId: createdGeneratedCampaignId },
-                });
-              } finally {
+	              } catch (err) {
+	                const captured = captureError(err, "Falha ao criar AdSet.");
+	                pushLog({
+	                  action: "adset.create",
+	                  ok: false,
+	                  error: captured.message || "error",
+	                  details: { mode: flowMode, generatedCampaignId: createdGeneratedCampaignId, errorDetails: captured.details },
+	                });
+	              } finally {
                 setAdSetCreating(false);
                 setBusy(false);
               }
@@ -1608,12 +1636,13 @@ export default function MetaPausedTest() {
             type="button"
             className="pillOutline"
             disabled={!canCreateAd}
-            onClick={async () => {
-              setBusy(true);
-              setAdCreating(true);
-              setError("");
-              setSuccess("");
-              try {
+	            onClick={async () => {
+	              setBusy(true);
+	              setAdCreating(true);
+	              setError("");
+	              setErrorDetails(null);
+	              setSuccess("");
+	              try {
                 const payload = {
                   generatedCampaignId: createdGeneratedCampaignId,
                   name: adName.trim(),
@@ -1638,15 +1667,15 @@ export default function MetaPausedTest() {
                 });
                 setSuccess(`Ad criado (${res.mode || flowMode}) — status obrigatório: PAUSED.`);
                 await refreshLocalGenerated();
-              } catch (err) {
-                setError(err?.message ? String(err.message) : "Falha ao criar Ad.");
-                pushLog({
-                  action: "ad.create",
-                  ok: false,
-                  error: err?.message ? String(err.message) : "error",
-                  details: { mode: flowMode, generatedCampaignId: createdGeneratedCampaignId },
-                });
-              } finally {
+	              } catch (err) {
+	                const captured = captureError(err, "Falha ao criar Ad.");
+	                pushLog({
+	                  action: "ad.create",
+	                  ok: false,
+	                  error: captured.message || "error",
+	                  details: { mode: flowMode, generatedCampaignId: createdGeneratedCampaignId, errorDetails: captured.details },
+	                });
+	              } finally {
                 setAdCreating(false);
                 setBusy(false);
               }
