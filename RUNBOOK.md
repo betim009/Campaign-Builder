@@ -242,6 +242,18 @@ Esta seção deve ser atualizada sempre que:
   - Verificação (db):
     - `SELECT meta_campaign_id, meta_status, meta_adset_id, meta_adset_status, meta_ad_id, meta_ad_status FROM generated_campaigns WHERE id = '<uuid>';`
 
+[2026-05-08 10:59]
+
+- Evidência (REAL): criação + leitura Graph + listagem PAUSED + sync (sem token no frontend):
+  - Criar Campaign REAL (PAUSED): `POST /api/meta/campaigns/simple` (`mode=REAL`)
+    - `generated_campaigns.id`: `7a6b1285-be7a-4f85-a8e4-26043d922394`
+    - `meta_campaign_id`: `120246780124490596`
+  - Ler Campaign no Graph: `GET /api/meta/campaigns/{meta_campaign_id}` → `status=PAUSED` / `effective_status=PAUSED`
+  - Listar PAUSED por Ad Account: `GET /api/meta/ad-accounts/:id/campaigns?pausedOnly=true` (campanha encontrada na lista)
+  - Sync REAL (insights): `POST /api/meta/sync/generated-campaigns/:id` → `provider=meta`
+  - Criar AdSet REAL (PAUSED): `POST /api/meta/adsets` (`mode=REAL`)
+    - `meta_adset_id`: `120246780152480596` (effective pode ficar `IN_PROCESS` no início)
+
 ## LEGADO / NÃO EXECUTAR
 
 Última atualização: [2026-05-08 08:48]

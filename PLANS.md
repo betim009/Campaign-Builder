@@ -146,7 +146,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-08 10:52]
+Última atualização: [2026-05-08 10:59]
 
 Regras:
 
@@ -157,13 +157,14 @@ Regras:
 
 ### P0 — Operação REAL mínima
 
-- [ ] Validar Campaign REAL via `/meta-test`
+- [x] Validar Campaign REAL via `/meta-test`
 - [ ] Validar persistência completa `meta_*`
 - [x] Evidência `meta_*` persistida em STUB (Campaign/AdSet/Ad)
+- [x] Evidência `meta_*` persistida em REAL (Campaign + AdSet)
 - [ ] Confirmar Campaign aparecendo PAUSED no Ads Manager
+- [x] Validar leitura REAL do Graph
+- [x] Validar status REAL sincronizado
 - [ ] Adicionar evidência visual REAL/STUB/FALLBACK
-- [ ] Validar leitura REAL do Graph
-- [ ] Validar status REAL sincronizado
 - [x] Garantir que token nunca chega no frontend
 - [x] Garantir fallback seguro quando Graph falhar
 
