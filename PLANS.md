@@ -307,7 +307,7 @@ Subtarefas (execução incremental):
 
 ### P1 — Evolução da `/meta-test` como fluxo operacional principal
 
-Última atualização: [2026-05-07 22:14]
+Última atualização: [2026-05-07 22:20]
 
 Objetivo:
 Transformar a página `/meta-test` no novo fluxo simplificado e progressivo de integração Meta Ads real, reduzindo dependência do formulário gigante atual.
@@ -328,7 +328,7 @@ Backlog:
 - [x] Simplificar UI da `/meta-test` (fluxo mínimo de Campaign)
 - [ ] Remover dependência de fluxos antigos (manter compatibilidade enquanto migra)
 - [x] Permitir criar Campaign diretamente pela UI (campos mínimos)
-- [ ] Permitir gerar automaticamente Campaigns independentes por país (batch)
+- [x] Permitir gerar automaticamente Campaigns independentes por país (batch)
 - [x] Exibir claramente:
   - REAL
   - STUB
@@ -399,7 +399,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
   em um único fluxo, aumentando complexidade operacional e de manutenção.
 ## Progress (sessão atual)
 
-Última atualização: [2026-05-07 22:14]
+Última atualização: [2026-05-07 22:20]
 
 - Migração adicionada para persistir campos `meta_*` em `generated_campaigns`.
 - Backend implementado para criação real de campanha (`POST /api/meta/campaigns`) com regra obrigatória `status: PAUSED` e persistência.
@@ -412,6 +412,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - Backend: scaffolding inicial para AdSet/Ad (providers + rotas `POST /api/meta/adsets` e `POST /api/meta/ads` como placeholders).
 - Frontend: `/meta-test` ganhou painel de status do backend/token (`/api/meta/status` + `/api/meta/validate`), validação de `act_...` e botão para consultar status da Campaign via Graph (`GET /api/meta/campaigns/:id`).
 - Frontend: `/meta-test` ganhou base visual para AdSet/Ad (UI desabilitada + preview de payload).
+- Frontend: `/meta-test` ganhou batch de criação de Campaigns por país (REAL/STUB, sempre `PAUSED`) + painel de evidência de persistência local (`generated_campaigns`).
 
 ## Surprises & Discoveries
 
