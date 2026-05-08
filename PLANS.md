@@ -146,7 +146,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-08 10:59]
+Última atualização: [2026-05-08 11:01]
 
 Regras:
 
@@ -164,7 +164,7 @@ Regras:
 - [ ] Confirmar Campaign aparecendo PAUSED no Ads Manager
 - [x] Validar leitura REAL do Graph
 - [x] Validar status REAL sincronizado
-- [ ] Adicionar evidência visual REAL/STUB/FALLBACK
+- [x] Adicionar evidência visual REAL/STUB/FALLBACK
 - [x] Garantir que token nunca chega no frontend
 - [x] Garantir fallback seguro quando Graph falhar
 
