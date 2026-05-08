@@ -49,7 +49,7 @@ Construir o **Campaign Builder**, uma aplicação web que substitui a planilha o
 
 ## Snapshot (Estado Atual)
 
-Última atualização: [2026-05-07 14:03]
+Última atualização: [2026-05-07 22:05]
 
 O que está funcional hoje:
 
@@ -59,6 +59,7 @@ O que está funcional hoje:
 - Stack Docker definida (db + backend + frontend): ver `docker-compose.yml` e `README.md`.
 - Sincronização de métricas definida como sync manual (`/api/meta/sync/*`) com provider Meta Graph e fallback `stub`: ver `backend/src/routes/meta.js`.
 - Criação real de campanhas Meta Ads via backend (`POST /api/meta/campaigns`) implementada com persistência em `generated_campaigns` (campos `meta_*`) e regra obrigatória `status: PAUSED`.
+- Criação REAL simplificada (lab) com campos mínimos via `POST /api/meta/campaigns/simple` (nome/objetivo/ad account/país), persistindo em `campaigns` + `generated_campaigns`.
 - O fluxo operacional começou a ser separado conceitualmente entre:
   - Campaign
   - AdSet
@@ -306,7 +307,7 @@ Subtarefas (execução incremental):
 
 ### P1 — Evolução da `/meta-test` como fluxo operacional principal
 
-Última atualização: [2026-05-07 18:10]
+Última atualização: [2026-05-07 22:05]
 
 Objetivo:
 Transformar a página `/meta-test` no novo fluxo simplificado e progressivo de integração Meta Ads real, reduzindo dependência do formulário gigante atual.
@@ -324,14 +325,16 @@ Regras:
 
 Backlog:
 
-- [ ] Simplificar UI da `/meta-test`
-- [ ] Remover dependência de fluxos antigos
-- [ ] Permitir criar Campaign diretamente pela UI
-- [ ] Permitir gerar automaticamente Campaigns independentes por país
-- [ ] Exibir claramente:
+- [x] Simplificar UI da `/meta-test` (fluxo mínimo de Campaign)
+- [ ] Remover dependência de fluxos antigos (manter compatibilidade enquanto migra)
+- [x] Permitir criar Campaign diretamente pela UI (campos mínimos)
+- [ ] Permitir gerar automaticamente Campaigns independentes por país (batch)
+- [x] Exibir claramente:
   - REAL
   - STUB
   - FALLBACK
+- [ ] Preparar UI/serviços para criação de AdSet (sem implementar full)
+- [ ] Preparar UI/serviços para criação de Ad (sem implementar full)
 - [ ] Adicionar criação REAL de AdSet
 - [ ] Adicionar criação REAL de Ad
 - [ ] Exibir estrutura Meta:
@@ -348,7 +351,7 @@ Backlog:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-07 14:03]
+Última atualização: [2026-05-07 22:05]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -377,6 +380,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
   - AdSet
   - Ad
   sem depender do fluxo completo antigo.
+- [2026-05-07 22:05] Decisão: para iniciar o fluxo progressivo com baixo acoplamento, `/meta-test` cria Campaign via endpoint dedicado (`POST /api/meta/campaigns/simple`) com campos mínimos (nome/objetivo/ad account/país), mantendo `POST /api/meta/campaigns` (baseado em `generated_campaigns`) como compatibilidade do fluxo antigo.
 
 ## Blockers & Risks
 
@@ -395,7 +399,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
   em um único fluxo, aumentando complexidade operacional e de manutenção.
 ## Progress (sessão atual)
 
-Última atualização: [2026-05-07 14:49]
+Última atualização: [2026-05-07 22:05]
 
 - Migração adicionada para persistir campos `meta_*` em `generated_campaigns`.
 - Backend implementado para criação real de campanha (`POST /api/meta/campaigns`) com regra obrigatória `status: PAUSED` e persistência.
@@ -403,18 +407,23 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - Frontend atualizado para exibir `STUB`/`REAL`, `meta_campaign_id` e status real da Meta.
 - Página isolada adicionada para testar criação REAL via UI: `/meta-test` (sem token no frontend).
 - `mark-published` corrigido para não alterar status local indevidamente.
+- Backend: endpoint `POST /api/meta/campaigns/simple` adicionado para criação REAL/`STUB` com campos mínimos (modo seguro `PAUSED`) + persistência local.
+- Frontend: `/meta-test` simplificado para fluxo progressivo (Campaign) e exibição explícita de REAL/STUB/FALLBACK.
+- Backend: scaffolding inicial para AdSet/Ad (providers + rotas `POST /api/meta/adsets` e `POST /api/meta/ads` como placeholders).
 
 ## Surprises & Discoveries
 
-Última atualização: [2026-05-07 14:03]
+Última atualização: [2026-05-07 22:05]
 
 - Para criação de campanha via Marketing API, o payload inclui `special_ad_categories` (mesmo vazio) e deve sempre forçar `status=PAUSED` no backend em dev.
+- O “país” não existe como entidade nativa na Campaign da Meta: no produto, ele é parte do **modelo operacional** (mapeado em `generated_campaigns.country_code`) e será aplicado de forma real no nível de AdSet (targeting) na evolução futura.
 
 ## Outcomes & Retrospective
 
-Última atualização: [2026-05-07 14:03]
+Última atualização: [2026-05-07 22:05]
 
 - O projeto deixa de ser apenas simulação para criação de campanhas: existe caminho real end-to-end via backend, mantendo segurança operacional com `PAUSED`.
+- Direção arquitetural consolidada: abandonar evolução como “formulário gigante” e migrar para fluxo progressivo baseado em entidades Meta reais, com `/meta-test` como laboratório principal.
 
 ## Referências (histórico e legado)
 
