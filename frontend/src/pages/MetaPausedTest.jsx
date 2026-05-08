@@ -113,6 +113,9 @@ export default function MetaPausedTest() {
     normalizeNonEmptyString(countryCode) !== "";
 
   const adAccountNormalized = useMemo(() => normalizeMetaAdAccountId(metaAdAccountId), [metaAdAccountId]);
+  const runModeLabel = mode === "STUB" ? "STUB" : "REAL";
+  const dataModeLabel = countriesSource === "fallback" ? "FALLBACK" : "API";
+  const metaReadyLabel = backendStatus?.hasAccessToken ? "REAL" : "STUB";
 
   return (
     <PageShell
@@ -120,6 +123,62 @@ export default function MetaPausedTest() {
       subtitle="Fluxo progressivo operacional — criação REAL sempre PAUSED"
       backFallbackTo="/configuracoes"
     >
+      <div className="card" style={{ padding: 18 }}>
+        <div style={{ fontWeight: 900 }}>Modo atual</div>
+        <div style={{ marginTop: 10, display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              borderRadius: 999,
+              padding: "8px 12px",
+              fontWeight: 900,
+              border: "1px solid #e5e7eb",
+              background: runModeLabel === "REAL" ? "#dcfce7" : "#fef3c7",
+              color: "#111827",
+            }}
+          >
+            RUN MODE: {runModeLabel}
+          </span>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              borderRadius: 999,
+              padding: "8px 12px",
+              fontWeight: 900,
+              border: "1px solid #e5e7eb",
+              background: dataModeLabel === "FALLBACK" ? "#fee2e2" : "#dbeafe",
+              color: "#111827",
+            }}
+          >
+            DATA: {dataModeLabel}
+          </span>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              borderRadius: 999,
+              padding: "8px 12px",
+              fontWeight: 900,
+              border: "1px solid #e5e7eb",
+              background: metaReadyLabel === "REAL" ? "#dcfce7" : "#fef3c7",
+              color: "#111827",
+            }}
+          >
+            META READY: {metaReadyLabel}
+          </span>
+        </div>
+        <div className="muted" style={{ marginTop: 10, fontWeight: 800, lineHeight: 1.55 }}>
+          - <b>RUN MODE</b>: define se a criação chama Meta (REAL) ou cria `stub-*` (STUB).<br />
+          - <b>DATA</b>: indica se a UI está usando API ou FALLBACK.<br />
+          - <b>META READY</b>: depende de token presente no backend.
+        </div>
+      </div>
+
       <div className="card" style={{ padding: 18 }}>
         <div style={{ fontWeight: 900 }}>Regras (segurança)</div>
         <ul className="muted" style={{ marginTop: 10, fontWeight: 800, lineHeight: 1.55 }}>
@@ -268,7 +327,7 @@ export default function MetaPausedTest() {
 
         <div className="muted" style={{ marginTop: 10, fontWeight: 800 }}>
           Fonte países:{" "}
-          <span style={{ fontWeight: 900 }}>{countriesSource === "fallback" ? "FALLBACK" : "API"}</span>
+          <span style={{ fontWeight: 900 }}>{dataModeLabel}</span>
         </div>
 
         <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -432,7 +491,9 @@ export default function MetaPausedTest() {
           <button
             type="button"
             className="pillOutline"
-            disabled={normalizeNonEmptyString(metaAdAccountId) === "" || metaLoading}
+            disabled={
+              normalizeNonEmptyString(metaAdAccountId) === "" || metaLoading || !backendStatus?.hasAccessToken
+            }
             onClick={async () => {
               setMetaLoading(true);
               setMetaError("");
@@ -453,6 +514,11 @@ export default function MetaPausedTest() {
           >
             {metaLoading ? "Listando..." : "Listar PAUSED na Meta"}
           </button>
+          {!backendStatus?.hasAccessToken ? (
+            <div className="muted" style={{ fontWeight: 800 }}>
+              Token ausente no backend → listagem REAL indisponível (use STUB ou configure token).
+            </div>
+          ) : null}
         </div>
 
         {metaError ? (
