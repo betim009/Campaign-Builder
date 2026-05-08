@@ -7,6 +7,7 @@ import { syncGeneratedCampaignMetrics } from '../meta/sync.js'
 import { metaFetchMe } from '../meta/graph.js'
 import { coerceAccessToken, resolveAccessToken } from '../meta/accessToken.js'
 import { metaCreateCampaign, metaFetchCampaign, metaListAdAccountCampaigns } from '../meta/campaigns.js'
+import { slugify } from '../lib/slugify.js'
 
 function parseDateOrNull(value) {
   if (typeof value !== 'string' || !value.trim()) return null
@@ -27,6 +28,27 @@ function normalizeMetaAdAccountId(value) {
   const stripped = raw.replace(/^act_/, '')
   if (!/^\d+$/.test(stripped)) return null
   return `act_${stripped}`
+}
+
+function normalizeCountryCode(value) {
+  const raw = normalizeNonEmptyString(value)
+  if (!raw) return null
+  const code = raw.toUpperCase()
+  if (!/^[A-Z]{2}$/.test(code)) return null
+  return code
+}
+
+async function createUniqueSlug(pool, base) {
+  const cleaned = slugify(base) || `campaign-${Date.now()}`
+  let candidate = cleaned
+  let attempt = 0
+
+  while (true) {
+    const { rowCount } = await pool.query('SELECT 1 FROM campaigns WHERE slug = $1', [candidate])
+    if (rowCount === 0) return candidate
+    attempt += 1
+    candidate = `${cleaned}-${attempt}`
+  }
 }
 
 export function metaRouter() {
@@ -314,6 +336,205 @@ export function metaRouter() {
         const status = typeof err?.status === 'number' ? err.status : 502
         return jsonError(res, status, err?.message ?? 'Meta campaign creation failed', err?.details)
       }
+    })
+  )
+
+  router.post(
+    '/campaigns/simple',
+    asyncHandler(async (req, res) => {
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      const name = normalizeNonEmptyString(req.body?.name)
+      if (!name) {
+        return jsonError(res, 400, 'Invalid name')
+      }
+
+      const objective = normalizeNonEmptyString(req.body?.objective)
+      if (!objective) {
+        return jsonError(res, 400, 'Missing objective')
+      }
+
+      const countryCode = normalizeCountryCode(req.body?.countryCode)
+      if (!countryCode) {
+        return jsonError(res, 400, 'Invalid countryCode (expected ISO-2)')
+      }
+
+      const metaAdAccountId = normalizeMetaAdAccountId(req.body?.metaAdAccountId)
+      if (!metaAdAccountId) {
+        return jsonError(res, 400, 'Invalid metaAdAccountId (expected act_<digits>)')
+      }
+
+      const modeRaw = normalizeNonEmptyString(req.body?.mode)
+      const mode = modeRaw === 'STUB' ? 'STUB' : 'REAL'
+
+      const pool = getPool()
+      const accessToken = await resolveAccessToken(pool, req)
+
+      if (mode === 'REAL' && !accessToken) {
+        return jsonError(
+          res,
+          400,
+          'Missing accessToken (provide body.accessToken, META_ACCESS_TOKEN, or save via /tokens)'
+        )
+      }
+
+      const country = await pool.query('SELECT code FROM countries WHERE code = $1', [countryCode])
+      if (country.rowCount === 0) {
+        return jsonError(res, 400, 'Unknown countryCode (not in countries table)')
+      }
+
+      let metaUserId = normalizeNonEmptyString(req.body?.metaUserId)
+      if (!metaUserId && mode === 'REAL') {
+        try {
+          const me = await metaFetchMe({ accessToken })
+          metaUserId = normalizeNonEmptyString(me?.id)
+        } catch (err) {
+          const status = typeof err?.status === 'number' ? err.status : 502
+          return jsonError(res, status, err?.message ?? 'Meta Graph validation failed', err?.details)
+        }
+      }
+
+      const client = await pool.connect()
+      try {
+        await client.query('BEGIN')
+
+        const slug = await createUniqueSlug(client, name)
+        const insertedCampaign = await client.query(
+          `
+            INSERT INTO campaigns (slug, name, status, scope, objective_key, created_by_user_id, config)
+            VALUES ($1, $2, 'draft', 'global', NULL, NULL, '{}'::jsonb)
+            RETURNING id, slug, name, status, scope, objective_key, created_by_user_id, config, created_at
+          `,
+          [slug, name]
+        )
+
+        const campaign = insertedCampaign.rows[0]
+
+        await client.query(
+          `
+            INSERT INTO campaign_country_targets (campaign_id, country_code)
+            VALUES ($1, $2)
+            ON CONFLICT DO NOTHING
+          `,
+          [campaign.id, countryCode]
+        )
+
+        const generatedName = `${name} — ${countryCode}`
+        const insertedGenerated = await client.query(
+          `
+            INSERT INTO generated_campaigns (campaign_id, country_code, name, status)
+            VALUES ($1, $2, $3, 'PAUSED')
+            RETURNING
+              id,
+              campaign_id,
+              country_code,
+              meta_campaign_id,
+              meta_ad_account_id,
+              meta_user_id,
+              meta_status,
+              meta_effective_status,
+              meta_objective,
+              name,
+              status,
+              created_at
+          `,
+          [campaign.id, countryCode, generatedName]
+        )
+
+        const generated = insertedGenerated.rows[0]
+
+        let created = null
+        if (mode === 'REAL') {
+          created = await metaCreateCampaign({
+            metaAdAccountId,
+            name: generated.name,
+            objective,
+            accessToken
+          })
+        } else {
+          created = {
+            id: `stub-${generated.id}`,
+            name: generated.name,
+            status: 'PAUSED',
+            effective_status: 'PAUSED',
+            objective
+          }
+        }
+
+        const updated = await client.query(
+          `
+            UPDATE generated_campaigns
+            SET
+              meta_campaign_id = $2,
+              meta_ad_account_id = $3,
+              meta_user_id = $4,
+              meta_status = $5,
+              meta_effective_status = $6,
+              meta_objective = $7
+            WHERE id = $1
+            RETURNING
+              id,
+              campaign_id,
+              country_code,
+              meta_campaign_id,
+              meta_ad_account_id,
+              meta_user_id,
+              meta_status,
+              meta_effective_status,
+              meta_objective,
+              name,
+              status,
+              created_at
+          `,
+          [
+            generated.id,
+            String(created.id),
+            metaAdAccountId,
+            metaUserId,
+            normalizeNonEmptyString(created?.status),
+            normalizeNonEmptyString(created?.effective_status),
+            normalizeNonEmptyString(created?.objective)
+          ]
+        )
+
+        await client.query('COMMIT')
+        return res.status(201).json({
+          ok: true,
+          mode,
+          meta_campaign: created,
+          campaign,
+          generated_campaign: updated.rows[0]
+        })
+      } catch (err) {
+        await client.query('ROLLBACK')
+        throw err
+      } finally {
+        client.release()
+      }
+    })
+  )
+
+  router.post(
+    '/adsets',
+    asyncHandler(async (req, res) => {
+      return jsonError(
+        res,
+        501,
+        'Not implemented yet (planned: create AdSet for a Meta Campaign). Use /meta-test roadmap.'
+      )
+    })
+  )
+
+  router.post(
+    '/ads',
+    asyncHandler(async (req, res) => {
+      return jsonError(
+        res,
+        501,
+        'Not implemented yet (planned: create Ad for a Meta AdSet). Use /meta-test roadmap.'
+      )
     })
   )
 
