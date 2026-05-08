@@ -52,9 +52,10 @@
 
 ### Meta — Sync / Automação (dev)
 
-Última atualização: [2026-05-08 08:48]
+Última atualização: [2026-05-08 10:43]
 
 - Sync manual de métricas: `POST /api/meta/sync/generated-campaigns/:id`
+- Fallback seguro: se o Graph falhar e `META_SYNC_PROVIDER` não for `meta`, o backend retorna `provider=stub` + campo `fallback` (para fail-fast, use `META_SYNC_PROVIDER=meta`).
 - Executor de automação (dry-run): `curl -X POST http://localhost:3001/api/automation/run -H 'Content-Type: application/json' -d '{"dryRun":true}'`
 - Executor de automação (persistindo logs): `curl -X POST http://localhost:3001/api/automation/run -H 'Content-Type: application/json' -d '{}'`
 

@@ -60,14 +60,41 @@ export async function syncGeneratedCampaignMetrics({
     return { inserted: 0, updated: 0, since, until, reason: range.reason, provider: 'noop' }
   }
 
-  const raw = await metaFetchCampaignInsightsDaily({
-    metaCampaignId,
-    accessToken,
-    since,
-    until
-  })
+  const providerSetting = process.env.META_SYNC_PROVIDER ?? null
+  let raw = null
+  let providerUsed = providerSetting === 'stub' || !accessToken ? 'stub' : 'meta'
+  let fallback = null
 
-  const rows = raw
+  try {
+    raw = await metaFetchCampaignInsightsDaily({
+      metaCampaignId,
+      accessToken,
+      since,
+      until
+    })
+  } catch (err) {
+    if (providerSetting === 'meta') {
+      throw err
+    }
+
+    fallback = {
+      from: 'meta',
+      reason: 'meta_graph_error',
+      message: err?.message ?? 'Meta Graph error',
+      status: typeof err?.status === 'number' ? err.status : null,
+      details: err?.details ?? null
+    }
+
+    raw = await metaFetchCampaignInsightsDaily({
+      metaCampaignId,
+      accessToken: null,
+      since,
+      until
+    })
+    providerUsed = 'stub'
+  }
+
+  const rows = (Array.isArray(raw) ? raw : [])
     .map((r) => normalizeDailyInsightRow(r))
     .filter(Boolean)
     .filter((r) => r.metricDate >= since && r.metricDate <= until)
@@ -79,7 +106,8 @@ export async function syncGeneratedCampaignMetrics({
       since,
       until,
       reason: range.reason,
-      provider: process.env.META_SYNC_PROVIDER === 'stub' || !accessToken ? 'stub' : 'meta'
+      provider: providerUsed,
+      ...(fallback ? { fallback } : null)
     }
   }
 
@@ -135,7 +163,8 @@ export async function syncGeneratedCampaignMetrics({
       since,
       until,
       reason: range.reason,
-      provider: process.env.META_SYNC_PROVIDER === 'stub' || !accessToken ? 'stub' : 'meta'
+      provider: providerUsed,
+      ...(fallback ? { fallback } : null)
     }
   } catch (err) {
     await client.query('ROLLBACK')

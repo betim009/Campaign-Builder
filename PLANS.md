@@ -126,7 +126,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-08 08:48]
+Última atualização: [2026-05-08 10:43]
 
 Regras:
 
@@ -135,17 +135,93 @@ Regras:
 - Procedimentos/como rodar/testar devem ficar em `RUNBOOK.md`.
 - Ao concluir um item: marcar como `[x]`, registrar decisão se necessário em `Decision Log (Ativo)` e criar commit incremental.
 
-### P0 — Operação Meta real (PAUSED) — validações pendentes
+### P0 — Operação REAL mínima
 
-Contexto:
-- O fluxo oficial de evolução/validação Meta passa por `/meta-test` (ver regra em `## Governança Operacional`).
-- O histórico detalhado da integração inicial e itens concluídos foi movido para `ARCHIVE.md` (não manter PLANS como diário).
+- [ ] Validar Campaign REAL via `/meta-test`
+- [ ] Validar persistência completa `meta_*`
+- [ ] Confirmar Campaign aparecendo PAUSED no Ads Manager
+- [ ] Adicionar evidência visual REAL/STUB/FALLBACK
+- [ ] Validar leitura REAL do Graph
+- [ ] Validar status REAL sincronizado
+- [x] Garantir que token nunca chega no frontend
+- [x] Garantir fallback seguro quando Graph falhar
 
-Backlog:
+### P1 — UX operacional
 
-- [ ] Validar com token real via UI em `/meta-test` (evidência: Campaign aparece `PAUSED` no Ads Manager).
-- [ ] (Opcional) Adicionar botão “atualizar status” (Graph) para REAL persistidas, sem expor token.
-- [ ] Preparar futura substituição da página "Nova Campanha" (migração incremental do fluxo legado → `/meta-test`).
+- [ ] Melhorar loading states
+- [ ] Melhorar error states
+- [ ] Melhorar feedback visual de persistência
+- [ ] Melhorar timeline/log operacional
+- [ ] Melhorar visualização da estrutura Meta
+- [ ] Melhorar estados de sucesso/erro
+- [ ] Melhorar navegação operacional
+- [ ] Melhorar percepção REAL vs STUB
+- [ ] Refinar responsividade
+
+### P2 — Fluxo progressivo Meta
+
+- [ ] Consolidar fluxo Campaign → AdSet → Ad
+- [ ] Separar estados operacionais por entidade
+- [ ] Separar services por entidade Meta
+- [ ] Separar persistência por entidade
+- [ ] Separar logs por entidade
+- [ ] Permitir continuar fluxo incrementalmente
+- [ ] Criar navegação progressiva
+- [ ] Evitar formulário gigante
+
+### P3 — Persistência operacional
+
+- [ ] Persistir drafts operacionais
+- [ ] Persistir logs operacionais
+- [ ] Persistir estados REAL/STUB
+- [ ] Persistir falhas operacionais
+- [ ] Persistir histórico Meta
+- [ ] Persistir status de execução
+- [ ] Persistir estrutura Campaign/AdSet/Ad
+- [ ] Criar recuperação operacional
+
+### P4 — Creative Flow MVP
+
+- [ ] Upload real de mídia
+- [ ] Persistência de creatives
+- [ ] Criar estrutura de copy
+- [ ] Criar estrutura headline/description
+- [ ] Associar creative ao Ad
+- [ ] Validar creative REAL
+- [ ] Exibir preview operacional
+- [ ] Preparar variações futuras
+
+### P5 — Ad REAL mínimo
+
+- [ ] Validar criação REAL de Ad
+- [ ] Validar creative vinculado
+- [ ] Validar CTA
+- [ ] Validar mídia
+- [ ] Validar preview
+- [ ] Validar status PAUSED
+- [ ] Validar persistência do Ad
+- [ ] Validar leitura REAL do Graph
+
+### P6 — Governança operacional leve
+
+- [ ] Adicionar Operational Priorities
+- [ ] Adicionar Execution Rules
+- [ ] Adicionar Technical Debt
+- [ ] Adicionar Known Problems
+- [ ] Separar Blockers de Risks
+- [ ] Padronizar timestamps
+- [ ] Melhorar rastreabilidade
+- [ ] Melhorar logs de decisão
+
+### P7 — Refinamento do fluxo legado
+
+- [ ] Reduzir dependência da Nova Campanha
+- [ ] Remover responsabilidades excessivas
+- [ ] Migrar partes úteis para `/meta-test`
+- [ ] Isolar partes obsoletas
+- [ ] Melhorar compatibilidade temporária
+- [ ] Criar estratégia de substituição gradual
+- [ ] Evitar duplicação operacional
 
 Histórico/itens concluídos:
 - Ver `ARCHIVE.md` em `## Backlog (concluído) — snapshots de execução` e `## Integração Meta — histórico consolidado`.
@@ -153,7 +229,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-07 22:44]
+Última atualização: [2026-05-08 10:43]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -186,6 +262,8 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-07 22:20] Decisão: batch por país será implementado no frontend (sequencial) chamando `POST /api/meta/campaigns/simple` por país, evitando criar endpoints batch agora (sem overengineering) e mantendo `PAUSED` obrigatório.
 - [2026-05-07 22:27] Decisão: logs operacionais ficam inicialmente no frontend (localStorage) para acelerar auditoria e troubleshooting sem criar schema/log pipeline no backend nesta fase.
 - [2026-05-07 22:44] Decisão: criação incremental de AdSet/Ad via `POST /api/meta/adsets` e `POST /api/meta/ads` (sempre `PAUSED`), persistindo `meta_adset_id/meta_ad_id` e status em `generated_campaigns`. `creativeId` é obrigatório apenas em REAL.
+- [2026-05-08 10:43] Decisão: frontend não envia `accessToken` em nenhuma chamada HTTP; token permanece exclusivamente no backend (env/DB).
+- [2026-05-08 10:43] Decisão: sync de métricas tolera falhas do Meta Graph com fallback `stub` quando `META_SYNC_PROVIDER` não for `meta` (retorna `fallback` no payload); para fail-fast, usar `META_SYNC_PROVIDER=meta`.
 
 ## Blockers & Risks
 

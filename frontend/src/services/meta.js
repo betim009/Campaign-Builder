@@ -1,10 +1,9 @@
 import { apiGet, apiPost } from "./http.js";
 
-export async function syncGeneratedCampaign(generatedCampaignId, { startDate, endDate, accessToken, userId } = {}) {
+export async function syncGeneratedCampaign(generatedCampaignId, { startDate, endDate, userId } = {}) {
   const body = {
     ...(startDate ? { startDate } : null),
     ...(endDate ? { endDate } : null),
-    ...(accessToken ? { accessToken } : null),
     ...(userId ? { userId } : null),
   };
 
