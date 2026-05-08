@@ -72,12 +72,14 @@ export default function MetaPausedTest() {
 
   const [metaLoading, setMetaLoading] = useState(false);
   const [metaError, setMetaError] = useState("");
+  const [metaErrorDetails, setMetaErrorDetails] = useState(null);
   const [metaCampaigns, setMetaCampaigns] = useState([]);
 
   const [backendStatus, setBackendStatus] = useState(null);
   const [backendStatusError, setBackendStatusError] = useState("");
   const [validateLoading, setValidateLoading] = useState(false);
   const [validateError, setValidateError] = useState("");
+  const [validateErrorDetails, setValidateErrorDetails] = useState(null);
   const [validateMe, setValidateMe] = useState(null);
 
   // AdSet/Ad (fluxo mínimo incremental)
@@ -101,6 +103,7 @@ export default function MetaPausedTest() {
   // Evidência de persistência local
   const [localLoading, setLocalLoading] = useState(false);
   const [localError, setLocalError] = useState("");
+  const [localErrorDetails, setLocalErrorDetails] = useState(null);
   const [localGenerated, setLocalGenerated] = useState([]);
 
   // Logs operacionais (frontend-only, sem tokens)
@@ -234,6 +237,7 @@ export default function MetaPausedTest() {
   async function refreshLocalGenerated() {
     setLocalLoading(true);
     setLocalError("");
+    setLocalErrorDetails(null);
     try {
       const res = await listGeneratedCampaigns({ limit: 50 });
       setLocalGenerated(res.generatedCampaigns ?? []);
@@ -243,7 +247,14 @@ export default function MetaPausedTest() {
       setLocalError(
         err?.message ? String(err.message) : "Falha ao carregar `generated_campaigns` (DB/API indisponível).",
       );
-      pushLog({ action: "db.generated_campaigns.list", ok: false, error: err?.message ? String(err.message) : "error" });
+      const details = err?.body?.error?.details ?? err?.body ?? null;
+      setLocalErrorDetails(details);
+      pushLog({
+        action: "db.generated_campaigns.list",
+        ok: false,
+        error: err?.message ? String(err.message) : "error",
+        details,
+      });
     } finally {
       setLocalLoading(false);
     }
@@ -780,6 +791,7 @@ export default function MetaPausedTest() {
 	            onClick={async () => {
 	              setValidateLoading(true);
 	              setValidateError("");
+                setValidateErrorDetails(null);
 	              try {
 	                const res = await validateMetaToken();
 	                setValidateMe(res.me ?? null);
@@ -787,7 +799,14 @@ export default function MetaPausedTest() {
 	              } catch (err) {
 	                setValidateMe(null);
 	                setValidateError(err?.message ? String(err.message) : "Falha ao validar token.");
-	                pushLog({ action: "meta.validate", ok: false, error: err?.message ? String(err.message) : "error" });
+                  const details = err?.body?.error?.details ?? err?.body ?? null;
+                  setValidateErrorDetails(details);
+	                pushLog({
+                    action: "meta.validate",
+                    ok: false,
+                    error: err?.message ? String(err.message) : "error",
+                    details,
+                  });
 	              } finally {
 	                setValidateLoading(false);
 	              }
@@ -806,6 +825,21 @@ export default function MetaPausedTest() {
           <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
             <div style={{ fontWeight: 900 }}>Erro (validate)</div>
             <div style={{ marginTop: 6, fontWeight: 700 }}>{validateError}</div>
+            {validateErrorDetails ? (
+              <pre
+                style={{
+                  marginTop: 12,
+                  background: "#0b1220",
+                  color: "#e5e7eb",
+                  padding: 12,
+                  borderRadius: 12,
+                  overflowX: "auto",
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+{safeJson(validateErrorDetails)}
+              </pre>
+            ) : null}
           </div>
         ) : null}
 
@@ -843,6 +877,21 @@ export default function MetaPausedTest() {
           <div className="card" style={{ padding: 14, margin: "0 16px 16px", borderColor: "#fecaca", color: "#991b1b" }}>
             <div style={{ fontWeight: 900 }}>Erro</div>
             <div style={{ marginTop: 6, fontWeight: 700 }}>{localError}</div>
+            {localErrorDetails ? (
+              <pre
+                style={{
+                  marginTop: 12,
+                  background: "#0b1220",
+                  color: "#e5e7eb",
+                  padding: 12,
+                  borderRadius: 12,
+                  overflowX: "auto",
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+{safeJson(localErrorDetails)}
+              </pre>
+            ) : null}
           </div>
         ) : null}
 
@@ -1221,6 +1270,7 @@ export default function MetaPausedTest() {
 	            onClick={async () => {
 	              setMetaLoading(true);
 	              setMetaError("");
+                setMetaErrorDetails(null);
 	              try {
 	                const res = await listMetaAdAccountCampaigns({
 	                  metaAdAccountId: adAccountNormalized || metaAdAccountId.trim(),
@@ -1235,11 +1285,14 @@ export default function MetaPausedTest() {
 	                });
 	              } catch (err) {
 	                setMetaError(err?.message ? String(err.message) : "Falha ao listar campanhas na Meta (PAUSED).");
+                  const details = err?.body?.error?.details ?? err?.body ?? null;
+                  setMetaErrorDetails(details);
 	                setMetaCampaigns([]);
 	                pushLog({
 	                  action: "meta.adaccount.campaigns.list",
 	                  ok: false,
 	                  error: err?.message ? String(err.message) : "error",
+                    details,
 	                });
 	              } finally {
 	                setMetaLoading(false);
@@ -1259,6 +1312,21 @@ export default function MetaPausedTest() {
           <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
             <div style={{ fontWeight: 900 }}>Erro (Meta)</div>
             <div style={{ marginTop: 6, fontWeight: 700 }}>{metaError}</div>
+            {metaErrorDetails ? (
+              <pre
+                style={{
+                  marginTop: 12,
+                  background: "#0b1220",
+                  color: "#e5e7eb",
+                  padding: 12,
+                  borderRadius: 12,
+                  overflowX: "auto",
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+{safeJson(metaErrorDetails)}
+              </pre>
+            ) : null}
           </div>
         ) : null}
       </div>

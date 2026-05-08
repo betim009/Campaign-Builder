@@ -146,7 +146,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-08 11:06]
+Última atualização: [2026-05-08 12:03]
 
 Regras:
 
@@ -173,6 +173,7 @@ Regras:
 - [ ] Melhorar loading states
 - [x] `/meta-test`: exibir `LOADING` nos indicadores (DATA/DB/META/SYNC)
 - [ ] Melhorar error states
+- [x] `/meta-test`: exibir detalhes (`error.details`) em falhas (validate/meta/db)
 - [ ] Melhorar feedback visual de persistência
 - [x] `/meta-test`: destacar registro recém-criado/atualizado em `generated_campaigns`
 - [x] Exibir provider/fallback no resultado do sync (Campanha Detalhes)
