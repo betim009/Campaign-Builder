@@ -307,7 +307,7 @@ Subtarefas (execução incremental):
 
 ### P1 — Evolução da `/meta-test` como fluxo operacional principal
 
-Última atualização: [2026-05-07 22:05]
+Última atualização: [2026-05-07 22:14]
 
 Objetivo:
 Transformar a página `/meta-test` no novo fluxo simplificado e progressivo de integração Meta Ads real, reduzindo dependência do formulário gigante atual.
@@ -333,8 +333,8 @@ Backlog:
   - REAL
   - STUB
   - FALLBACK
-- [ ] Preparar UI/serviços para criação de AdSet (sem implementar full)
-- [ ] Preparar UI/serviços para criação de Ad (sem implementar full)
+- [x] Preparar UI/serviços para criação de AdSet (sem implementar full)
+- [x] Preparar UI/serviços para criação de Ad (sem implementar full)
 - [ ] Adicionar criação REAL de AdSet
 - [ ] Adicionar criação REAL de Ad
 - [ ] Exibir estrutura Meta:
@@ -399,7 +399,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
   em um único fluxo, aumentando complexidade operacional e de manutenção.
 ## Progress (sessão atual)
 
-Última atualização: [2026-05-07 22:05]
+Última atualização: [2026-05-07 22:14]
 
 - Migração adicionada para persistir campos `meta_*` em `generated_campaigns`.
 - Backend implementado para criação real de campanha (`POST /api/meta/campaigns`) com regra obrigatória `status: PAUSED` e persistência.
@@ -410,6 +410,8 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - Backend: endpoint `POST /api/meta/campaigns/simple` adicionado para criação REAL/`STUB` com campos mínimos (modo seguro `PAUSED`) + persistência local.
 - Frontend: `/meta-test` simplificado para fluxo progressivo (Campaign) e exibição explícita de REAL/STUB/FALLBACK.
 - Backend: scaffolding inicial para AdSet/Ad (providers + rotas `POST /api/meta/adsets` e `POST /api/meta/ads` como placeholders).
+- Frontend: `/meta-test` ganhou painel de status do backend/token (`/api/meta/status` + `/api/meta/validate`), validação de `act_...` e botão para consultar status da Campaign via Graph (`GET /api/meta/campaigns/:id`).
+- Frontend: `/meta-test` ganhou base visual para AdSet/Ad (UI desabilitada + preview de payload).
 
 ## Surprises & Discoveries
 
@@ -420,10 +422,11 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 
 ## Outcomes & Retrospective
 
-Última atualização: [2026-05-07 22:05]
+Última atualização: [2026-05-07 22:14]
 
 - O projeto deixa de ser apenas simulação para criação de campanhas: existe caminho real end-to-end via backend, mantendo segurança operacional com `PAUSED`.
 - Direção arquitetural consolidada: abandonar evolução como “formulário gigante” e migrar para fluxo progressivo baseado em entidades Meta reais, com `/meta-test` como laboratório principal.
+- A `/meta-test` agora expõe “modo operacional” de forma explícita (RUN MODE / DATA / META READY) e prepara incrementalmente o caminho para AdSet/Ad sem quebrar o fluxo antigo.
 
 ## Referências (histórico e legado)
 
