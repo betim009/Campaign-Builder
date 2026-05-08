@@ -38,6 +38,33 @@ export async function createMetaCampaign({
   };
 }
 
+export async function createMetaCampaignSimple({
+  name,
+  objective,
+  metaAdAccountId,
+  countryCode,
+  mode,
+  metaUserId,
+} = {}) {
+  const body = {
+    name,
+    metaAdAccountId,
+    countryCode,
+    ...(objective ? { objective } : null),
+    ...(mode ? { mode } : null),
+    ...(metaUserId ? { metaUserId } : null),
+  };
+
+  const data = await apiPost("/api/meta/campaigns/simple", body);
+  return {
+    ok: true,
+    mode: data?.mode ?? null,
+    metaCampaign: data?.meta_campaign ?? null,
+    campaign: data?.campaign ?? null,
+    generatedCampaign: data?.generated_campaign ?? null,
+  };
+}
+
 export async function listMetaAdAccountCampaigns({ metaAdAccountId, limit = 50, pausedOnly = true } = {}) {
   const id = String(metaAdAccountId || "").trim();
   const query = new URLSearchParams();
@@ -49,4 +76,14 @@ export async function listMetaAdAccountCampaigns({ metaAdAccountId, limit = 50, 
   );
   const list = Array.isArray(data?.meta_campaigns) ? data.meta_campaigns : [];
   return { ok: true, metaCampaigns: list };
+}
+
+export async function createMetaAdSet(payload) {
+  const data = await apiPost("/api/meta/adsets", payload ?? {});
+  return { ok: true, metaAdSet: data?.meta_adset ?? null };
+}
+
+export async function createMetaAd(payload) {
+  const data = await apiPost("/api/meta/ads", payload ?? {});
+  return { ok: true, metaAd: data?.meta_ad ?? null };
 }

@@ -1,8 +1,8 @@
 import PageShell from "../components/PageShell.jsx";
-import { useEffect, useMemo, useState } from "react";
-import { listGeneratedCampaigns } from "../services/generatedCampaigns.js";
-import { createMetaCampaign, listMetaAdAccountCampaigns } from "../services/meta.js";
 import StatusBadge from "../components/StatusBadge.jsx";
+import { useEffect, useMemo, useState } from "react";
+import { getCountries } from "../services/reference.js";
+import { createMetaCampaignSimple, listMetaAdAccountCampaigns } from "../services/meta.js";
 import { countryCodeToFlag } from "../services/fallbacks.js";
 
 const OBJECTIVE_OPTIONS = [
@@ -17,33 +17,40 @@ function normalizeNonEmptyString(value) {
   return trimmed ? trimmed : "";
 }
 
-function isRealMetaId(metaCampaignId) {
-  const id = normalizeNonEmptyString(metaCampaignId);
-  return Boolean(id) && !id.startsWith("stub-");
-}
-
 export default function MetaPausedTest() {
   const [loading, setLoading] = useState(true);
-  const [busyId, setBusyId] = useState(null);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [generated, setGenerated] = useState([]);
+
+  const [countries, setCountries] = useState([]);
+  const [countriesSource, setCountriesSource] = useState("api");
+
+  const [mode, setMode] = useState("REAL");
+  const [name, setName] = useState("");
+  const [objective, setObjective] = useState("OUTCOME_TRAFFIC");
+  const [metaAdAccountId, setMetaAdAccountId] = useState("");
+  const [countryCode, setCountryCode] = useState("");
+
+  const [created, setCreated] = useState(null);
+
   const [metaLoading, setMetaLoading] = useState(false);
   const [metaError, setMetaError] = useState("");
   const [metaCampaigns, setMetaCampaigns] = useState([]);
-
-  const [metaAdAccountId, setMetaAdAccountId] = useState("");
-  const [objective, setObjective] = useState("OUTCOME_TRAFFIC");
 
   async function refresh() {
     setLoading(true);
     setError("");
     try {
-      const res = await listGeneratedCampaigns({ limit: 200 });
-      setGenerated(res.generatedCampaigns ?? []);
+      const res = await getCountries();
+      const list = res.countries ?? [];
+      setCountries(list);
+      setCountriesSource(res.source ?? "api");
+      setCountryCode((prev) => (normalizeNonEmptyString(prev) ? prev : (list[0]?.code ?? "")));
     } catch (err) {
-      setError(err?.message ? String(err.message) : "Falha ao carregar campanhas geradas.");
-      setGenerated([]);
+      setCountries([]);
+      setCountriesSource("fallback");
+      setError(err?.message ? String(err.message) : "Falha ao carregar países.");
     } finally {
       setLoading(false);
     }
@@ -53,31 +60,48 @@ export default function MetaPausedTest() {
     refresh();
   }, []);
 
-  const realCampaigns = useMemo(
-    () => generated.filter((gc) => isRealMetaId(gc.meta_campaign_id)),
-    [generated],
+  const countryOptions = useMemo(() => countries ?? [], [countries]);
+  const selectedCountry = useMemo(
+    () => countryOptions.find((c) => c.code === countryCode) ?? null,
+    [countryOptions, countryCode],
   );
 
-  const stubOrUnlinked = useMemo(
-    () => generated.filter((gc) => !isRealMetaId(gc.meta_campaign_id)),
-    [generated],
-  );
-
-  const canCreate = normalizeNonEmptyString(metaAdAccountId) !== "" && normalizeNonEmptyString(objective) !== "";
+  const canCreate =
+    !loading &&
+    !busy &&
+    normalizeNonEmptyString(name) !== "" &&
+    normalizeNonEmptyString(objective) !== "" &&
+    normalizeNonEmptyString(metaAdAccountId) !== "" &&
+    normalizeNonEmptyString(countryCode) !== "";
 
   return (
     <PageShell
-      title="Teste Meta (REAL + PAUSED)"
-      subtitle="Página isolada de teste — não altera o fluxo principal"
+      title="Meta (lab): Campaign → AdSet → Ad"
+      subtitle="Fluxo progressivo operacional — criação REAL sempre PAUSED"
       backFallbackTo="/configuracoes"
     >
       <div className="card" style={{ padding: 18 }}>
-        <div style={{ fontWeight: 900 }}>Regras</div>
+        <div style={{ fontWeight: 900 }}>Regras (segurança)</div>
         <ul className="muted" style={{ marginTop: 10, fontWeight: 800, lineHeight: 1.55 }}>
           <li>Esta página NÃO envia token para o frontend.</li>
           <li>O backend deve ter token via `META_ACCESS_TOKEN` ou `POST /api/meta/tokens`.</li>
-          <li>Toda campanha criada aqui deve nascer obrigatoriamente como `PAUSED` (forçado no backend).</li>
+          <li>Toda criação REAL deve nascer como `PAUSED` (forçado no backend).</li>
         </ul>
+      </div>
+
+      <div className="card" style={{ padding: 18, marginTop: 16 }}>
+        <div style={{ fontWeight: 900 }}>Modos operacionais</div>
+        <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
+          <div>
+            <b>REAL</b>: backend chama Meta Graph/Marketing API (token válido) e persiste IDs reais.
+          </div>
+          <div style={{ marginTop: 6 }}>
+            <b>STUB</b>: não chama Meta; cria IDs `stub-*` para testar fluxo/persistência.
+          </div>
+          <div style={{ marginTop: 6 }}>
+            <b>FALLBACK</b>: UI usa dados locais quando API/DB não estiverem disponíveis (sempre sinalizado).
+          </div>
+        </div>
       </div>
 
       {error ? (
@@ -97,17 +121,43 @@ export default function MetaPausedTest() {
       <div className="card" style={{ padding: 18, marginTop: 16 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
           <div>
-            <div style={{ fontWeight: 900, fontSize: 16 }}>Configuração do teste</div>
+            <div style={{ fontWeight: 900, fontSize: 16 }}>Etapa 1 — Campaign (mínimo)</div>
             <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
-              Preencha a Ad Account e o objetivo, depois clique em “Criar REAL (PAUSED)” em uma linha abaixo.
+              Nome + Objective + Ad Account + País.
             </div>
           </div>
-          <button type="button" className="pillOutline" onClick={refresh} disabled={loading || busyId !== null}>
+          <button type="button" className="pillOutline" onClick={refresh} disabled={loading || busy}>
             Atualizar
           </button>
         </div>
 
+        <div className="muted" style={{ marginTop: 10, fontWeight: 800 }}>
+          Fonte países:{" "}
+          <span style={{ fontWeight: 900 }}>{countriesSource === "fallback" ? "FALLBACK" : "API"}</span>
+        </div>
+
         <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <label style={{ display: "grid", gap: 6 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>
+              Nome
+            </span>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ex: Lançamento Produto X"
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 700,
+                outline: "none",
+                background: "#ffffff",
+              }}
+            />
+          </label>
+
           <label style={{ display: "grid", gap: 6 }}>
             <span className="muted" style={{ fontWeight: 900 }}>
               Meta Ad Account ID (formato `act_...`)
@@ -131,7 +181,34 @@ export default function MetaPausedTest() {
 
           <label style={{ display: "grid", gap: 6 }}>
             <span className="muted" style={{ fontWeight: 900 }}>
-              Objective (quando não existir no banco)
+              País
+            </span>
+            <select
+              value={countryCode}
+              onChange={(e) => setCountryCode(e.target.value)}
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 800,
+                outline: "none",
+                background: "#ffffff",
+              }}
+            >
+              {countryOptions.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.code} — {c.name}
+                </option>
+              ))}
+              {!countryOptions.length ? <option value="">(sem países)</option> : null}
+            </select>
+          </label>
+
+          <label style={{ display: "grid", gap: 6 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>
+              Objective
             </span>
             <select
               value={objective}
@@ -156,7 +233,59 @@ export default function MetaPausedTest() {
           </label>
         </div>
 
-        <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+        <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "end" }}>
+          <label style={{ display: "grid", gap: 6, minWidth: 220 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>
+              Modo
+            </span>
+            <select
+              value={mode}
+              onChange={(e) => setMode(e.target.value)}
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 900,
+                outline: "none",
+                background: "#ffffff",
+              }}
+            >
+              <option value="REAL">REAL</option>
+              <option value="STUB">STUB</option>
+            </select>
+          </label>
+
+          <button
+            type="button"
+            className="pillOutline"
+            disabled={!canCreate}
+            onClick={async () => {
+              setBusy(true);
+              setError("");
+              setSuccess("");
+              setCreated(null);
+              try {
+                const res = await createMetaCampaignSimple({
+                  name: name.trim(),
+                  objective,
+                  metaAdAccountId: metaAdAccountId.trim(),
+                  countryCode,
+                  mode,
+                });
+                setCreated(res);
+                setSuccess(`Campaign criada (${res.mode || mode}) — status obrigatório: PAUSED.`);
+              } catch (err) {
+                setError(err?.message ? String(err.message) : "Falha ao criar Campaign.");
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            {busy ? "Criando..." : "Criar Campaign REAL (PAUSED)"}
+          </button>
+
           <button
             type="button"
             className="pillOutline"
@@ -172,9 +301,7 @@ export default function MetaPausedTest() {
                 });
                 setMetaCampaigns(res.metaCampaigns ?? []);
               } catch (err) {
-                setMetaError(
-                  err?.message ? String(err.message) : "Falha ao listar campanhas na Meta (PAUSED).",
-                );
+                setMetaError(err?.message ? String(err.message) : "Falha ao listar campanhas na Meta (PAUSED).");
                 setMetaCampaigns([]);
               } finally {
                 setMetaLoading(false);
@@ -183,9 +310,6 @@ export default function MetaPausedTest() {
           >
             {metaLoading ? "Listando..." : "Listar PAUSED na Meta"}
           </button>
-          <div className="muted" style={{ fontWeight: 800 }}>
-            Mostra campanhas que já existem no Ads Manager (não depende do banco local).
-          </div>
         </div>
 
         {metaError ? (
@@ -196,6 +320,61 @@ export default function MetaPausedTest() {
         ) : null}
       </div>
 
+      {created?.metaCampaign ? (
+        <div className="card" style={{ padding: 18, marginTop: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline" }}>
+            <div style={{ fontWeight: 900, fontSize: 16 }}>Resultado</div>
+            <div className="muted" style={{ fontWeight: 900 }}>
+              Modo: <span style={{ fontWeight: 900 }}>{created.mode || "—"}</span>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div className="card" style={{ padding: 14 }}>
+              <div className="muted" style={{ fontWeight: 900 }}>
+                Meta Campaign ID
+              </div>
+              <div style={{ marginTop: 6, fontWeight: 900 }}>{created.metaCampaign.id || "—"}</div>
+            </div>
+            <div className="card" style={{ padding: 14 }}>
+              <div className="muted" style={{ fontWeight: 900 }}>
+                País
+              </div>
+              <div style={{ marginTop: 6, fontWeight: 900 }}>
+                {selectedCountry ? `${countryCodeToFlag(selectedCountry.code)} ${selectedCountry.code}` : countryCode}
+              </div>
+            </div>
+            <div className="card" style={{ padding: 14 }}>
+              <div className="muted" style={{ fontWeight: 900 }}>
+                Status
+              </div>
+              <div style={{ marginTop: 8 }}>
+                <StatusBadge>{created.metaCampaign.status || "—"}</StatusBadge>
+              </div>
+            </div>
+            <div className="card" style={{ padding: 14 }}>
+              <div className="muted" style={{ fontWeight: 900 }}>
+                Effective Status
+              </div>
+              <div style={{ marginTop: 8 }}>
+                <StatusBadge>{created.metaCampaign.effective_status || "—"}</StatusBadge>
+              </div>
+            </div>
+          </div>
+
+          <div className="muted" style={{ marginTop: 12, fontWeight: 800 }}>
+            Persistência local:
+            <div style={{ marginTop: 6 }}>
+              `generated_campaigns.id`: <b>{created.generatedCampaign?.id || "—"}</b>
+            </div>
+            <div style={{ marginTop: 6 }}>
+              `generated_campaigns.meta_campaign_id`:{" "}
+              <b>{created.generatedCampaign?.meta_campaign_id || "—"}</b>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div className="card" style={{ padding: 0, marginTop: 16 }}>
         <div style={{ padding: 16, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
           <div>
@@ -204,9 +383,7 @@ export default function MetaPausedTest() {
               {metaLoading ? "Carregando..." : `${metaCampaigns.length} item(ns)`}
             </div>
           </div>
-          <div className="muted" style={{ fontWeight: 800 }}>
-            Token continua apenas no backend.
-          </div>
+          <div className="muted" style={{ fontWeight: 800 }}>Token continua apenas no backend.</div>
         </div>
 
         <div style={{ borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
@@ -252,144 +429,20 @@ export default function MetaPausedTest() {
         </div>
       </div>
 
-      <div className="card" style={{ padding: 0, marginTop: 16 }}>
-        <div style={{ padding: 16, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
-          <div>
-            <div style={{ fontWeight: 900, fontSize: 16 }}>Pendentes / STUB (não-real)</div>
-            <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
-              {loading ? "Carregando..." : `${stubOrUnlinked.length} item(ns)`}
-            </div>
-          </div>
-          <div className="muted" style={{ fontWeight: 800 }}>
-            Clique em “Criar REAL (PAUSED)” para criar na Meta via backend (e persistir no banco local).
-          </div>
-        </div>
-
-        <div style={{ borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
-          <table className="dataTable" style={{ marginTop: 0 }}>
-            <thead>
-              <tr>
-                <th>País</th>
-                <th>Nome</th>
-                <th>Status (local)</th>
-                <th>Meta Campaign ID</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stubOrUnlinked.map((gc) => (
-                <tr key={gc.id}>
-                  <td style={{ fontWeight: 900 }}>
-                    <span style={{ marginRight: 10 }} aria-hidden="true">
-                      {countryCodeToFlag(gc.country_code)}
-                    </span>
-                    {gc.country_code}
-                  </td>
-                  <td style={{ fontWeight: 900 }}>{gc.name}</td>
-                  <td style={{ fontWeight: 900 }}>
-                    <StatusBadge>{gc.status || "—"}</StatusBadge>
-                  </td>
-                  <td className="muted" style={{ fontWeight: 800 }}>
-                    {gc.meta_campaign_id || "—"}
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="pillOutline"
-                      disabled={!canCreate || busyId !== null || loading}
-                      onClick={async () => {
-                        setBusyId(gc.id);
-                        setError("");
-                        setSuccess("");
-                        try {
-                          const res = await createMetaCampaign({
-                            generatedCampaignId: gc.id,
-                            metaAdAccountId: metaAdAccountId.trim(),
-                            objective: objective.trim(),
-                          });
-                          const id = res?.metaCampaign?.id ? String(res.metaCampaign.id) : "";
-                          const status = res?.metaCampaign?.status ? String(res.metaCampaign.status) : "—";
-                          const effective = res?.metaCampaign?.effective_status ? String(res.metaCampaign.effective_status) : "—";
-                          setSuccess(`Criada na Meta: ${id} (status=${status} / effective_status=${effective}).`);
-                          await refresh();
-                        } catch (err) {
-                          setError(err?.message ? String(err.message) : "Falha ao criar campanha real na Meta.");
-                        } finally {
-                          setBusyId(null);
-                        }
-                      }}
-                    >
-                      {busyId === gc.id ? "Criando..." : "Criar REAL (PAUSED)"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {!stubOrUnlinked.length ? (
-                <tr>
-                  <td colSpan={5} className="muted" style={{ fontWeight: 800 }}>
-                    {loading ? "Carregando..." : "Nenhuma campanha pendente/stub encontrada."}
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
+      <div className="card" style={{ padding: 18, marginTop: 16 }}>
+        <div style={{ fontWeight: 900, fontSize: 16 }}>Etapa 2 — AdSet (preparação)</div>
+        <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
+          Estrutura preparada no backend para `POST /api/meta/adsets` (ainda não implementado).
         </div>
       </div>
 
-      <div className="card" style={{ padding: 0, marginTop: 16 }}>
-        <div style={{ padding: 16, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
-          <div>
-            <div style={{ fontWeight: 900, fontSize: 16 }}>REAL (persistidas)</div>
-            <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
-              {loading ? "Carregando..." : `${realCampaigns.length} item(ns)`}
-            </div>
-          </div>
-          <div className="muted" style={{ fontWeight: 800 }}>
-            Esperado: `meta_status` / `meta_effective_status` = PAUSED no Ads Manager.
-          </div>
-        </div>
-
-        <div style={{ borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
-          <table className="dataTable" style={{ marginTop: 0 }}>
-            <thead>
-              <tr>
-                <th>País</th>
-                <th>Nome</th>
-                <th>Meta Campaign ID</th>
-                <th>Status Meta</th>
-              </tr>
-            </thead>
-            <tbody>
-              {realCampaigns.map((gc) => (
-                <tr key={gc.id}>
-                  <td style={{ fontWeight: 900 }}>
-                    <span style={{ marginRight: 10 }} aria-hidden="true">
-                      {countryCodeToFlag(gc.country_code)}
-                    </span>
-                    {gc.country_code}
-                  </td>
-                  <td style={{ fontWeight: 900 }}>{gc.name}</td>
-                  <td className="muted" style={{ fontWeight: 800 }}>
-                    {gc.meta_campaign_id}
-                  </td>
-                  <td className="muted" style={{ fontWeight: 900 }}>
-                    {gc.meta_status || gc.meta_effective_status
-                      ? `${gc.meta_status || "—"}${gc.meta_effective_status && gc.meta_effective_status !== gc.meta_status ? ` / ${gc.meta_effective_status}` : ""}`
-                      : "—"}
-                  </td>
-                </tr>
-              ))}
-              {!realCampaigns.length ? (
-                <tr>
-                  <td colSpan={4} className="muted" style={{ fontWeight: 800 }}>
-                    {loading ? "Carregando..." : "Nenhuma campanha REAL persistida ainda."}
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
+      <div className="card" style={{ padding: 18, marginTop: 16 }}>
+        <div style={{ fontWeight: 900, fontSize: 16 }}>Etapa 3 — Ad (preparação)</div>
+        <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
+          Estrutura preparada no backend para `POST /api/meta/ads` (ainda não implementado).
         </div>
       </div>
     </PageShell>
   );
 }
+
