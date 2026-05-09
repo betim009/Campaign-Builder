@@ -323,6 +323,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-09 15:21] Decisão: a navegação progressiva do `/meta-test` deve exibir evidência de conclusão por etapa (OK/—) baseada em `meta_*` persistido no DB.
 - [2026-05-09 15:22] Decisão: ignorar screenshots acidentais no repo root (ex: “Captura de Tela*.png”) via `.gitignore` para reduzir ruído operacional no `git status`.
 - [2026-05-09 15:23] Decisão: erros por seção do `/meta-test` devem ser descartáveis (dismiss) para reduzir ruído visual durante troubleshooting.
+- [2026-05-09 15:23] Decisão: ao selecionar `generated_campaigns` no `/meta-test`, preencher contexto no formulário (nome/objetivo/ad account/país) para facilitar retomar/depurar o fluxo.
 
 ## Blockers
 

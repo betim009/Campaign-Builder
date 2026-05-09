@@ -330,6 +330,12 @@ export default function MetaPausedTest() {
     if (normalizeNonEmptyString(gc?.country_code)) {
       setCountryCode(gc.country_code);
     }
+    if (normalizeNonEmptyString(gc?.name)) {
+      setName(gc.name);
+    }
+    if (normalizeNonEmptyString(gc?.meta_objective)) {
+      setObjective(gc.meta_objective);
+    }
 
     pushLog({
       action: "db.generated_campaigns.select",
