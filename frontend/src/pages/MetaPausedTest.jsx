@@ -7,6 +7,7 @@ import ModeStatusCard from "./metaTest/ModeStatusCard.jsx";
 import BackendStatusSection from "./metaTest/BackendStatusSection.jsx";
 import OpsLogsSection from "./metaTest/OpsLogsSection.jsx";
 import GeneratedCampaignsSection from "./metaTest/GeneratedCampaignsSection.jsx";
+import StepAdSetSection from "./metaTest/StepAdSetSection.jsx";
 import { getCountries } from "../services/reference.js";
 import { createMetaCampaignSimple, getMetaCampaign, listMetaAdAccountCampaigns } from "../services/metaCampaigns.js";
 import { createMetaAdSet } from "../services/metaAdSets.js";
@@ -1320,233 +1321,71 @@ export default function MetaPausedTest() {
         </div>
       </div>
 
-      <div id="meta-test-step-adset" className="card" style={{ padding: 18, marginTop: 16 }}>
-        <div style={{ fontWeight: 900, fontSize: 16 }}>Etapa 2 — AdSet (PAUSED)</div>
-        <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
-          Criação incremental via `POST /api/meta/adsets` (REAL/STUB). Sempre PAUSED.
-        </div>
-
-        <div
-          style={{
-            marginTop: 14,
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: 12,
-          }}
-        >
-          <label style={{ display: "grid", gap: 6 }}>
-            <span className="muted" style={{ fontWeight: 900 }}>
-              Meta Campaign ID (origem)
-            </span>
-            <input
-              value={createdMetaCampaignId}
-              readOnly
-              placeholder="Crie uma Campaign acima para preencher automaticamente"
-              style={{
-                height: 38,
-                borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                padding: "0 12px",
-                fontSize: 13,
-                fontWeight: 800,
-                outline: "none",
-                background: "#f9fafb",
-              }}
-            />
-          </label>
-
-          <label style={{ display: "grid", gap: 6 }}>
-            <span className="muted" style={{ fontWeight: 900 }}>
-              Nome do AdSet
-            </span>
-            <input
-              value={adSetName}
-              onChange={(e) => setAdSetName(e.target.value)}
-              placeholder="Ex: AdSet BR — Broad"
-              style={{
-                height: 38,
-                borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                padding: "0 12px",
-                fontSize: 13,
-                fontWeight: 700,
-                outline: "none",
-                background: "#ffffff",
-              }}
-            />
-          </label>
-
-          <label style={{ display: "grid", gap: 6 }}>
-            <span className="muted" style={{ fontWeight: 900 }}>
-              País (targeting)
-            </span>
-            <input
-              value={created?.generatedCampaign?.country_code ?? countryCode}
-              readOnly
-              style={{
-                height: 38,
-                borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                padding: "0 12px",
-                fontSize: 13,
-                fontWeight: 800,
-                outline: "none",
-                background: "#f9fafb",
-              }}
-            />
-          </label>
-
-          <label style={{ display: "grid", gap: 6 }}>
-            <span className="muted" style={{ fontWeight: 900 }}>
-              Daily budget (cents)
-            </span>
-            <input
-              value={adSetDailyBudget}
-              onChange={(e) => setAdSetDailyBudget(e.target.value)}
-              placeholder="1000"
-              inputMode="numeric"
-              style={{
-                height: 38,
-                borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                padding: "0 12px",
-                fontSize: 13,
-                fontWeight: 700,
-                outline: "none",
-                background: "#ffffff",
-              }}
-            />
-          </label>
-
-          <label style={{ display: "grid", gap: 6 }}>
-            <span className="muted" style={{ fontWeight: 900 }}>
-              Billing event
-            </span>
-            <input
-              value={adSetBillingEvent}
-              onChange={(e) => setAdSetBillingEvent(e.target.value)}
-              placeholder="Ex: IMPRESSIONS"
-              style={{
-                height: 38,
-                borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                padding: "0 12px",
-                fontSize: 13,
-                fontWeight: 700,
-                outline: "none",
-                background: "#ffffff",
-              }}
-            />
-          </label>
-
-          <label style={{ display: "grid", gap: 6 }}>
-            <span className="muted" style={{ fontWeight: 900 }}>
-              Optimization goal
-            </span>
-            <input
-              value={adSetOptimizationGoal}
-              onChange={(e) => setAdSetOptimizationGoal(e.target.value)}
-              placeholder="Ex: LINK_CLICKS"
-              style={{
-                height: 38,
-                borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                padding: "0 12px",
-                fontSize: 13,
-                fontWeight: 700,
-                outline: "none",
-                background: "#ffffff",
-              }}
-            />
-          </label>
-        </div>
-
-        <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-          <button
-            type="button"
-            className="pillOutline"
-            disabled={!canCreateAdSet}
-	            onClick={async () => {
-	              setAdSetCreating(true);
-	              setError("");
-	              setErrorDetails(null);
-	              setSuccess("");
-	              try {
-                const payload = {
-                  generatedCampaignId: createdGeneratedCampaignId,
-                  name: adSetName.trim(),
-                  countryCode: created?.generatedCampaign?.country_code ?? countryCode,
-                  dailyBudgetCents: Math.trunc(Number(adSetDailyBudget)),
-                  billingEvent: adSetBillingEvent.trim(),
-                  optimizationGoal: adSetOptimizationGoal.trim(),
-                  mode: flowMode,
-                };
-                const res = await createMetaAdSet(payload);
-                setCreated((prev) => ({
-                  ...(prev ?? {}),
-                  mode: res.mode ?? prev?.mode ?? flowMode,
-                  metaAdSet: res.metaAdSet ?? prev?.metaAdSet ?? null,
-                  generatedCampaign: res.generatedCampaign ?? prev?.generatedCampaign ?? null,
-                }));
-                pushLog({
-                  action: "adset.create",
-                  ok: true,
-                  details: {
-                    mode: res.mode ?? flowMode,
-                    generatedCampaignId: createdGeneratedCampaignId,
-                    metaAdSetId: res?.metaAdSet?.id ?? null,
-                  },
-                });
-                setSuccess(`AdSet criado (${res.mode || flowMode}) — status obrigatório: PAUSED.`);
-                await refreshLocalGenerated();
-	              } catch (err) {
-	                const captured = captureError(err, "Falha ao criar AdSet.");
-	                pushLog({
-	                  action: "adset.create",
-	                  ok: false,
-	                  error: captured.message || "error",
-	                  details: { mode: flowMode, generatedCampaignId: createdGeneratedCampaignId, errorDetails: captured.details },
-	                });
-	              } finally {
-                setAdSetCreating(false);
-              }
-            }}
-          >
-            {adSetCreating ? "Criando..." : `Criar AdSet ${flowMode} (PAUSED)`}
-          </button>
-          <button
-            type="button"
-            className="pillOutline"
-            disabled={!stepAdSetOk}
-            onClick={() => scrollToSection("meta-test-step-ad")}
-            title={stepAdSetOk ? "Ir para criação de Ad" : "Crie/Selecione um AdSet primeiro"}
-          >
-            Ir para Etapa 3
-          </button>
-          <div className="muted" style={{ fontWeight: 800 }}>
-            Requer Campaign criada acima. REAL exige token no backend.
-          </div>
-        </div>
-
-        <details style={{ marginTop: 12 }}>
-          <summary style={{ cursor: "pointer", fontWeight: 900 }}>Preview do payload</summary>
-          <pre style={{ marginTop: 10, background: "#0b1220", color: "#e5e7eb", padding: 12, borderRadius: 12, overflowX: "auto" }}>
-{JSON.stringify(
-  {
-    generatedCampaignId: createdGeneratedCampaignId || null,
-    name: normalizeNonEmptyString(adSetName) || null,
-    countryCode: created?.generatedCampaign?.country_code ?? countryCode ?? null,
-    dailyBudgetCents: Number(adSetDailyBudget) ? Math.trunc(Number(adSetDailyBudget)) : null,
-    billingEvent: normalizeNonEmptyString(adSetBillingEvent) || null,
-    optimizationGoal: normalizeNonEmptyString(adSetOptimizationGoal) || null,
-    mode: flowMode,
-  },
-  null,
-  2,
-)}
-          </pre>
-        </details>
-      </div>
+      <StepAdSetSection
+        createdMetaCampaignId={createdMetaCampaignId}
+        adSetName={adSetName}
+        setAdSetName={setAdSetName}
+        countryCodeValue={created?.generatedCampaign?.country_code ?? countryCode}
+        adSetDailyBudget={adSetDailyBudget}
+        setAdSetDailyBudget={setAdSetDailyBudget}
+        adSetBillingEvent={adSetBillingEvent}
+        setAdSetBillingEvent={setAdSetBillingEvent}
+        adSetOptimizationGoal={adSetOptimizationGoal}
+        setAdSetOptimizationGoal={setAdSetOptimizationGoal}
+        canCreateAdSet={canCreateAdSet}
+        adSetCreating={adSetCreating}
+        onCreateAdSet={async () => {
+          setAdSetCreating(true);
+          setError("");
+          setErrorDetails(null);
+          setSuccess("");
+          try {
+            const payload = {
+              generatedCampaignId: createdGeneratedCampaignId,
+              name: adSetName.trim(),
+              countryCode: created?.generatedCampaign?.country_code ?? countryCode,
+              dailyBudgetCents: Math.trunc(Number(adSetDailyBudget)),
+              billingEvent: adSetBillingEvent.trim(),
+              optimizationGoal: adSetOptimizationGoal.trim(),
+              mode: flowMode,
+            };
+            const res = await createMetaAdSet(payload);
+            setCreated((prev) => ({
+              ...(prev ?? {}),
+              mode: res.mode ?? prev?.mode ?? flowMode,
+              metaAdSet: res.metaAdSet ?? prev?.metaAdSet ?? null,
+              generatedCampaign: res.generatedCampaign ?? prev?.generatedCampaign ?? null,
+            }));
+            pushLog({
+              action: "adset.create",
+              ok: true,
+              details: {
+                mode: res.mode ?? flowMode,
+                generatedCampaignId: createdGeneratedCampaignId,
+                metaAdSetId: res?.metaAdSet?.id ?? null,
+              },
+            });
+            setSuccess(`AdSet criado (${res.mode || flowMode}) — status obrigatório: PAUSED.`);
+            await refreshLocalGenerated();
+          } catch (err) {
+            const captured = captureError(err, "Falha ao criar AdSet.");
+            pushLog({
+              action: "adset.create",
+              ok: false,
+              error: captured.message || "error",
+              details: { mode: flowMode, generatedCampaignId: createdGeneratedCampaignId, errorDetails: captured.details },
+            });
+          } finally {
+            setAdSetCreating(false);
+          }
+        }}
+        stepAdSetOk={stepAdSetOk}
+        onScrollToAdStep={() => scrollToSection("meta-test-step-ad")}
+        createdGeneratedCampaignId={createdGeneratedCampaignId}
+        countryCodeForPayload={created?.generatedCampaign?.country_code ?? countryCode ?? null}
+        flowMode={flowMode}
+        normalizeNonEmptyString={normalizeNonEmptyString}
+      />
 
       <div id="meta-test-step-ad" className="card" style={{ padding: 18, marginTop: 16 }}>
         <div style={{ fontWeight: 900, fontSize: 16 }}>Etapa 3 — Ad (PAUSED)</div>
