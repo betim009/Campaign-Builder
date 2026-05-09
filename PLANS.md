@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-09 15:20]
+Última atualização: [2026-05-09 15:21]
 
 Regras:
 
@@ -208,6 +208,7 @@ Regras:
 - [ ] Permitir continuar fluxo incrementalmente
 - [x] `/meta-test`: selecionar registro de `generated_campaigns` para continuar (Campaign → AdSet → Ad)
 - [ ] Criar navegação progressiva
+- [x] `/meta-test`: exibir status OK/— das etapas nos atalhos (Campaign/AdSet/Ad)
 - [ ] Evitar formulário gigante
 
 ### P3 — Persistência operacional
@@ -270,7 +271,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-09 15:20]
+Última atualização: [2026-05-09 15:21]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -318,6 +319,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-09 15:16] Decisão: preferir `gridTemplateColumns: repeat(auto-fit, minmax(...))` no `/meta-test` para responsividade sem depender de media queries/código extra.
 - [2026-05-09 15:18] Decisão: logs do `/meta-test` devem ser filtráveis por entidade (campaign/adset/ad/meta/db) para troubleshooting rápido sem backend schema/log pipeline nesta fase.
 - [2026-05-09 15:20] Decisão: `/meta-test` deve permitir retomar execução a partir de `generated_campaigns` existente (seleção explícita) para suportar troubleshooting e fluxo incremental sem refazer a Campaign.
+- [2026-05-09 15:21] Decisão: a navegação progressiva do `/meta-test` deve exibir evidência de conclusão por etapa (OK/—) baseada em `meta_*` persistido no DB.
 
 ## Blockers
 

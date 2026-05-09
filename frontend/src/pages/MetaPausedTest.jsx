@@ -225,6 +225,9 @@ export default function MetaPausedTest() {
   const createdMetaAdSetId = normalizeNonEmptyString(created?.generatedCampaign?.meta_adset_id);
   const createdMetaAdId = normalizeNonEmptyString(created?.generatedCampaign?.meta_ad_id);
   const createdCountryCode = normalizeNonEmptyString(created?.generatedCampaign?.country_code) || countryCode;
+  const stepCampaignOk = createdMetaCampaignId !== "";
+  const stepAdSetOk = createdMetaAdSetId !== "";
+  const stepAdOk = createdMetaAdId !== "";
   const campaignEntityModeLabel = createdMetaCampaignId ? (createdMetaCampaignIdIsReal ? "REAL" : "STUB") : "—";
   const adSetEntityId = normalizeNonEmptyString(created?.metaAdSet?.id) || createdMetaAdSetId;
   const adSetEntityModeLabel = adSetEntityId ? (isRealMetaId(adSetEntityId) ? "REAL" : "STUB") : "—";
@@ -352,9 +355,15 @@ export default function MetaPausedTest() {
           <a className="pillOutline" href="#meta-test-backend-status">Status backend</a>
           <a className="pillOutline" href="#meta-test-db">DB (generated_campaigns)</a>
           <a className="pillOutline" href="#meta-test-ops-logs">Logs</a>
-          <a className="pillOutline" href="#meta-test-step-campaign">Etapa 1 (Campaign)</a>
-          <a className="pillOutline" href="#meta-test-step-adset">Etapa 2 (AdSet)</a>
-          <a className="pillOutline" href="#meta-test-step-ad">Etapa 3 (Ad)</a>
+          <a className="pillOutline" href="#meta-test-step-campaign" title="Etapa 1 concluída quando existe meta_campaign_id.">
+            Etapa 1 (Campaign) <span className="muted" style={{ fontWeight: 900 }}>{stepCampaignOk ? "OK" : "—"}</span>
+          </a>
+          <a className="pillOutline" href="#meta-test-step-adset" title="Etapa 2 concluída quando existe meta_adset_id.">
+            Etapa 2 (AdSet) <span className="muted" style={{ fontWeight: 900 }}>{stepAdSetOk ? "OK" : "—"}</span>
+          </a>
+          <a className="pillOutline" href="#meta-test-step-ad" title="Etapa 3 concluída quando existe meta_ad_id.">
+            Etapa 3 (Ad) <span className="muted" style={{ fontWeight: 900 }}>{stepAdOk ? "OK" : "—"}</span>
+          </a>
         </div>
       </div>
 
