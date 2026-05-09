@@ -113,8 +113,20 @@ export default function MetaPausedTest() {
       return [];
     }
   });
+  const [opsLogsFilter, setOpsLogsFilter] = useState("all");
 
   const isCreatingAny = campaignCreating || adSetCreating || adCreating;
+
+  const filteredOpsLogs = useMemo(() => {
+    const list = Array.isArray(opsLogs) ? opsLogs : [];
+    if (opsLogsFilter === "all") return list;
+    if (opsLogsFilter === "campaign") return list.filter((l) => String(l?.action || "").startsWith("campaign."));
+    if (opsLogsFilter === "adset") return list.filter((l) => String(l?.action || "").startsWith("adset."));
+    if (opsLogsFilter === "ad") return list.filter((l) => String(l?.action || "").startsWith("ad."));
+    if (opsLogsFilter === "meta") return list.filter((l) => String(l?.action || "").startsWith("meta."));
+    if (opsLogsFilter === "db") return list.filter((l) => String(l?.action || "").startsWith("db."));
+    return list;
+  }, [opsLogs, opsLogsFilter]);
 
   function pushLog(entry) {
     const enriched = { at: formatNowPtBr(), ...(entry ?? {}) };
@@ -1094,6 +1106,9 @@ export default function MetaPausedTest() {
             <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
               Timeline local do navegador (sem token) para auditoria rápida do lab.
             </div>
+            <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
+              Mostrando <b>{filteredOpsLogs.length}</b> de <b>{opsLogs.length}</b> log(s).
+            </div>
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             <button
@@ -1118,20 +1133,48 @@ export default function MetaPausedTest() {
                 setError("");
                 setErrorDetails(null);
                 setSuccess("");
-                const text = safeJson(opsLogs);
+                const text = safeJson(filteredOpsLogs);
                 try {
                   await navigator.clipboard.writeText(text);
-                  setSuccess("Logs copiados para a área de transferência.");
+                  setSuccess("Logs (filtro atual) copiados para a área de transferência.");
                 } catch {
                   setError("Não foi possível copiar os logs.");
                   setErrorDetails(null);
                 }
               }}
-              disabled={!opsLogs.length}
+              disabled={!filteredOpsLogs.length}
             >
               Copiar JSON
             </button>
           </div>
+        </div>
+
+        <div style={{ padding: "0 16px 16px", display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {[
+            { id: "all", label: "Todos" },
+            { id: "campaign", label: "Campaign" },
+            { id: "adset", label: "AdSet" },
+            { id: "ad", label: "Ad" },
+            { id: "meta", label: "Meta" },
+            { id: "db", label: "DB" },
+          ].map((opt) => {
+            const active = opsLogsFilter === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                className="pillOutline"
+                onClick={() => setOpsLogsFilter(opt.id)}
+                style={{
+                  borderColor: active ? "#2563eb" : undefined,
+                  background: active ? "#dbeafe" : undefined,
+                  fontWeight: 900,
+                }}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
         </div>
 
         <div style={{ borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
@@ -1145,7 +1188,7 @@ export default function MetaPausedTest() {
               </tr>
             </thead>
             <tbody>
-              {opsLogs.map((l, idx) => (
+              {filteredOpsLogs.map((l, idx) => (
                 <tr key={`${l.at}-${idx}`}>
                   <td className="muted" style={{ fontWeight: 800 }}>
                     {l.at}
@@ -1161,10 +1204,10 @@ export default function MetaPausedTest() {
                   </td>
                 </tr>
               ))}
-              {!opsLogs.length ? (
+              {!filteredOpsLogs.length ? (
                 <tr>
                   <td colSpan={4} className="muted" style={{ fontWeight: 800 }}>
-                    Vazio. Execute ações acima para gerar logs.
+                    {opsLogs.length ? "Vazio (filtro atual)." : "Vazio. Execute ações acima para gerar logs."}
                   </td>
                 </tr>
               ) : null}
