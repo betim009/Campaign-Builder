@@ -9,6 +9,7 @@ import OpsLogsSection from "./metaTest/OpsLogsSection.jsx";
 import GeneratedCampaignsSection from "./metaTest/GeneratedCampaignsSection.jsx";
 import StepAdSetSection from "./metaTest/StepAdSetSection.jsx";
 import StepAdSection from "./metaTest/StepAdSection.jsx";
+import StepCampaignSection from "./metaTest/StepCampaignSection.jsx";
 import { getCountries } from "../services/reference.js";
 import { createMetaCampaignSimple, getMetaCampaign, listMetaAdAccountCampaigns } from "../services/metaCampaigns.js";
 import { createMetaAdSet } from "../services/metaAdSets.js";
@@ -864,297 +865,112 @@ export default function MetaPausedTest() {
         setSuccess={setSuccess}
       />
 
-      <div id="meta-test-step-campaign" className="card" style={{ padding: 18, marginTop: 16 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-          <div>
-            <div style={{ fontWeight: 900, fontSize: 16 }}>Etapa 1 — Campaign (mínimo)</div>
-            <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
-              Nome + Objective + Ad Account + País.
-            </div>
-          </div>
-          <button type="button" className="pillOutline" onClick={refresh} disabled={loading || isCreatingAny}>
-            Atualizar
-          </button>
-        </div>
-
-        <div className="muted" style={{ marginTop: 10, fontWeight: 800 }}>
-          Fonte países:{" "}
-          <span style={{ fontWeight: 900 }}>{dataModeLabel}</span>
-        </div>
-
-        <div
-          style={{
-            marginTop: 14,
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: 12,
-          }}
-        >
-          <label style={{ display: "grid", gap: 6 }}>
-            <span className="muted" style={{ fontWeight: 900 }}>
-              Nome
-            </span>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Ex: Lançamento Produto X"
-              style={{
-                height: 38,
-                borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                padding: "0 12px",
-                fontSize: 13,
-                fontWeight: 700,
-                outline: "none",
-                background: "#ffffff",
-              }}
-            />
-          </label>
-
-          <label style={{ display: "grid", gap: 6 }}>
-            <span className="muted" style={{ fontWeight: 900 }}>
-              Meta Ad Account ID (formato `act_...`)
-            </span>
-            <input
-              value={metaAdAccountId}
-              onChange={(e) => setMetaAdAccountId(e.target.value)}
-              placeholder="act_259174718403969"
-              style={{
-                height: 38,
-                borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                padding: "0 12px",
-                fontSize: 13,
-                fontWeight: 700,
-                outline: "none",
-                background: "#ffffff",
-              }}
-            />
-            {normalizeNonEmptyString(metaAdAccountId) && !adAccountNormalized ? (
-              <span className="muted" style={{ fontWeight: 800, color: "#991b1b" }}>
-                Formato inválido. Use `act_` + dígitos (ex: `act_123...`).
-              </span>
-            ) : null}
-          </label>
-
-          <label style={{ display: "grid", gap: 6 }}>
-            <span className="muted" style={{ fontWeight: 900 }}>
-              País
-            </span>
-            <select
-              value={countryCode}
-              onChange={(e) => setCountryCode(e.target.value)}
-              style={{
-                height: 38,
-                borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                padding: "0 12px",
-                fontSize: 13,
-                fontWeight: 800,
-                outline: "none",
-                background: "#ffffff",
-              }}
-            >
-              {countryOptions.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.code} — {c.name}
-                </option>
-              ))}
-              {!countryOptions.length ? <option value="">(sem países)</option> : null}
-            </select>
-          </label>
-
-          <label style={{ display: "grid", gap: 6 }}>
-            <span className="muted" style={{ fontWeight: 900 }}>
-              Objective
-            </span>
-            <select
-              value={objective}
-              onChange={(e) => setObjective(e.target.value)}
-              style={{
-                height: 38,
-                borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                padding: "0 12px",
-                fontSize: 13,
-                fontWeight: 800,
-                outline: "none",
-                background: "#ffffff",
-              }}
-            >
-              {OBJECTIVE_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "end" }}>
-          <label style={{ display: "grid", gap: 6, minWidth: 220 }}>
-            <span className="muted" style={{ fontWeight: 900 }}>
-              Modo
-            </span>
-            <select
-              value={mode}
-              onChange={(e) => setMode(e.target.value)}
-              style={{
-                height: 38,
-                borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                padding: "0 12px",
-                fontSize: 13,
-                fontWeight: 900,
-                outline: "none",
-                background: "#ffffff",
-              }}
-            >
-              <option value="REAL">REAL</option>
-              <option value="STUB">STUB</option>
-            </select>
-          </label>
-
-          <button
-            type="button"
-            className="pillOutline"
-            disabled={!canCreate}
-		            onClick={async () => {
-                  setCampaignCreating(true);
-		              setError("");
-		              setErrorDetails(null);
-		              setSuccess("");
-		              setCreated(null);
-		              try {
-	                const res = await createMetaCampaignSimple({
-	                  name: name.trim(),
-	                  objective,
-	                  metaAdAccountId: adAccountNormalized,
-	                  countryCode,
-	                  mode,
-	                });
-	                setCreated(res);
-	                pushLog({
-	                  action: "campaign.create.simple",
-	                  ok: true,
-	                  details: {
-	                    mode: res.mode ?? mode,
-	                    countryCode,
-	                    metaCampaignId: res?.metaCampaign?.id ?? null,
-	                    generatedCampaignId: res?.generatedCampaign?.id ?? null,
-	                  },
-	                });
-	                setSuccess(`Campaign criada (${res.mode || mode}) — status obrigatório: PAUSED.`);
-	                await refreshBackendStatus();
-	                await refreshLocalGenerated();
-		              } catch (err) {
-		                const captured = captureError(err, "Falha ao criar Campaign.");
-		                pushLog({
-		                  action: "campaign.create.simple",
-		                  ok: false,
-		                  error: captured.message || "error",
-		                  details: { mode, countryCode, errorDetails: captured.details },
-		                });
-		              } finally {
-	                setCampaignCreating(false);
-	              }
-	            }}
-          >
-            {campaignCreating ? "Criando..." : `Criar Campaign ${mode} (PAUSED)`}
-          </button>
-
-          <button
-            type="button"
-            className="pillOutline"
-            disabled={
-              normalizeNonEmptyString(metaAdAccountId) === "" || metaLoading || !backendStatus?.hasAccessToken
-            }
-	            onClick={async () => {
-	              setMetaLoading(true);
-	              setMetaError("");
-                setMetaErrorDetails(null);
-	              try {
-	                const res = await listMetaAdAccountCampaigns({
-	                  metaAdAccountId: adAccountNormalized || metaAdAccountId.trim(),
-	                  limit: 100,
-	                  pausedOnly: true,
-	                });
-	                setMetaCampaigns(res.metaCampaigns ?? []);
-	                pushLog({
-	                  action: "meta.adaccount.campaigns.list",
-	                  ok: true,
-	                  details: { count: (res.metaCampaigns ?? []).length },
-	                });
-	              } catch (err) {
-	                setMetaError(err?.message ? String(err.message) : "Falha ao listar campanhas na Meta (PAUSED).");
-                  const details = err?.body?.error?.details ?? err?.body ?? null;
-                  setMetaErrorDetails(details);
-	                setMetaCampaigns([]);
-	                pushLog({
-	                  action: "meta.adaccount.campaigns.list",
-	                  ok: false,
-	                  error: err?.message ? String(err.message) : "error",
-                    details,
-	                });
-	              } finally {
-	                setMetaLoading(false);
-	              }
-	            }}
-          >
-            {metaLoading ? "Listando..." : "Listar PAUSED na Meta"}
-          </button>
-
-          <button
-            type="button"
-            className="pillOutline"
-            disabled={!stepCampaignOk}
-            onClick={() => scrollToSection("meta-test-step-adset")}
-            title={stepCampaignOk ? "Ir para criação de AdSet" : "Crie/Selecione uma Campaign primeiro"}
-          >
-            Ir para Etapa 2
-          </button>
-          {!backendStatus?.hasAccessToken ? (
-            <div className="muted" style={{ fontWeight: 800 }}>
-              Token ausente no backend → listagem REAL indisponível (use STUB ou configure token).
-            </div>
-          ) : null}
-        </div>
-
-        {metaError ? (
-          <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
-            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
-              <div style={{ fontWeight: 900 }}>Erro (Meta)</div>
-              <button
-                type="button"
-                className="pillOutline"
-                onClick={() => {
-                  setMetaError("");
-                  setMetaErrorDetails(null);
-                }}
-                style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 900 }}
-              >
-                Fechar
-              </button>
-            </div>
-            <div style={{ marginTop: 6, fontWeight: 700 }}>{metaError}</div>
-            {metaErrorDetails ? (
-              <pre
-                style={{
-                  marginTop: 12,
-                  background: "#0b1220",
-                  color: "#e5e7eb",
-                  padding: 12,
-                  borderRadius: 12,
-                  overflowX: "auto",
-                  whiteSpace: "pre-wrap",
-                }}
-              >
-{safeJson(metaErrorDetails)}
-              </pre>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
+      <StepCampaignSection
+        refresh={refresh}
+        refreshDisabled={loading || isCreatingAny}
+        dataModeLabel={dataModeLabel}
+        name={name}
+        setName={setName}
+        metaAdAccountId={metaAdAccountId}
+        setMetaAdAccountId={setMetaAdAccountId}
+        adAccountNormalized={adAccountNormalized}
+        normalizeNonEmptyString={normalizeNonEmptyString}
+        countryCode={countryCode}
+        setCountryCode={setCountryCode}
+        countryOptions={countryOptions}
+        objective={objective}
+        setObjective={setObjective}
+        objectiveOptions={OBJECTIVE_OPTIONS}
+        mode={mode}
+        setMode={setMode}
+        canCreate={canCreate}
+        campaignCreating={campaignCreating}
+        onCreateCampaign={async () => {
+          setCampaignCreating(true);
+          setError("");
+          setErrorDetails(null);
+          setSuccess("");
+          setCreated(null);
+          try {
+            const res = await createMetaCampaignSimple({
+              name: name.trim(),
+              objective,
+              metaAdAccountId: adAccountNormalized,
+              countryCode,
+              mode,
+            });
+            setCreated(res);
+            pushLog({
+              action: "campaign.create.simple",
+              ok: true,
+              details: {
+                mode: res.mode ?? mode,
+                countryCode,
+                metaCampaignId: res?.metaCampaign?.id ?? null,
+                generatedCampaignId: res?.generatedCampaign?.id ?? null,
+              },
+            });
+            setSuccess(`Campaign criada (${res.mode || mode}) — status obrigatório: PAUSED.`);
+            await refreshBackendStatus();
+            await refreshLocalGenerated();
+          } catch (err) {
+            const captured = captureError(err, "Falha ao criar Campaign.");
+            pushLog({
+              action: "campaign.create.simple",
+              ok: false,
+              error: captured.message || "error",
+              details: { mode, countryCode, errorDetails: captured.details },
+            });
+          } finally {
+            setCampaignCreating(false);
+          }
+        }}
+        canListPaused={
+          normalizeNonEmptyString(metaAdAccountId) !== "" && !metaLoading && Boolean(backendStatus?.hasAccessToken)
+        }
+        metaLoading={metaLoading}
+        onListPaused={async () => {
+          setMetaLoading(true);
+          setMetaError("");
+          setMetaErrorDetails(null);
+          try {
+            const res = await listMetaAdAccountCampaigns({
+              metaAdAccountId: adAccountNormalized || metaAdAccountId.trim(),
+              limit: 100,
+              pausedOnly: true,
+            });
+            setMetaCampaigns(res.metaCampaigns ?? []);
+            pushLog({
+              action: "meta.adaccount.campaigns.list",
+              ok: true,
+              details: { count: (res.metaCampaigns ?? []).length },
+            });
+          } catch (err) {
+            setMetaError(err?.message ? String(err.message) : "Falha ao listar campanhas na Meta (PAUSED).");
+            const details = err?.body?.error?.details ?? err?.body ?? null;
+            setMetaErrorDetails(details);
+            setMetaCampaigns([]);
+            pushLog({
+              action: "meta.adaccount.campaigns.list",
+              ok: false,
+              error: err?.message ? String(err.message) : "error",
+              details,
+            });
+          } finally {
+            setMetaLoading(false);
+          }
+        }}
+        stepCampaignOk={stepCampaignOk}
+        onScrollToAdSetStep={() => scrollToSection("meta-test-step-adset")}
+        backendHasAccessToken={Boolean(backendStatus?.hasAccessToken)}
+        metaError={metaError}
+        metaErrorDetails={metaErrorDetails}
+        onDismissMetaError={() => {
+          setMetaError("");
+          setMetaErrorDetails(null);
+        }}
+        safeJson={safeJson}
+      />
 
       {created?.metaCampaign ? (
         <div className="card" style={{ padding: 18, marginTop: 16 }}>
