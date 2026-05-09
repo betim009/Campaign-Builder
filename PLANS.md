@@ -146,7 +146,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-09 15:07]
+Última atualização: [2026-05-09 15:08]
 
 Regras:
 
@@ -183,6 +183,7 @@ Regras:
 - [ ] Melhorar visualização da estrutura Meta
 - [x] `/meta-test`: estrutura Meta exibe IDs/status de AdSet/Ad quando disponíveis
 - [ ] Melhorar estados de sucesso/erro
+- [x] `/meta-test`: garantir consistência de alertas (erro limpa sucesso; dismiss manual)
 - [ ] Melhorar navegação operacional
 - [x] `/meta-test`: adicionar atalhos (anchors) para navegação entre seções
 - [ ] Melhorar percepção REAL vs STUB
@@ -260,7 +261,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-09 15:07]
+Última atualização: [2026-05-09 15:08]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -301,6 +302,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-09 15:03] Decisão: `/meta-test` deve sempre limpar/exibir detalhes de erro de forma consistente (evitar `errorDetails` stale) e indicar `LOADING/UNKNOWN` no status do backend para troubleshooting operacional.
 - [2026-05-09 15:05] Decisão: `/meta-test` deve oferecer navegação rápida (anchors) por ser uma tela longa e usada para troubleshooting operacional.
 - [2026-05-09 15:07] Decisão: `/meta-test` deve sinalizar REAL/STUB por entidade (Campaign/AdSet/Ad) na estrutura Meta para reduzir confusão operacional.
+- [2026-05-09 15:08] Decisão: `/meta-test` deve evitar estado ambíguo de alertas (erro e sucesso simultâneos); em falhas, limpar `success`.
 
 ## Blockers
 

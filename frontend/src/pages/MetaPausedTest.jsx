@@ -137,6 +137,7 @@ export default function MetaPausedTest() {
     const details = err?.body?.error?.details ?? err?.body ?? null;
     setError(message);
     setErrorDetails(details);
+    setSuccess("");
     return { message, details };
   }
 
