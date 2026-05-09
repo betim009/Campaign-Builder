@@ -206,7 +206,7 @@ Regras:
 - [ ] Separar persistência por entidade
 - [x] Separar logs por entidade
 - [x] `/meta-test`: filtro de logs por entidade (campaign/adset/ad/meta/db)
-- [ ] Permitir continuar fluxo incrementalmente
+- [x] Permitir continuar fluxo incrementalmente
 - [x] `/meta-test`: selecionar registro de `generated_campaigns` para continuar (Campaign → AdSet → Ad)
 - [x] `/meta-test`: ao selecionar registro no DB, alinhar `RUN MODE` com o modo inferido (REAL/STUB)
 - [ ] Criar navegação progressiva
@@ -324,6 +324,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-09 15:27] Decisão: `/meta-test` deve exibir evidência de progresso do fluxo (Campaign/AdSet/Ad) baseada em `meta_*` persistido, para orientar execução incremental e troubleshooting.
 - [2026-05-09 15:29] Decisão: `/meta-test` deve oferecer navegação incremental explícita (scroll para Etapa 2/3) para reduzir erro operacional em telas longas.
 - [2026-05-09 15:31] Decisão: logs do `/meta-test` devem ter um campo `entity` persistido (inferido da `action`) para permitir filtro por entidade sem depender apenas de prefixo string.
+- [2026-05-09 15:31] Decisão: “continuar fluxo incrementalmente” no `/meta-test` significa poder retomar do DB (sem recriar Campaign) e executar Campaign → AdSet → Ad em etapas independentes.
 - [2026-05-09 15:16] Decisão: preferir `gridTemplateColumns: repeat(auto-fit, minmax(...))` no `/meta-test` para responsividade sem depender de media queries/código extra.
 - [2026-05-09 15:18] Decisão: logs do `/meta-test` devem ser filtráveis por entidade (campaign/adset/ad/meta/db) para troubleshooting rápido sem backend schema/log pipeline nesta fase.
 - [2026-05-09 15:20] Decisão: `/meta-test` deve permitir retomar execução a partir de `generated_campaigns` existente (seleção explícita) para suportar troubleshooting e fluxo incremental sem refazer a Campaign.
