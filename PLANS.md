@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-09 15:21]
+Última atualização: [2026-05-09 15:23]
 
 Regras:
 
@@ -179,6 +179,7 @@ Regras:
 - [x] `/meta-test`: melhorar loading/erro para status do backend + Graph get (com detalhes + dismiss)
 - [ ] Melhorar error states
 - [x] `/meta-test`: exibir detalhes (`error.details`) em falhas (validate/meta/db)
+- [x] `/meta-test`: permitir dismiss de errors de seção (Meta/DB/status backend)
 - [ ] Melhorar feedback visual de persistência
 - [x] `/meta-test`: destacar registro recém-criado/atualizado em `generated_campaigns`
 - [x] Exibir provider/fallback no resultado do sync (Campanha Detalhes)
@@ -271,7 +272,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-09 15:22]
+Última atualização: [2026-05-09 15:23]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -321,6 +322,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-09 15:20] Decisão: `/meta-test` deve permitir retomar execução a partir de `generated_campaigns` existente (seleção explícita) para suportar troubleshooting e fluxo incremental sem refazer a Campaign.
 - [2026-05-09 15:21] Decisão: a navegação progressiva do `/meta-test` deve exibir evidência de conclusão por etapa (OK/—) baseada em `meta_*` persistido no DB.
 - [2026-05-09 15:22] Decisão: ignorar screenshots acidentais no repo root (ex: “Captura de Tela*.png”) via `.gitignore` para reduzir ruído operacional no `git status`.
+- [2026-05-09 15:23] Decisão: erros por seção do `/meta-test` devem ser descartáveis (dismiss) para reduzir ruído visual durante troubleshooting.
 
 ## Blockers
 

@@ -895,7 +895,20 @@ export default function MetaPausedTest() {
 
         {backendStatusError ? (
           <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
-            <div style={{ fontWeight: 900 }}>Erro</div>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+              <div style={{ fontWeight: 900 }}>Erro</div>
+              <button
+                type="button"
+                className="pillOutline"
+                onClick={() => {
+                  setBackendStatusError("");
+                  setBackendStatusErrorDetails(null);
+                }}
+                style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 900 }}
+              >
+                Fechar
+              </button>
+            </div>
             <div style={{ marginTop: 6, fontWeight: 700 }}>{backendStatusError}</div>
             {backendStatusErrorDetails ? (
               <pre
@@ -1045,7 +1058,20 @@ export default function MetaPausedTest() {
 
         {localError ? (
           <div className="card" style={{ padding: 14, margin: "0 16px 16px", borderColor: "#fecaca", color: "#991b1b" }}>
-            <div style={{ fontWeight: 900 }}>Erro</div>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+              <div style={{ fontWeight: 900 }}>Erro</div>
+              <button
+                type="button"
+                className="pillOutline"
+                onClick={() => {
+                  setLocalError("");
+                  setLocalErrorDetails(null);
+                }}
+                style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 900 }}
+              >
+                Fechar
+              </button>
+            </div>
             <div style={{ marginTop: 6, fontWeight: 700 }}>{localError}</div>
             {localErrorDetails ? (
               <pre
@@ -1537,7 +1563,20 @@ export default function MetaPausedTest() {
 
         {metaError ? (
           <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
-            <div style={{ fontWeight: 900 }}>Erro (Meta)</div>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+              <div style={{ fontWeight: 900 }}>Erro (Meta)</div>
+              <button
+                type="button"
+                className="pillOutline"
+                onClick={() => {
+                  setMetaError("");
+                  setMetaErrorDetails(null);
+                }}
+                style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 900 }}
+              >
+                Fechar
+              </button>
+            </div>
             <div style={{ marginTop: 6, fontWeight: 700 }}>{metaError}</div>
             {metaErrorDetails ? (
               <pre
