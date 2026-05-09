@@ -150,6 +150,15 @@ export default function MetaPausedTest() {
     return { message, details };
   }
 
+  function scrollToSection(sectionId) {
+    try {
+      const el = document.getElementById(sectionId);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch {
+      // ignore
+    }
+  }
+
   async function refresh() {
     setLoading(true);
     setError("");
@@ -1583,6 +1592,16 @@ export default function MetaPausedTest() {
           >
             {metaLoading ? "Listando..." : "Listar PAUSED na Meta"}
           </button>
+
+          <button
+            type="button"
+            className="pillOutline"
+            disabled={!stepCampaignOk}
+            onClick={() => scrollToSection("meta-test-step-adset")}
+            title={stepCampaignOk ? "Ir para criação de AdSet" : "Crie/Selecione uma Campaign primeiro"}
+          >
+            Ir para Etapa 2
+          </button>
           {!backendStatus?.hasAccessToken ? (
             <div className="muted" style={{ fontWeight: 800 }}>
               Token ausente no backend → listagem REAL indisponível (use STUB ou configure token).
@@ -1985,6 +2004,15 @@ export default function MetaPausedTest() {
             }}
           >
             {adSetCreating ? "Criando..." : `Criar AdSet ${flowMode} (PAUSED)`}
+          </button>
+          <button
+            type="button"
+            className="pillOutline"
+            disabled={!stepAdSetOk}
+            onClick={() => scrollToSection("meta-test-step-ad")}
+            title={stepAdSetOk ? "Ir para criação de Ad" : "Crie/Selecione um AdSet primeiro"}
+          >
+            Ir para Etapa 3
           </button>
           <div className="muted" style={{ fontWeight: 800 }}>
             Requer Campaign criada acima. REAL exige token no backend.
