@@ -10,6 +10,8 @@ Fonte operacional:
 
 ## Regras de Atualização (OBRIGATÓRIO)
 
+Última atualização: [2026-05-09 15:09]
+
 Todas as seções deste documento devem registrar data de atualização.
 
 Formato padrão:
@@ -32,6 +34,8 @@ Observação:
 Se uma seção não tiver data, ela deve ser considerada desatualizada.
 
 ## Navegação
+
+Última atualização: [2026-05-09 15:09]
 
 - Snapshot do sistema: ver `## Snapshot (Estado Atual)`
 - Backlog ativo (único): ver `## Backlog Ativo (ÚNICO)`
@@ -146,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-09 15:08]
+Última atualização: [2026-05-09 15:09]
 
 Regras:
 
@@ -241,7 +245,7 @@ Regras:
 - [x] Adicionar Technical Debt
 - [x] Adicionar Known Problems
 - [x] Separar Blockers de Risks
-- [ ] Padronizar timestamps
+- [x] Padronizar timestamps
 - [ ] Melhorar rastreabilidade
 - [ ] Melhorar logs de decisão
 
