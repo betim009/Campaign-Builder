@@ -289,6 +289,53 @@ export default function MetaPausedTest() {
     }
   }
 
+  function selectGeneratedCampaignRow(gc) {
+    const metaCampaignId = normalizeNonEmptyString(gc?.meta_campaign_id);
+    const inferredMode = metaCampaignId ? (metaCampaignId.startsWith("stub-") ? "STUB" : "REAL") : "REAL";
+
+    setCreated({
+      ok: true,
+      mode: inferredMode,
+      metaCampaign: metaCampaignId
+        ? {
+            id: metaCampaignId,
+            status: gc?.meta_status ?? null,
+            effective_status: gc?.meta_effective_status ?? null,
+            objective: gc?.meta_objective ?? null,
+          }
+        : null,
+      metaAdSet: normalizeNonEmptyString(gc?.meta_adset_id)
+        ? {
+            id: gc?.meta_adset_id ?? null,
+            status: gc?.meta_adset_status ?? null,
+            effective_status: gc?.meta_adset_effective_status ?? null,
+          }
+        : null,
+      metaAd: normalizeNonEmptyString(gc?.meta_ad_id)
+        ? {
+            id: gc?.meta_ad_id ?? null,
+            status: gc?.meta_ad_status ?? null,
+            effective_status: gc?.meta_ad_effective_status ?? null,
+          }
+        : null,
+      generatedCampaign: gc ?? null,
+    });
+
+    if (normalizeNonEmptyString(gc?.meta_ad_account_id)) {
+      setMetaAdAccountId(gc.meta_ad_account_id);
+    }
+    if (normalizeNonEmptyString(gc?.country_code)) {
+      setCountryCode(gc.country_code);
+    }
+
+    pushLog({
+      action: "db.generated_campaigns.select",
+      ok: true,
+      details: { generatedCampaignId: gc?.id ?? null, metaCampaignId: metaCampaignId || null },
+    });
+    setSuccess("Registro selecionado. Você pode continuar o fluxo incremental a partir do DB.");
+  }
+
   return (
     <PageShell
       title="Meta (lab): Campaign → AdSet → Ad"
@@ -1022,6 +1069,7 @@ export default function MetaPausedTest() {
                 <th>Effective</th>
                 <th>AdSet (Meta)</th>
                 <th>Ad (Meta)</th>
+                <th>Ação</th>
               </tr>
             </thead>
             <tbody>
@@ -1078,12 +1126,28 @@ export default function MetaPausedTest() {
                         {(gc.meta_ad_status || "—") + " / " + (gc.meta_ad_effective_status || "—")}
                       </div>
                     </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="pillOutline"
+                        onClick={() => {
+                          setError("");
+                          setErrorDetails(null);
+                          setSuccess("");
+                          selectGeneratedCampaignRow(gc);
+                        }}
+                        disabled={localLoading || isCreatingAny}
+                        style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 900 }}
+                      >
+                        Selecionar
+                      </button>
+                    </td>
                   </tr>
                 );
               })}
               {!localGenerated.length ? (
                 <tr>
-                  <td colSpan={9} className="muted" style={{ fontWeight: 800 }}>
+                  <td colSpan={10} className="muted" style={{ fontWeight: 800 }}>
                     {localLoading
                       ? "Carregando..."
                       : "Vazio. Clique em “Atualizar lista” ou crie Campaigns acima para gerar registros."}

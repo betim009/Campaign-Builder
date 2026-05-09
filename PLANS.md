@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-09 15:18]
+Última atualização: [2026-05-09 15:20]
 
 Regras:
 
@@ -206,6 +206,7 @@ Regras:
 - [ ] Separar logs por entidade
 - [x] `/meta-test`: filtro de logs por entidade (campaign/adset/ad/meta/db)
 - [ ] Permitir continuar fluxo incrementalmente
+- [x] `/meta-test`: selecionar registro de `generated_campaigns` para continuar (Campaign → AdSet → Ad)
 - [ ] Criar navegação progressiva
 - [ ] Evitar formulário gigante
 
@@ -269,7 +270,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-09 15:18]
+Última atualização: [2026-05-09 15:20]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -316,6 +317,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-09 15:15] Decisão: remover `busy` global do `/meta-test` e derivar “bloqueios de ação” a partir de flags específicas de criação por entidade para reduzir acoplamento e risco de regressão.
 - [2026-05-09 15:16] Decisão: preferir `gridTemplateColumns: repeat(auto-fit, minmax(...))` no `/meta-test` para responsividade sem depender de media queries/código extra.
 - [2026-05-09 15:18] Decisão: logs do `/meta-test` devem ser filtráveis por entidade (campaign/adset/ad/meta/db) para troubleshooting rápido sem backend schema/log pipeline nesta fase.
+- [2026-05-09 15:20] Decisão: `/meta-test` deve permitir retomar execução a partir de `generated_campaigns` existente (seleção explícita) para suportar troubleshooting e fluxo incremental sem refazer a Campaign.
 
 ## Blockers
 
