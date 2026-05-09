@@ -1,6 +1,9 @@
 import PageShell from "../components/PageShell.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
 import { useEffect, useMemo, useState } from "react";
+import ShortcutsCard from "./metaTest/ShortcutsCard.jsx";
+import FlowProgressCard from "./metaTest/FlowProgressCard.jsx";
+import ModeStatusCard from "./metaTest/ModeStatusCard.jsx";
 import OpsLogsSection from "./metaTest/OpsLogsSection.jsx";
 import GeneratedCampaignsSection from "./metaTest/GeneratedCampaignsSection.jsx";
 import { getCountries } from "../services/reference.js";
@@ -384,145 +387,15 @@ export default function MetaPausedTest() {
       subtitle="Fluxo progressivo operacional — criação REAL sempre PAUSED"
       backFallbackTo="/configuracoes"
     >
-      <div className="card" style={{ padding: 18 }}>
-        <div style={{ fontWeight: 900 }}>Atalhos</div>
-        <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
-          Navegação rápida para as seções principais (evita scroll longo).
-        </div>
-        <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <a className="pillOutline" href="#meta-test-mode">Modo</a>
-          <a className="pillOutline" href="#meta-test-backend-status">Status backend</a>
-          <a className="pillOutline" href="#meta-test-db">DB (generated_campaigns)</a>
-          <a className="pillOutline" href="#meta-test-ops-logs">Logs</a>
-          <a className="pillOutline" href="#meta-test-step-campaign" title="Etapa 1 concluída quando existe meta_campaign_id.">
-            Etapa 1 (Campaign) <span className="muted" style={{ fontWeight: 900 }}>{stepCampaignOk ? "OK" : "—"}</span>
-          </a>
-          <a className="pillOutline" href="#meta-test-step-adset" title="Etapa 2 concluída quando existe meta_adset_id.">
-            Etapa 2 (AdSet) <span className="muted" style={{ fontWeight: 900 }}>{stepAdSetOk ? "OK" : "—"}</span>
-          </a>
-          <a className="pillOutline" href="#meta-test-step-ad" title="Etapa 3 concluída quando existe meta_ad_id.">
-            Etapa 3 (Ad) <span className="muted" style={{ fontWeight: 900 }}>{stepAdOk ? "OK" : "—"}</span>
-          </a>
-        </div>
-      </div>
-
-      <div className="card" style={{ padding: 18, marginTop: 16 }}>
-        <div style={{ fontWeight: 900 }}>Progresso (fluxo)</div>
-        <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
-          Evidência baseada em `meta_*` persistido em `generated_campaigns`.
-        </div>
-        <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <span className="pillOutline" style={{ background: stepCampaignOk ? "#dcfce7" : "#ffffff" }}>
-            1. Campaign: {stepCampaignOk ? "OK" : "pendente"}
-          </span>
-          <span className="pillOutline" style={{ background: stepAdSetOk ? "#dcfce7" : "#ffffff" }}>
-            2. AdSet: {stepAdSetOk ? "OK" : "pendente"}
-          </span>
-          <span className="pillOutline" style={{ background: stepAdOk ? "#dcfce7" : "#ffffff" }}>
-            3. Ad: {stepAdOk ? "OK" : "pendente"}
-          </span>
-        </div>
-        <div className="muted" style={{ marginTop: 10, fontWeight: 800, lineHeight: 1.55 }}>
-          Dica: para retomar, use DB → “Selecionar” (não precisa recriar a Campaign).
-        </div>
-      </div>
-
-      <div id="meta-test-mode" className="card" style={{ padding: 18 }}>
-        <div style={{ fontWeight: 900 }}>Modo atual</div>
-        <div style={{ marginTop: 10, display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              borderRadius: 999,
-              padding: "8px 12px",
-              fontWeight: 900,
-              border: "1px solid #e5e7eb",
-              background: runModeLabel === "REAL" ? "#dcfce7" : "#fef3c7",
-              color: "#111827",
-            }}
-          >
-            RUN MODE: {runModeLabel}
-          </span>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              borderRadius: 999,
-              padding: "8px 12px",
-              fontWeight: 900,
-              border: "1px solid #e5e7eb",
-              background: dataModeLabel === "LOADING" ? "#f3f4f6" : dataModeLabel === "FALLBACK" ? "#fee2e2" : "#dbeafe",
-              color: "#111827",
-            }}
-          >
-            DATA: {dataModeLabel}
-          </span>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              borderRadius: 999,
-              padding: "8px 12px",
-              fontWeight: 900,
-              border: "1px solid #e5e7eb",
-              background: metaReadyLabel === "LOADING" ? "#f3f4f6" : metaReadyLabel === "REAL" ? "#dcfce7" : "#fef3c7",
-              color: "#111827",
-            }}
-          >
-            META READY: {metaReadyLabel}
-          </span>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              borderRadius: 999,
-              padding: "8px 12px",
-              fontWeight: 900,
-              border: "1px solid #e5e7eb",
-              background: dbModeLabel === "LOADING" ? "#f3f4f6" : dbModeLabel === "FALLBACK" ? "#fee2e2" : "#dbeafe",
-              color: "#111827",
-            }}
-            title={
-              dbModeLabel === "LOADING"
-                ? "Carregando lista de generated_campaigns..."
-                : dbModeLabel === "FALLBACK"
-                ? "DB/API indisponível (lista de generated_campaigns falhou)."
-                : "DB/API OK (lista de generated_campaigns carregou)."
-            }
-          >
-            DB: {dbModeLabel}
-          </span>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              borderRadius: 999,
-              padding: "8px 12px",
-              fontWeight: 900,
-              border: "1px solid #e5e7eb",
-              background:
-                syncProviderLabel === "LOADING" ? "#f3f4f6" : syncProviderLabel === "meta" ? "#dcfce7" : "#fef3c7",
-              color: "#111827",
-            }}
-            title="Valor reportado pelo backend em /api/meta/status (META_SYNC_PROVIDER)."
-          >
-            SYNC: {syncProviderLabel}
-          </span>
-        </div>
-        <div className="muted" style={{ marginTop: 10, fontWeight: 800, lineHeight: 1.55 }}>
-          - <b>RUN MODE</b>: define se a criação chama Meta (REAL) ou cria `stub-*` (STUB).<br />
-          - <b>DATA</b>: indica se a UI está usando API ou FALLBACK.<br />
-          - <b>META READY</b>: depende de token presente no backend.
-          <br />- <b>DB</b>: indica se a UI conseguiu ler `generated_campaigns` (API/DB) para evidenciar persistência.
-          <br />- <b>SYNC</b>: provider configurado no backend (`META_SYNC_PROVIDER`).
-        </div>
-      </div>
+      <ShortcutsCard stepCampaignOk={stepCampaignOk} stepAdSetOk={stepAdSetOk} stepAdOk={stepAdOk} />
+      <FlowProgressCard stepCampaignOk={stepCampaignOk} stepAdSetOk={stepAdSetOk} stepAdOk={stepAdOk} />
+      <ModeStatusCard
+        runModeLabel={runModeLabel}
+        dataModeLabel={dataModeLabel}
+        metaReadyLabel={metaReadyLabel}
+        dbModeLabel={dbModeLabel}
+        syncProviderLabel={syncProviderLabel}
+      />
 
       <div className="card" style={{ padding: 18 }}>
         <div style={{ fontWeight: 900 }}>Regras (segurança)</div>
