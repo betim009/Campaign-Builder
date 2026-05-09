@@ -2,15 +2,10 @@ import PageShell from "../components/PageShell.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { getCountries } from "../services/reference.js";
-import {
-  createMetaCampaignSimple,
-  createMetaAd,
-  createMetaAdSet,
-  getMetaCampaign,
-  getMetaStatus,
-  listMetaAdAccountCampaigns,
-  validateMetaToken,
-} from "../services/meta.js";
+import { createMetaCampaignSimple, getMetaCampaign, listMetaAdAccountCampaigns } from "../services/metaCampaigns.js";
+import { createMetaAdSet } from "../services/metaAdSets.js";
+import { createMetaAd } from "../services/metaAds.js";
+import { getMetaStatus, validateMetaToken } from "../services/metaStatus.js";
 import { countryCodeToFlag } from "../services/fallbacks.js";
 import { listGeneratedCampaigns } from "../services/generatedCampaigns.js";
 

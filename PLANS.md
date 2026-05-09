@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-09 15:09]
+Última atualização: [2026-05-09 15:10]
 
 Regras:
 
@@ -198,7 +198,7 @@ Regras:
 
 - [ ] Consolidar fluxo Campaign → AdSet → Ad
 - [ ] Separar estados operacionais por entidade
-- [ ] Separar services por entidade Meta
+- [x] Separar services por entidade Meta
 - [ ] Separar persistência por entidade
 - [ ] Separar logs por entidade
 - [ ] Permitir continuar fluxo incrementalmente
@@ -265,7 +265,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-09 15:08]
+Última atualização: [2026-05-09 15:10]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -307,6 +307,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-09 15:05] Decisão: `/meta-test` deve oferecer navegação rápida (anchors) por ser uma tela longa e usada para troubleshooting operacional.
 - [2026-05-09 15:07] Decisão: `/meta-test` deve sinalizar REAL/STUB por entidade (Campaign/AdSet/Ad) na estrutura Meta para reduzir confusão operacional.
 - [2026-05-09 15:08] Decisão: `/meta-test` deve evitar estado ambíguo de alertas (erro e sucesso simultâneos); em falhas, limpar `success`.
+- [2026-05-09 15:10] Decisão: separar `services/` de Meta por entidade (Campaign/AdSet/Ad/Status/Sync), mantendo `services/meta.js` como re-export para compatibilidade incremental.
 
 ## Blockers
 
