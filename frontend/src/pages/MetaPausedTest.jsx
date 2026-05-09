@@ -76,7 +76,9 @@ export default function MetaPausedTest() {
   const [metaCampaigns, setMetaCampaigns] = useState([]);
 
   const [backendStatus, setBackendStatus] = useState(null);
+  const [backendStatusLoading, setBackendStatusLoading] = useState(false);
   const [backendStatusError, setBackendStatusError] = useState("");
+  const [backendStatusErrorDetails, setBackendStatusErrorDetails] = useState(null);
   const [validateLoading, setValidateLoading] = useState(false);
   const [validateError, setValidateError] = useState("");
   const [validateErrorDetails, setValidateErrorDetails] = useState(null);
@@ -141,6 +143,7 @@ export default function MetaPausedTest() {
   async function refresh() {
     setLoading(true);
     setError("");
+    setErrorDetails(null);
     try {
       const res = await getCountries();
       const list = res.countries ?? [];
@@ -150,7 +153,7 @@ export default function MetaPausedTest() {
     } catch (err) {
       setCountries([]);
       setCountriesSource("fallback");
-      setError(err?.message ? String(err.message) : "Falha ao carregar países.");
+      captureError(err, "Falha ao carregar países.");
     } finally {
       setLoading(false);
     }
@@ -158,6 +161,8 @@ export default function MetaPausedTest() {
 
   async function refreshBackendStatus() {
     setBackendStatusError("");
+    setBackendStatusErrorDetails(null);
+    setBackendStatusLoading(true);
     try {
       const res = await getMetaStatus();
       setBackendStatus(res);
@@ -165,7 +170,10 @@ export default function MetaPausedTest() {
     } catch (err) {
       setBackendStatus(null);
       setBackendStatusError(err?.message ? String(err.message) : "Falha ao consultar /api/meta/status.");
+      setBackendStatusErrorDetails(err?.body?.error?.details ?? err?.body ?? null);
       pushLog({ action: "meta.status", ok: false, error: err?.message ? String(err.message) : "error" });
+    } finally {
+      setBackendStatusLoading(false);
     }
   }
 
@@ -193,8 +201,12 @@ export default function MetaPausedTest() {
   const runModeLabel = mode === "STUB" ? "STUB" : "REAL";
   const dataModeLabel = loading ? "LOADING" : countriesSource === "fallback" ? "FALLBACK" : "API";
   const dbModeLabel = localLoading ? "LOADING" : localError ? "FALLBACK" : "API";
-  const metaReadyLabel = backendStatus ? (backendStatus.hasAccessToken ? "REAL" : "STUB") : "LOADING";
-  const syncProviderLabel = backendStatus ? normalizeNonEmptyString(backendStatus?.provider) || "—" : "LOADING";
+  const metaReadyLabel = backendStatusLoading ? "LOADING" : backendStatus ? (backendStatus.hasAccessToken ? "REAL" : "STUB") : "UNKNOWN";
+  const syncProviderLabel = backendStatusLoading
+    ? "LOADING"
+    : backendStatus
+    ? normalizeNonEmptyString(backendStatus?.provider) || "—"
+    : "UNKNOWN";
   const flowMode = (created?.mode ?? mode) === "STUB" ? "STUB" : "REAL";
   const createdGeneratedCampaignId = normalizeNonEmptyString(created?.generatedCampaign?.id);
   const createdMetaCampaignId = normalizeNonEmptyString(created?.metaCampaign?.id);
@@ -389,7 +401,19 @@ export default function MetaPausedTest() {
 
       {error ? (
         <div className="card" style={{ padding: 18, marginTop: 16, borderColor: "#fecaca", color: "#991b1b" }}>
-          <div style={{ fontWeight: 900 }}>Erro</div>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+            <div style={{ fontWeight: 900 }}>Erro</div>
+            <button
+              type="button"
+              className="pillOutline"
+              onClick={() => {
+                setError("");
+                setErrorDetails(null);
+              }}
+            >
+              Fechar
+            </button>
+          </div>
           <div style={{ marginTop: 6, fontWeight: 700 }}>{error}</div>
           {errorDetails ? (
             <pre
@@ -411,7 +435,12 @@ export default function MetaPausedTest() {
 
       {success ? (
         <div className="card" style={{ padding: 18, marginTop: 16, borderColor: "#bbf7d0", color: "#14532d" }}>
-          <div style={{ fontWeight: 900 }}>Sucesso</div>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+            <div style={{ fontWeight: 900 }}>Sucesso</div>
+            <button type="button" className="pillOutline" onClick={() => setSuccess("")}>
+              Fechar
+            </button>
+          </div>
           <div style={{ marginTop: 6, fontWeight: 800 }}>{success}</div>
         </div>
       ) : null}
@@ -747,9 +776,9 @@ export default function MetaPausedTest() {
             type="button"
             className="pillOutline"
             onClick={refreshBackendStatus}
-            disabled={busy || loading}
+            disabled={busy || loading || backendStatusLoading}
           >
-            Atualizar status
+            {backendStatusLoading ? "Atualizando..." : "Atualizar status"}
           </button>
         </div>
 
@@ -757,6 +786,21 @@ export default function MetaPausedTest() {
           <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
             <div style={{ fontWeight: 900 }}>Erro</div>
             <div style={{ marginTop: 6, fontWeight: 700 }}>{backendStatusError}</div>
+            {backendStatusErrorDetails ? (
+              <pre
+                style={{
+                  marginTop: 12,
+                  background: "#0b1220",
+                  color: "#e5e7eb",
+                  padding: 12,
+                  borderRadius: 12,
+                  overflowX: "auto",
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+{safeJson(backendStatusErrorDetails)}
+              </pre>
+            ) : null}
           </div>
         ) : null}
 
@@ -765,20 +809,28 @@ export default function MetaPausedTest() {
             <div className="muted" style={{ fontWeight: 900 }}>
               Provider
             </div>
-            <div style={{ marginTop: 6, fontWeight: 900 }}>{backendStatus?.provider ?? "—"}</div>
+            <div style={{ marginTop: 6, fontWeight: 900 }}>
+              {backendStatusLoading ? "LOADING" : (backendStatus?.provider ?? "—")}
+            </div>
           </div>
           <div className="card" style={{ padding: 14 }}>
             <div className="muted" style={{ fontWeight: 900 }}>
               Graph version
             </div>
-            <div style={{ marginTop: 6, fontWeight: 900 }}>{backendStatus?.graphVersion ?? "—"}</div>
+            <div style={{ marginTop: 6, fontWeight: 900 }}>
+              {backendStatusLoading ? "LOADING" : (backendStatus?.graphVersion ?? "—")}
+            </div>
           </div>
           <div className="card" style={{ padding: 14 }}>
             <div className="muted" style={{ fontWeight: 900 }}>
               Token no backend
             </div>
             <div style={{ marginTop: 6, fontWeight: 900 }}>
-              {backendStatus?.hasAccessToken ? "SIM (REAL disponível)" : "NÃO (somente STUB)"}
+              {backendStatusLoading
+                ? "LOADING"
+                : backendStatus?.hasAccessToken
+                ? "SIM (REAL disponível)"
+                : "NÃO (somente STUB)"}
             </div>
           </div>
         </div>
@@ -1013,12 +1065,16 @@ export default function MetaPausedTest() {
               type="button"
               className="pillOutline"
               onClick={async () => {
+                setError("");
+                setErrorDetails(null);
+                setSuccess("");
                 const text = safeJson(opsLogs);
                 try {
                   await navigator.clipboard.writeText(text);
                   setSuccess("Logs copiados para a área de transferência.");
                 } catch {
                   setError("Não foi possível copiar os logs.");
+                  setErrorDetails(null);
                 }
               }}
               disabled={!opsLogs.length}
@@ -1403,6 +1459,7 @@ export default function MetaPausedTest() {
 	              onClick={async () => {
 	                setCreatedLoading(true);
 	                setError("");
+                  setErrorDetails(null);
 	                try {
 	                  const res = await getMetaCampaign(created.metaCampaign.id);
 	                  setCreated((prev) => ({
@@ -1412,8 +1469,13 @@ export default function MetaPausedTest() {
 	                  setSuccess("Status atualizado via Graph.");
 	                  pushLog({ action: "meta.campaign.get", ok: true, details: { metaCampaignId: created.metaCampaign.id } });
 	                } catch (err) {
-	                  setError(err?.message ? String(err.message) : "Falha ao consultar Campaign no Graph.");
-	                  pushLog({ action: "meta.campaign.get", ok: false, error: err?.message ? String(err.message) : "error" });
+	                  const captured = captureError(err, "Falha ao consultar Campaign no Graph.");
+	                  pushLog({
+                      action: "meta.campaign.get",
+                      ok: false,
+                      error: captured.message || "error",
+                      details: { metaCampaignId: created.metaCampaign.id, errorDetails: captured.details },
+                    });
 	                } finally {
 	                  setCreatedLoading(false);
 	                }
