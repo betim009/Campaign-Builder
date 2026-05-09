@@ -146,7 +146,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-09 15:06]
+Última atualização: [2026-05-09 15:07]
 
 Regras:
 
@@ -186,6 +186,7 @@ Regras:
 - [ ] Melhorar navegação operacional
 - [x] `/meta-test`: adicionar atalhos (anchors) para navegação entre seções
 - [ ] Melhorar percepção REAL vs STUB
+- [x] `/meta-test`: exibir REAL/STUB por entidade (Campaign/AdSet/Ad) na estrutura Meta
 - [ ] Refinar responsividade
 
 ### P2 — Fluxo progressivo Meta
@@ -259,7 +260,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-09 15:05]
+Última atualização: [2026-05-09 15:07]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -299,6 +300,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-08 10:47] Decisão: documentar `Execution Rules` no `PLANS.md` para orientar execução contínua e reduzir ambiguidades operacionais.
 - [2026-05-09 15:03] Decisão: `/meta-test` deve sempre limpar/exibir detalhes de erro de forma consistente (evitar `errorDetails` stale) e indicar `LOADING/UNKNOWN` no status do backend para troubleshooting operacional.
 - [2026-05-09 15:05] Decisão: `/meta-test` deve oferecer navegação rápida (anchors) por ser uma tela longa e usada para troubleshooting operacional.
+- [2026-05-09 15:07] Decisão: `/meta-test` deve sinalizar REAL/STUB por entidade (Campaign/AdSet/Ad) na estrutura Meta para reduzir confusão operacional.
 
 ## Blockers
 

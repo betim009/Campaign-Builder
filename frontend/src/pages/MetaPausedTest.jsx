@@ -212,7 +212,13 @@ export default function MetaPausedTest() {
   const createdMetaCampaignId = normalizeNonEmptyString(created?.metaCampaign?.id);
   const createdMetaCampaignIdIsReal = isRealMetaId(createdMetaCampaignId);
   const createdMetaAdSetId = normalizeNonEmptyString(created?.generatedCampaign?.meta_adset_id);
+  const createdMetaAdId = normalizeNonEmptyString(created?.generatedCampaign?.meta_ad_id);
   const createdCountryCode = normalizeNonEmptyString(created?.generatedCampaign?.country_code) || countryCode;
+  const campaignEntityModeLabel = createdMetaCampaignId ? (createdMetaCampaignIdIsReal ? "REAL" : "STUB") : "—";
+  const adSetEntityId = normalizeNonEmptyString(created?.metaAdSet?.id) || createdMetaAdSetId;
+  const adSetEntityModeLabel = adSetEntityId ? (isRealMetaId(adSetEntityId) ? "REAL" : "STUB") : "—";
+  const adEntityId = normalizeNonEmptyString(created?.metaAd?.id) || createdMetaAdId;
+  const adEntityModeLabel = adEntityId ? (isRealMetaId(adEntityId) ? "REAL" : "STUB") : "—";
 
   const canCreateAdSet =
     !loading &&
@@ -469,8 +475,13 @@ export default function MetaPausedTest() {
 
         <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
           <div className="card" style={{ padding: 14 }}>
-            <div className="muted" style={{ fontWeight: 900 }}>
-              Campaign (Meta)
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+              <div className="muted" style={{ fontWeight: 900 }}>
+                Campaign (Meta)
+              </div>
+              <span className="muted" style={{ fontWeight: 900 }}>
+                {campaignEntityModeLabel}
+              </span>
             </div>
             <div style={{ marginTop: 6, fontWeight: 900 }}>
               {created?.metaCampaign?.id ?? "—"}
@@ -481,8 +492,13 @@ export default function MetaPausedTest() {
           </div>
 
           <div className="card" style={{ padding: 14 }}>
-            <div className="muted" style={{ fontWeight: 900 }}>
-              AdSet (Meta)
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+              <div className="muted" style={{ fontWeight: 900 }}>
+                AdSet (Meta)
+              </div>
+              <span className="muted" style={{ fontWeight: 900 }}>
+                {adSetEntityModeLabel}
+              </span>
             </div>
             <div style={{ marginTop: 6, fontWeight: 900 }}>
               {created?.metaAdSet?.id ?? created?.generatedCampaign?.meta_adset_id ?? "—"}
@@ -500,8 +516,13 @@ export default function MetaPausedTest() {
           </div>
 
           <div className="card" style={{ padding: 14 }}>
-            <div className="muted" style={{ fontWeight: 900 }}>
-              Ad (Meta)
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+              <div className="muted" style={{ fontWeight: 900 }}>
+                Ad (Meta)
+              </div>
+              <span className="muted" style={{ fontWeight: 900 }}>
+                {adEntityModeLabel}
+              </span>
             </div>
             <div style={{ marginTop: 6, fontWeight: 900 }}>
               {created?.metaAd?.id ?? created?.generatedCampaign?.meta_ad_id ?? "—"}
