@@ -621,43 +621,74 @@ export function metaRouter() {
               })
             : metaCreateAdSetStub({ stubId: `stub-adset-${generatedCampaignId}`, name, campaign_id: metaCampaignId })
 
-        const updated = await pool.query(
-          `
-            UPDATE generated_campaigns
-            SET
-              meta_adset_id = $2,
-              meta_adset_status = $3,
-              meta_adset_effective_status = $4
-            WHERE id = $1
-            RETURNING
-              id,
-              campaign_id,
-              country_code,
-              meta_campaign_id,
-              meta_ad_account_id,
-              meta_user_id,
-              meta_status,
-              meta_effective_status,
-              meta_objective,
-              meta_adset_id,
-              meta_adset_status,
-              meta_adset_effective_status,
-              meta_ad_id,
-              meta_ad_status,
-              meta_ad_effective_status,
-              name,
-              status,
-              created_at
-          `,
-          [
-            generatedCampaignId,
-            String(created.id),
-            normalizeNonEmptyString(created?.status),
-            normalizeNonEmptyString(created?.effective_status)
-          ]
-        )
+        const client = await pool.connect()
+        try {
+          await client.query('BEGIN')
 
-        return res.status(201).json({ ok: true, mode, meta_adset: created, generated_campaign: updated.rows[0] })
+          const updated = await client.query(
+            `
+              UPDATE generated_campaigns
+              SET
+                meta_adset_id = $2,
+                meta_adset_status = $3,
+                meta_adset_effective_status = $4
+              WHERE id = $1
+              RETURNING
+                id,
+                campaign_id,
+                country_code,
+                meta_campaign_id,
+                meta_ad_account_id,
+                meta_user_id,
+                meta_status,
+                meta_effective_status,
+                meta_objective,
+                meta_adset_id,
+                meta_adset_status,
+                meta_adset_effective_status,
+                meta_ad_id,
+                meta_ad_status,
+                meta_ad_effective_status,
+                name,
+                status,
+                created_at
+            `,
+            [
+              generatedCampaignId,
+              String(created.id),
+              normalizeNonEmptyString(created?.status),
+              normalizeNonEmptyString(created?.effective_status)
+            ]
+          )
+
+          await client.query(
+            `
+              INSERT INTO generated_adsets (
+                generated_campaign_id,
+                meta_adset_id,
+                name,
+                status,
+                effective_status
+              )
+              VALUES ($1, $2, $3, $4, $5)
+            `,
+            [
+              generatedCampaignId,
+              String(created.id),
+              name,
+              normalizeNonEmptyString(created?.status) ?? 'PAUSED',
+              normalizeNonEmptyString(created?.effective_status)
+            ]
+          )
+
+          await client.query('COMMIT')
+          return res.status(201).json({ ok: true, mode, meta_adset: created, generated_campaign: updated.rows[0] })
+        } catch (err) {
+          await client.query('ROLLBACK')
+          throw err
+        } finally {
+          client.release()
+        }
       } catch (err) {
         const status = typeof err?.status === 'number' ? err.status : 502
         return jsonError(res, status, err?.message ?? 'Meta ad set creation failed', err?.details)
@@ -739,43 +770,88 @@ export function metaRouter() {
               })
             : metaCreateAdStub({ stubId: `stub-ad-${generatedCampaignId}`, name, adset_id: metaAdSetId })
 
-        const updated = await pool.query(
-          `
-            UPDATE generated_campaigns
-            SET
-              meta_ad_id = $2,
-              meta_ad_status = $3,
-              meta_ad_effective_status = $4
-            WHERE id = $1
-            RETURNING
-              id,
-              campaign_id,
-              country_code,
-              meta_campaign_id,
-              meta_ad_account_id,
-              meta_user_id,
-              meta_status,
-              meta_effective_status,
-              meta_objective,
-              meta_adset_id,
-              meta_adset_status,
-              meta_adset_effective_status,
-              meta_ad_id,
-              meta_ad_status,
-              meta_ad_effective_status,
-              name,
-              status,
-              created_at
-          `,
-          [
-            generatedCampaignId,
-            String(created.id),
-            normalizeNonEmptyString(created?.status),
-            normalizeNonEmptyString(created?.effective_status)
-          ]
-        )
+        const client = await pool.connect()
+        try {
+          await client.query('BEGIN')
 
-        return res.status(201).json({ ok: true, mode, meta_ad: created, generated_campaign: updated.rows[0] })
+          const updated = await client.query(
+            `
+              UPDATE generated_campaigns
+              SET
+                meta_ad_id = $2,
+                meta_ad_status = $3,
+                meta_ad_effective_status = $4
+              WHERE id = $1
+              RETURNING
+                id,
+                campaign_id,
+                country_code,
+                meta_campaign_id,
+                meta_ad_account_id,
+                meta_user_id,
+                meta_status,
+                meta_effective_status,
+                meta_objective,
+                meta_adset_id,
+                meta_adset_status,
+                meta_adset_effective_status,
+                meta_ad_id,
+                meta_ad_status,
+                meta_ad_effective_status,
+                name,
+                status,
+                created_at
+            `,
+            [
+              generatedCampaignId,
+              String(created.id),
+              normalizeNonEmptyString(created?.status),
+              normalizeNonEmptyString(created?.effective_status)
+            ]
+          )
+
+          const { rows: gaRows } = await client.query(
+            `
+              SELECT id
+              FROM generated_adsets
+              WHERE generated_campaign_id = $1 AND meta_adset_id = $2
+              ORDER BY created_at DESC
+              LIMIT 1
+            `,
+            [generatedCampaignId, metaAdSetId]
+          )
+          const generatedAdSetRowId = gaRows?.[0]?.id ?? null
+
+          await client.query(
+            `
+              INSERT INTO generated_ads (
+                generated_campaign_id,
+                generated_adset_id,
+                meta_ad_id,
+                name,
+                status,
+                effective_status
+              )
+              VALUES ($1, $2, $3, $4, $5, $6)
+            `,
+            [
+              generatedCampaignId,
+              generatedAdSetRowId,
+              String(created.id),
+              name,
+              normalizeNonEmptyString(created?.status) ?? 'PAUSED',
+              normalizeNonEmptyString(created?.effective_status)
+            ]
+          )
+
+          await client.query('COMMIT')
+          return res.status(201).json({ ok: true, mode, meta_ad: created, generated_campaign: updated.rows[0] })
+        } catch (err) {
+          await client.query('ROLLBACK')
+          throw err
+        } finally {
+          client.release()
+        }
       } catch (err) {
         const status = typeof err?.status === 'number' ? err.status : 502
         return jsonError(res, status, err?.message ?? 'Meta ad creation failed', err?.details)
