@@ -201,7 +201,7 @@ export default function StepCampaignSection({
 
         {!backendHasAccessToken ? (
           <div className="muted" style={{ fontWeight: 800 }}>
-            Token ausente no backend → listagem REAL indisponível (use STUB ou configure token).
+            Token ausente no backend → operações REAL indisponíveis (use STUB ou configure token).
           </div>
         ) : null}
       </div>
@@ -240,4 +240,3 @@ export default function StepCampaignSection({
     </div>
   );
 }
-

@@ -161,7 +161,8 @@ export default function MetaPausedTest() {
     normalizeNonEmptyString(name) !== "" &&
     normalizeNonEmptyString(objective) !== "" &&
     normalizeNonEmptyString(normalizeMetaAdAccountId(metaAdAccountId)) !== "" &&
-    normalizeNonEmptyString(countryCode) !== "";
+    normalizeNonEmptyString(countryCode) !== "" &&
+    (mode === "STUB" || Boolean(backendStatus?.hasAccessToken));
 
   const adAccountNormalized = useMemo(() => normalizeMetaAdAccountId(metaAdAccountId), [metaAdAccountId]);
   const runModeLabel = mode === "STUB" ? "STUB" : "REAL";
