@@ -150,14 +150,14 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-11 12:30]
+Última atualização: [2026-05-11 12:31]
 
 Regras:
 
 - Esta é a ÚNICA fonte oficial do backlog ativo.
 - Backlog concluído e worklogs históricos devem ficar em `ARCHIVE.md`.
 - Procedimentos/como rodar/testar devem ficar em `RUNBOOK.md`.
-- Ao concluir um item: marcar como `[x]`, registrar decisão se necessário em `Decision Log (Ativo)` e criar commit incremental.
+- Ao concluir um item: marcar como `[x]`, registrar decisão se necessário em `Decision Log (Ativo)` e criar commit incremental (ideal: registrar hash curto no item/decisão).
 
 ### P0 — Operação REAL mínima
 
@@ -222,7 +222,7 @@ Regras:
 - [x] `/meta-test`: exibir status OK/— das etapas nos atalhos (Campaign/AdSet/Ad)
 - [x] `/meta-test`: adicionar card de progresso do fluxo (Campaign/AdSet/Ad) baseado em `meta_*` persistido
 - [x] `/meta-test`: botões “Ir para Etapa 2/3” (scroll) para navegação incremental
-- [x] Evitar formulário gigante
+- [x] Evitar formulário gigante (commit: 20e2627)
 
 ### P3 — Persistência operacional
 
@@ -265,8 +265,8 @@ Regras:
 - [x] Adicionar Known Problems
 - [x] Separar Blockers de Risks
 - [x] Padronizar timestamps
-- [ ] Melhorar rastreabilidade
-- [ ] Melhorar logs de decisão
+- [x] Melhorar rastreabilidade
+- [x] Melhorar logs de decisão
 
 ### P7 — Refinamento do fluxo legado
 
@@ -284,7 +284,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-11 12:30]
+Última atualização: [2026-05-11 12:31]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -352,7 +352,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-09 15:22] Decisão: ignorar screenshots acidentais no repo root (ex: “Captura de Tela*.png”) via `.gitignore` para reduzir ruído operacional no `git status`.
 - [2026-05-09 15:23] Decisão: erros por seção do `/meta-test` devem ser descartáveis (dismiss) para reduzir ruído visual durante troubleshooting.
 - [2026-05-09 15:23] Decisão: ao selecionar `generated_campaigns` no `/meta-test`, preencher contexto no formulário (nome/objetivo/ad account/país) para facilitar retomar/depurar o fluxo.
-- [2026-05-11 12:30] Decisão: reduzir risco do `/meta-test` extraindo seções (Batch/Resultado) + util/hook (`metaTestUtils`, `useOpsLogs`) para diminuir o tamanho de `MetaPausedTest.jsx` sem alterar comportamento.
+- [2026-05-11 12:30] Decisão: reduzir risco do `/meta-test` extraindo seções (Batch/Resultado) + util/hook (`metaTestUtils`, `useOpsLogs`) para diminuir o tamanho de `MetaPausedTest.jsx` sem alterar comportamento. (commit: 20e2627)
 
 ## Blockers
 
