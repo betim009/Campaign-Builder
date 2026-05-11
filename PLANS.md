@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-09 16:57]
+Última atualização: [2026-05-11 12:30]
 
 Regras:
 
@@ -222,7 +222,7 @@ Regras:
 - [x] `/meta-test`: exibir status OK/— das etapas nos atalhos (Campaign/AdSet/Ad)
 - [x] `/meta-test`: adicionar card de progresso do fluxo (Campaign/AdSet/Ad) baseado em `meta_*` persistido
 - [x] `/meta-test`: botões “Ir para Etapa 2/3” (scroll) para navegação incremental
-- [ ] Evitar formulário gigante
+- [x] Evitar formulário gigante
 
 ### P3 — Persistência operacional
 
@@ -284,7 +284,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-09 16:57]
+Última atualização: [2026-05-11 12:30]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -352,6 +352,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-09 15:22] Decisão: ignorar screenshots acidentais no repo root (ex: “Captura de Tela*.png”) via `.gitignore` para reduzir ruído operacional no `git status`.
 - [2026-05-09 15:23] Decisão: erros por seção do `/meta-test` devem ser descartáveis (dismiss) para reduzir ruído visual durante troubleshooting.
 - [2026-05-09 15:23] Decisão: ao selecionar `generated_campaigns` no `/meta-test`, preencher contexto no formulário (nome/objetivo/ad account/país) para facilitar retomar/depurar o fluxo.
+- [2026-05-11 12:30] Decisão: reduzir risco do `/meta-test` extraindo seções (Batch/Resultado) + util/hook (`metaTestUtils`, `useOpsLogs`) para diminuir o tamanho de `MetaPausedTest.jsx` sem alterar comportamento.
 
 ## Blockers
 
@@ -371,9 +372,9 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 
 ## Technical Debt
 
-Última atualização: [2026-05-09 15:06]
+Última atualização: [2026-05-11 12:30]
 
-- Frontend: `frontend/src/pages/MetaPausedTest.jsx` ainda concentra muita lógica inline (handlers/payloads). Próximo passo: extrair por entidade (Campaign/AdSet/Ad) em `services/` + helpers para reduzir risco de regressão.
+- Frontend: `frontend/src/pages/MetaPausedTest.jsx` foi reduzido e teve seções extraídas, mas ainda concentra handlers/payloads. Próximo passo: extrair actions por entidade (Campaign/AdSet/Ad) para reduzir risco de regressão.
 - Frontend: ausência de um padrão compartilhado de alerts/toasts (cada tela implementa manualmente).
 - Legado: fluxo “Nova Campanha” segue monolítico e tende a acumular responsabilidades; manter compatível e migrar capacidades úteis para `/meta-test` (P7).
 

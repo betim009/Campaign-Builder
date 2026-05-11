@@ -1,5 +1,4 @@
 import PageShell from "../components/PageShell.jsx";
-import StatusBadge from "../components/StatusBadge.jsx";
 import { useEffect, useMemo, useState } from "react";
 import ShortcutsCard from "./metaTest/ShortcutsCard.jsx";
 import FlowProgressCard from "./metaTest/FlowProgressCard.jsx";
@@ -12,6 +11,8 @@ import StepAdSection from "./metaTest/StepAdSection.jsx";
 import StepCampaignSection from "./metaTest/StepCampaignSection.jsx";
 import PausedMetaCampaignsSection from "./metaTest/PausedMetaCampaignsSection.jsx";
 import MetaStructureCard from "./metaTest/MetaStructureCard.jsx";
+import CampaignResultSection from "./metaTest/CampaignResultSection.jsx";
+import CampaignBatchSection from "./metaTest/CampaignBatchSection.jsx";
 import { getCountries } from "../services/reference.js";
 import { createMetaCampaignSimple, getMetaCampaign, listMetaAdAccountCampaigns } from "../services/metaCampaigns.js";
 import { createMetaAdSet } from "../services/metaAdSets.js";
@@ -19,54 +20,19 @@ import { createMetaAd } from "../services/metaAds.js";
 import { getMetaStatus, validateMetaToken } from "../services/metaStatus.js";
 import { countryCodeToFlag } from "../services/fallbacks.js";
 import { listGeneratedCampaigns } from "../services/generatedCampaigns.js";
+import useOpsLogs from "./metaTest/useOpsLogs.js";
+import {
+  isRealMetaId,
+  normalizeMetaAdAccountId,
+  normalizeNonEmptyString,
+  safeJson,
+} from "./metaTest/metaTestUtils.js";
 
 const OBJECTIVE_OPTIONS = [
   { value: "OUTCOME_TRAFFIC", label: "OUTCOME_TRAFFIC" },
   { value: "OUTCOME_LEADS", label: "OUTCOME_LEADS" },
   { value: "OUTCOME_SALES", label: "OUTCOME_SALES" },
 ];
-
-function normalizeNonEmptyString(value) {
-  if (typeof value !== "string") return "";
-  const trimmed = value.trim();
-  return trimmed ? trimmed : "";
-}
-
-function normalizeMetaAdAccountId(value) {
-  const raw = normalizeNonEmptyString(value);
-  if (!raw) return "";
-  const stripped = raw.replace(/^act_/, "");
-  if (!/^\d+$/.test(stripped)) return "";
-  return `act_${stripped}`;
-}
-
-function isRealMetaId(metaId) {
-  const id = normalizeNonEmptyString(metaId);
-  return Boolean(id) && !id.startsWith("stub-");
-}
-
-function formatNowPtBr() {
-  return new Date().toLocaleString("pt-BR", { hour12: false });
-}
-
-function safeJson(value) {
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return "";
-  }
-}
-
-function inferEntityFromAction(action) {
-  const a = normalizeNonEmptyString(action);
-  if (!a) return "unknown";
-  if (a.startsWith("campaign.")) return "campaign";
-  if (a.startsWith("adset.")) return "adset";
-  if (a.startsWith("ad.")) return "ad";
-  if (a.startsWith("meta.")) return "meta";
-  if (a.startsWith("db.")) return "db";
-  return "other";
-}
 
 export default function MetaPausedTest() {
   const [loading, setLoading] = useState(true);
@@ -111,59 +77,15 @@ export default function MetaPausedTest() {
   const [adCreativeId, setAdCreativeId] = useState("");
   const [adCreating, setAdCreating] = useState(false);
 
-  // Batch (Campaign por país)
-  const [batchMode, setBatchMode] = useState("REAL");
-  const [selectedCountryCodes, setSelectedCountryCodes] = useState([]);
-  const [batchRunning, setBatchRunning] = useState(false);
-  const [batchProgress, setBatchProgress] = useState(null);
-  const [batchResults, setBatchResults] = useState([]);
-  const [batchErrors, setBatchErrors] = useState([]);
-
   // Evidência de persistência local
   const [localLoading, setLocalLoading] = useState(false);
   const [localError, setLocalError] = useState("");
   const [localErrorDetails, setLocalErrorDetails] = useState(null);
   const [localGenerated, setLocalGenerated] = useState([]);
 
-  // Logs operacionais (frontend-only, sem tokens)
-  const [opsLogs, setOpsLogs] = useState(() => {
-    try {
-      const raw = localStorage.getItem("metaTest.opsLogs.v1");
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  });
-  const [opsLogsFilter, setOpsLogsFilter] = useState("all");
+  const { opsLogs, setOpsLogs, opsLogsFilter, setOpsLogsFilter, filteredOpsLogs, pushLog } = useOpsLogs();
 
   const isCreatingAny = campaignCreating || adSetCreating || adCreating;
-
-  const filteredOpsLogs = useMemo(() => {
-    const list = Array.isArray(opsLogs) ? opsLogs : [];
-    if (opsLogsFilter === "all") return list;
-    if (opsLogsFilter === "campaign") return list.filter((l) => (l?.entity || inferEntityFromAction(l?.action)) === "campaign");
-    if (opsLogsFilter === "adset") return list.filter((l) => (l?.entity || inferEntityFromAction(l?.action)) === "adset");
-    if (opsLogsFilter === "ad") return list.filter((l) => (l?.entity || inferEntityFromAction(l?.action)) === "ad");
-    if (opsLogsFilter === "meta") return list.filter((l) => (l?.entity || inferEntityFromAction(l?.action)) === "meta");
-    if (opsLogsFilter === "db") return list.filter((l) => (l?.entity || inferEntityFromAction(l?.action)) === "db");
-    return list;
-  }, [opsLogs, opsLogsFilter]);
-
-  function pushLog(entry) {
-    const base = entry ?? {};
-    const entity = normalizeNonEmptyString(base?.entity) || inferEntityFromAction(base?.action);
-    const enriched = { at: formatNowPtBr(), entity, ...base };
-    setOpsLogs((prev) => {
-      const next = [enriched, ...(Array.isArray(prev) ? prev : [])].slice(0, 100);
-      try {
-        localStorage.setItem("metaTest.opsLogs.v1", JSON.stringify(next));
-      } catch {
-        // ignore
-      }
-      return next;
-    });
-  }
 
   function captureError(err, fallbackMessage) {
     const message = err?.message ? String(err.message) : fallbackMessage || "Erro";
@@ -287,17 +209,6 @@ export default function MetaPausedTest() {
     createdMetaAdSetId !== "" &&
     normalizeNonEmptyString(adName) !== "" &&
     (flowMode === "STUB" || (Boolean(backendStatus?.hasAccessToken) && normalizeNonEmptyString(adCreativeId) !== ""));
-
-  const canBatch =
-    !loading &&
-    !isCreatingAny &&
-    !batchRunning &&
-    normalizeNonEmptyString(name) !== "" &&
-    normalizeNonEmptyString(objective) !== "" &&
-    normalizeNonEmptyString(adAccountNormalized) !== "" &&
-    selectedCountryCodes.length > 0 &&
-    countriesSource !== "fallback" &&
-    (batchMode === "STUB" || Boolean(backendStatus?.hasAccessToken));
 
   async function refreshLocalGenerated() {
     setLocalLoading(true);
@@ -481,261 +392,23 @@ export default function MetaPausedTest() {
         countryCode={countryCode}
         countryNameByCode={countryNameByCode}
       />
-
-      <div className="card" style={{ padding: 18, marginTop: 16 }}>
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
-          <div>
-            <div style={{ fontWeight: 900, fontSize: 16 }}>Batch — Campaign por país</div>
-            <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
-              Gera Campaigns independentes por país (todas nascem `PAUSED`).
-            </div>
-          </div>
-          <button
-            type="button"
-            className="pillOutline"
-            onClick={() => setSelectedCountryCodes(countryOptions.map((c) => c.code))}
-            disabled={loading || batchRunning || !countryOptions.length}
-          >
-            Selecionar todos
-          </button>
-        </div>
-
-        <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "end" }}>
-          <label style={{ display: "grid", gap: 6, minWidth: 220 }}>
-            <span className="muted" style={{ fontWeight: 900 }}>
-              Modo (batch)
-            </span>
-            <select
-              value={batchMode}
-              onChange={(e) => setBatchMode(e.target.value)}
-              style={{
-                height: 38,
-                borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                padding: "0 12px",
-                fontSize: 13,
-                fontWeight: 900,
-                outline: "none",
-                background: "#ffffff",
-              }}
-            >
-              <option value="REAL">REAL</option>
-              <option value="STUB">STUB</option>
-            </select>
-          </label>
-
-          <button
-            type="button"
-            className="pillOutline"
-            disabled={!canBatch}
-	            onClick={async () => {
-	              pushLog({
-	                action: "campaign.batch.start",
-	                ok: true,
-	                details: { mode: batchMode, countries: selectedCountryCodes.slice(), total: selectedCountryCodes.length },
-	              });
-	              setBatchRunning(true);
-	              setBatchProgress(null);
-	              setBatchResults([]);
-	              setBatchErrors([]);
-	              setError("");
-	              setErrorDetails(null);
-	              setSuccess("");
-
-              const total = selectedCountryCodes.length;
-              const results = [];
-              const errors = [];
-
-              try {
-                for (let i = 0; i < selectedCountryCodes.length; i += 1) {
-                  const code = selectedCountryCodes[i];
-                  setBatchProgress({ current: i + 1, total, countryCode: code });
-
-                  try {
-                    const res = await createMetaCampaignSimple({
-                      name: name.trim(),
-                      objective,
-                      metaAdAccountId: adAccountNormalized,
-                      countryCode: code,
-                      mode: batchMode,
-                    });
-                    pushLog({
-                      action: "campaign.create.simple",
-                      ok: true,
-                      details: {
-                        mode: res.mode ?? batchMode,
-                        countryCode: code,
-                        metaCampaignId: res?.metaCampaign?.id ?? null,
-                        generatedCampaignId: res?.generatedCampaign?.id ?? null,
-                      },
-                    });
-                    results.push({
-                      countryCode: code,
-                      mode: res.mode ?? batchMode,
-                      metaCampaignId: res?.metaCampaign?.id ?? null,
-                      status: res?.metaCampaign?.status ?? null,
-                      effectiveStatus: res?.metaCampaign?.effective_status ?? null,
-                      generatedCampaignId: res?.generatedCampaign?.id ?? null,
-                    });
-	                  } catch (err) {
-	                    const captured = { message: err?.message ? String(err.message) : "error", details: err?.body?.error?.details ?? err?.body ?? null };
-	                    pushLog({
-	                      action: "campaign.create.simple",
-	                      ok: false,
-	                      error: captured.message,
-	                      details: { mode: batchMode, countryCode: code, errorDetails: captured.details },
-	                    });
-	                    errors.push({
-	                      countryCode: code,
-	                      message: captured.message || "Falha ao criar Campaign.",
-	                    });
-	                  }
-                }
-
-                setBatchResults(results);
-                setBatchErrors(errors);
-                pushLog({
-                  action: "campaign.batch.done",
-                  ok: true,
-                  details: { okCount: results.length, errorCount: errors.length },
-                });
-                setSuccess(
-                  `Batch concluído: ${results.length} sucesso(s) / ${errors.length} erro(s). Todas as Campaigns permanecem PAUSED.`,
-                );
-                await refreshBackendStatus();
-                await refreshLocalGenerated();
-              } finally {
-                setBatchRunning(false);
-                setBatchProgress(null);
-              }
-            }}
-          >
-            {batchRunning ? "Gerando..." : "Gerar Campaigns por país (PAUSED)"}
-          </button>
-
-          {!backendStatus?.hasAccessToken && batchMode === "REAL" ? (
-            <div className="muted" style={{ fontWeight: 800 }}>
-              Token ausente no backend → batch REAL indisponível (mude para STUB ou configure token).
-            </div>
-          ) : null}
-          {countriesSource === "fallback" ? (
-            <div className="muted" style={{ fontWeight: 800 }}>
-              DATA=FALLBACK → DB/API provavelmente indisponível; batch desabilitado.
-            </div>
-          ) : null}
-        </div>
-
-        <div style={{ marginTop: 12 }}>
-          <div className="muted" style={{ fontWeight: 900, marginBottom: 8 }}>
-            Países selecionados ({selectedCountryCodes.length})
-          </div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {countryOptions.map((c) => {
-              const active = selectedCountryCodes.includes(c.code);
-              return (
-                <button
-                  key={c.code}
-                  type="button"
-                  className="pillOutline"
-                  disabled={batchRunning}
-                  onClick={() => {
-                    setSelectedCountryCodes((prev) => {
-                      const has = prev.includes(c.code);
-                      if (has) return prev.filter((x) => x !== c.code);
-                      return [...prev, c.code];
-                    });
-                  }}
-                  style={{
-                    borderColor: active ? "#2563eb" : undefined,
-                    background: active ? "#dbeafe" : undefined,
-                    fontWeight: 900,
-                  }}
-                >
-                  {countryCodeToFlag(c.code)} {c.code}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {batchProgress ? (
-          <div className="card" style={{ padding: 14, marginTop: 12 }}>
-            <div className="muted" style={{ fontWeight: 900 }}>
-              Progresso
-            </div>
-            <div style={{ marginTop: 6, fontWeight: 900 }}>
-              {batchProgress.current}/{batchProgress.total} — {batchProgress.countryCode}
-            </div>
-          </div>
-        ) : null}
-
-        {batchErrors.length ? (
-          <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
-            <div style={{ fontWeight: 900 }}>Erros ({batchErrors.length})</div>
-            <div style={{ marginTop: 8, display: "grid", gap: 6 }}>
-              {batchErrors.slice(0, 8).map((e) => (
-                <div key={e.countryCode} style={{ fontWeight: 800 }}>
-                  {e.countryCode}: {e.message}
-                </div>
-              ))}
-              {batchErrors.length > 8 ? (
-                <div className="muted" style={{ fontWeight: 800 }}>
-                  +{batchErrors.length - 8} erro(s) ocultos…
-                </div>
-              ) : null}
-            </div>
-          </div>
-        ) : null}
-
-        {batchResults.length ? (
-          <div className="card" style={{ padding: 0, marginTop: 12 }}>
-            <div style={{ padding: 14 }}>
-              <div style={{ fontWeight: 900 }}>Resultados ({batchResults.length})</div>
-              <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
-                Evidência de criação + IDs (Meta + DB).
-              </div>
-            </div>
-            <div style={{ borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
-              <table className="dataTable" style={{ marginTop: 0 }}>
-                <thead>
-                  <tr>
-                    <th>País</th>
-                    <th>Modo</th>
-                    <th>Meta Campaign ID</th>
-                    <th>Status</th>
-                    <th>Effective</th>
-                    <th>Generated ID</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {batchResults.map((r) => (
-                    <tr key={`${r.countryCode}-${r.generatedCampaignId}`}>
-                      <td style={{ fontWeight: 900 }}>
-                        {countryCodeToFlag(r.countryCode)} {r.countryCode}
-                      </td>
-                      <td className="muted" style={{ fontWeight: 900 }}>
-                        {r.mode}
-                      </td>
-                      <td className="muted" style={{ fontWeight: 800 }}>
-                        {r.metaCampaignId || "—"}
-                      </td>
-                      <td className="muted" style={{ fontWeight: 900 }}>
-                        {r.status || "—"}
-                      </td>
-                      <td className="muted" style={{ fontWeight: 900 }}>
-                        {r.effectiveStatus || "—"}
-                      </td>
-                      <td className="muted" style={{ fontWeight: 800 }}>
-                        {r.generatedCampaignId || "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : null}
-      </div>
+      <CampaignBatchSection
+        isBusy={loading || isCreatingAny}
+        countriesSource={countriesSource}
+        countryOptions={countryOptions}
+        countryCodeToFlag={countryCodeToFlag}
+        backendHasAccessToken={Boolean(backendStatus?.hasAccessToken)}
+        name={name}
+        objective={objective}
+        adAccountNormalized={adAccountNormalized}
+        createMetaCampaignSimple={createMetaCampaignSimple}
+        refreshBackendStatus={refreshBackendStatus}
+        refreshLocalGenerated={refreshLocalGenerated}
+        pushLog={pushLog}
+        setError={setError}
+        setErrorDetails={setErrorDetails}
+        setSuccess={setSuccess}
+      />
 
       <BackendStatusSection
         refreshBackendStatus={refreshBackendStatus}
@@ -898,115 +571,42 @@ export default function MetaPausedTest() {
       />
 
       {created?.metaCampaign ? (
-        <div className="card" style={{ padding: 18, marginTop: 16 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline" }}>
-            <div style={{ fontWeight: 900, fontSize: 16 }}>Resultado</div>
-            <div className="muted" style={{ fontWeight: 900 }}>
-              Modo: <span style={{ fontWeight: 900 }}>{created.mode || "—"}</span>
-            </div>
-          </div>
-
-          <div
-            style={{
-              marginTop: 12,
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: 12,
-            }}
-          >
-            <div className="card" style={{ padding: 14 }}>
-              <div className="muted" style={{ fontWeight: 900 }}>
-                Meta Campaign ID
-              </div>
-              <div style={{ marginTop: 6, fontWeight: 900 }}>{created.metaCampaign.id || "—"}</div>
-            </div>
-            <div className="card" style={{ padding: 14 }}>
-              <div className="muted" style={{ fontWeight: 900 }}>
-                País
-              </div>
-              <div style={{ marginTop: 6, fontWeight: 900 }}>
-                {createdCountryCode ? `${countryCodeToFlag(createdCountryCode)} ${createdCountryCode}` : "—"}
-              </div>
-            </div>
-            <div className="card" style={{ padding: 14 }}>
-              <div className="muted" style={{ fontWeight: 900 }}>
-                Status
-              </div>
-              <div style={{ marginTop: 8 }}>
-                <StatusBadge>{created.metaCampaign.status || "—"}</StatusBadge>
-              </div>
-            </div>
-            <div className="card" style={{ padding: 14 }}>
-              <div className="muted" style={{ fontWeight: 900 }}>
-                Effective Status
-              </div>
-              <div style={{ marginTop: 8 }}>
-                <StatusBadge>{created.metaCampaign.effective_status || "—"}</StatusBadge>
-              </div>
-            </div>
-          </div>
-
-          <div className="muted" style={{ marginTop: 12, fontWeight: 800 }}>
-            Persistência local:
-            <div style={{ marginTop: 6 }}>
-              `generated_campaigns.id`: <b>{created.generatedCampaign?.id || "—"}</b>
-            </div>
-            <div style={{ marginTop: 6 }}>
-              `generated_campaigns.meta_campaign_id`:{" "}
-              <b>{created.generatedCampaign?.meta_campaign_id || "—"}</b>
-            </div>
-            <div style={{ marginTop: 6 }}>
-              `generated_campaigns.meta_adset_id`: <b>{created.generatedCampaign?.meta_adset_id || "—"}</b>
-            </div>
-            <div style={{ marginTop: 6 }}>
-              `generated_campaigns.meta_ad_id`: <b>{created.generatedCampaign?.meta_ad_id || "—"}</b>
-            </div>
-          </div>
-
-          <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-            <button
-              type="button"
-              className="pillOutline"
-              disabled={
-                createdLoading ||
-                isCreatingAny ||
-                !backendStatus?.hasAccessToken ||
-                !isRealMetaId(created.metaCampaign?.id)
-              }
-	              onClick={async () => {
-	                setCreatedLoading(true);
-	                setError("");
-                  setErrorDetails(null);
-	                try {
-	                  const res = await getMetaCampaign(created.metaCampaign.id);
-	                  setCreated((prev) => ({
-	                    ...(prev ?? {}),
-	                    metaCampaign: res.metaCampaign ?? prev?.metaCampaign ?? null,
-	                  }));
-	                  setSuccess("Status atualizado via Graph.");
-	                  pushLog({ action: "meta.campaign.get", ok: true, details: { metaCampaignId: created.metaCampaign.id } });
-	                } catch (err) {
-	                  const captured = captureError(err, "Falha ao consultar Campaign no Graph.");
-	                  pushLog({
-                      action: "meta.campaign.get",
-                      ok: false,
-                      error: captured.message || "error",
-                      details: { metaCampaignId: created.metaCampaign.id, errorDetails: captured.details },
-                    });
-	                } finally {
-	                  setCreatedLoading(false);
-	                }
-	              }}
-            >
-              {createdLoading ? "Consultando..." : "Consultar status no Graph"}
-            </button>
-            <div className="muted" style={{ fontWeight: 800 }}>
-              {isRealMetaId(created.metaCampaign?.id)
-                ? "Usa `GET /api/meta/campaigns/:id` via backend."
-                : "STUB não consulta Graph."}
-            </div>
-          </div>
-        </div>
+        <CampaignResultSection
+          created={created}
+          createdCountryCode={createdCountryCode}
+          countryCodeToFlag={countryCodeToFlag}
+          createdLoading={createdLoading}
+          refreshDisabled={createdLoading || isCreatingAny || !backendStatus?.hasAccessToken || !isRealMetaId(created.metaCampaign?.id)}
+          onRefreshGraph={async () => {
+            setCreatedLoading(true);
+            setError("");
+            setErrorDetails(null);
+            try {
+              const res = await getMetaCampaign(created.metaCampaign.id);
+              setCreated((prev) => ({
+                ...(prev ?? {}),
+                metaCampaign: res.metaCampaign ?? prev?.metaCampaign ?? null,
+              }));
+              setSuccess("Status atualizado via Graph.");
+              pushLog({ action: "meta.campaign.get", ok: true, details: { metaCampaignId: created.metaCampaign.id } });
+            } catch (err) {
+              const captured = captureError(err, "Falha ao consultar Campaign no Graph.");
+              pushLog({
+                action: "meta.campaign.get",
+                ok: false,
+                error: captured.message || "error",
+                details: { metaCampaignId: created.metaCampaign.id, errorDetails: captured.details },
+              });
+            } finally {
+              setCreatedLoading(false);
+            }
+          }}
+          graphInfoText={
+            isRealMetaId(created.metaCampaign?.id)
+              ? "Usa `GET /api/meta/campaigns/:id` via backend."
+              : "STUB não consulta Graph."
+          }
+        />
       ) : null}
 
       <PausedMetaCampaignsSection metaLoading={metaLoading} metaCampaigns={metaCampaigns} />
