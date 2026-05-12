@@ -45,6 +45,9 @@ export function generatedCampaignsRouter() {
             gc.meta_ad_id,
             gc.meta_ad_status,
             gc.meta_ad_effective_status,
+            gc.ops_last_action,
+            gc.ops_last_ok,
+            gc.ops_last_at,
             gc.name,
             gc.status,
             gc.created_at
@@ -165,6 +168,9 @@ export function generatedCampaignsRouter() {
             meta_ad_id,
             meta_ad_status,
             meta_ad_effective_status,
+            ops_last_action,
+            ops_last_ok,
+            ops_last_at,
             name,
             status,
             created_at
@@ -219,6 +225,9 @@ export function generatedCampaignsRouter() {
             meta_ad_id,
             meta_ad_status,
             meta_ad_effective_status,
+            ops_last_action,
+            ops_last_ok,
+            ops_last_at,
             name,
             status,
             created_at

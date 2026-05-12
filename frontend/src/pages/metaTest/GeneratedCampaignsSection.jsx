@@ -72,6 +72,8 @@ export default function GeneratedCampaignsSection({
               <th>País</th>
               <th>Nome</th>
               <th>Modo</th>
+              <th>Última ação</th>
+              <th>OK</th>
               <th>Meta Campaign ID</th>
               <th>Status Meta</th>
               <th>Effective</th>
@@ -114,6 +116,12 @@ export default function GeneratedCampaignsSection({
                   <td style={{ fontWeight: 900 }}>{gc.name || "—"}</td>
                   <td className="muted" style={{ fontWeight: 900 }}>
                     {mode}
+                  </td>
+                  <td className="muted" style={{ fontWeight: 800 }}>
+                    {gc.ops_last_action || "—"}
+                  </td>
+                  <td className="muted" style={{ fontWeight: 900 }}>
+                    {gc.ops_last_ok === true ? "SIM" : gc.ops_last_ok === false ? "NÃO" : "—"}
                   </td>
                   <td className="muted" style={{ fontWeight: 800 }}>
                     {gc.meta_campaign_id || "—"}
@@ -163,7 +171,7 @@ export default function GeneratedCampaignsSection({
             })}
             {!localGenerated.length ? (
               <tr>
-                <td colSpan={10} className="muted" style={{ fontWeight: 800 }}>
+                <td colSpan={12} className="muted" style={{ fontWeight: 800 }}>
                   {localLoading
                     ? "Carregando..."
                     : "Vazio. Clique em “Atualizar lista” ou crie Campaigns acima para gerar registros."}

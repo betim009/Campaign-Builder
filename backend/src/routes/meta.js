@@ -303,7 +303,10 @@ export function metaRouter() {
               meta_user_id = $4,
               meta_status = $5,
               meta_effective_status = $6,
-              meta_objective = $7
+              meta_objective = $7,
+              ops_last_action = 'campaign.create',
+              ops_last_ok = true,
+              ops_last_at = now()
             WHERE id = $1
             RETURNING
               id,
@@ -478,7 +481,10 @@ export function metaRouter() {
               meta_user_id = $4,
               meta_status = $5,
               meta_effective_status = $6,
-              meta_objective = $7
+              meta_objective = $7,
+              ops_last_action = 'campaign.create.simple',
+              ops_last_ok = true,
+              ops_last_at = now()
             WHERE id = $1
             RETURNING
               id,
@@ -638,7 +644,10 @@ export function metaRouter() {
                 meta_adset_id = $2,
                 meta_adset_status = $3,
                 meta_adset_effective_status = $4,
-                meta_run_mode = $5
+                meta_run_mode = $5,
+                ops_last_action = 'adset.create',
+                ops_last_ok = true,
+                ops_last_at = now()
               WHERE id = $1
               RETURNING
                 id,
@@ -792,7 +801,10 @@ export function metaRouter() {
                 meta_ad_id = $2,
                 meta_ad_status = $3,
                 meta_ad_effective_status = $4,
-                meta_run_mode = $5
+                meta_run_mode = $5,
+                ops_last_action = 'ad.create',
+                ops_last_ok = true,
+                ops_last_at = now()
               WHERE id = $1
               RETURNING
                 id,
