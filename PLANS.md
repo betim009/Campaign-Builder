@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-12 18:48]
+Última atualização: [2026-05-12 18:49]
 
 Regras:
 
@@ -174,34 +174,34 @@ Regras:
 
 ### P1 — UX operacional
 
-- [ ] Melhorar loading states
+- [x] Melhorar loading states
 - [x] `/meta-test`: exibir `LOADING` nos indicadores (DATA/DB/META/SYNC)
 - [x] `/meta-test`: botão “Atualizar” (países) exibe estado `Atualizando...` (commit: 06babdf)
 - [x] `/meta-test`: melhorar loading/erro para status do backend + Graph get (com detalhes + dismiss)
 - [x] `/meta-test`: desabilitar criação REAL de Campaign quando token está ausente no backend (evitar tentativa/erro) (commit: a3bceb2)
 - [x] `/meta-test`: adicionar botão “Copiar” no card de erro global (troubleshooting mais rápido) (commit: 22da892)
-- [ ] Melhorar error states
+- [x] Melhorar error states
 - [x] `/meta-test`: exibir detalhes (`error.details`) em falhas (validate/meta/db)
 - [x] `/meta-test`: permitir dismiss de errors de seção (Meta/DB/status backend)
 - [x] `/meta-test`: permitir dismiss de erro em “Validar token (Graph /me)” (commit: e7459f7)
-- [ ] Melhorar feedback visual de persistência
+- [x] Melhorar feedback visual de persistência
 - [x] `/meta-test`: destacar registro recém-criado/atualizado em `generated_campaigns`
 - [x] `/meta-test`: botão “Copiar IDs” na tabela de `generated_campaigns` (commit: 8db1a26)
 - [x] Exibir provider/fallback no resultado do sync (Campanha Detalhes)
-- [ ] Melhorar timeline/log operacional
+- [x] Melhorar timeline/log operacional
 - [x] `/meta-test`: logs exibem `error` + `details` em falhas
 - [x] `/meta-test`: logs com busca + filtro por status (OK/erro) (commit: 3431926)
-- [ ] Melhorar visualização da estrutura Meta
+- [x] Melhorar visualização da estrutura Meta
 - [x] `/meta-test`: estrutura Meta exibe IDs/status de AdSet/Ad quando disponíveis
-- [ ] Melhorar estados de sucesso/erro
+- [x] Melhorar estados de sucesso/erro
 - [x] `/meta-test`: garantir consistência de alertas (erro limpa sucesso; dismiss manual)
 - [x] `/meta-test`: ao validar token, limpar resultado anterior antes de revalidar (commit: e5dd3f1)
-- [ ] Melhorar navegação operacional
+- [x] Melhorar navegação operacional
 - [x] `/meta-test`: adicionar atalhos (anchors) para navegação entre seções
 - [x] `/meta-test`: atalhos incluem Graph/DB estrutura/logs DB (commit: c6b5eee)
-- [ ] Melhorar percepção REAL vs STUB
+- [x] Melhorar percepção REAL vs STUB
 - [x] `/meta-test`: exibir REAL/STUB por entidade (Campaign/AdSet/Ad) na estrutura Meta
-- [ ] Refinar responsividade
+- [x] Refinar responsividade
 - [x] `/meta-test`: tornar grids responsivos (auto-fit/minmax) para telas menores
 
 ### P2 — Fluxo progressivo Meta
