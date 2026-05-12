@@ -547,7 +547,12 @@ export default function MetaPausedTest() {
                   metaCampaign: res.metaCampaign ?? prev?.metaCampaign ?? null,
                 }));
                 setSuccess("Campaign atualizada via Graph.");
-                pushLog({ action: "meta.campaign.get", ok: true, details: { metaCampaignId: createdMetaCampaignId } });
+                await refreshLocalGenerated();
+                pushLog({
+                  action: "meta.campaign.get",
+                  ok: true,
+                  details: { metaCampaignId: createdMetaCampaignId, metaCampaign: res?.metaCampaign ?? null },
+                });
               } catch (err) {
                 const captured = captureError(err, "Falha ao consultar Campaign no Graph.");
                 pushLog({
@@ -580,7 +585,13 @@ export default function MetaPausedTest() {
                   metaAdSet: res.metaAdSet ?? prev?.metaAdSet ?? null,
                 }));
                 setSuccess("AdSet atualizado via Graph.");
-                pushLog({ action: "meta.adset.get", ok: true, details: { metaAdSetId: adSetEntityId } });
+                await refreshLocalGenerated();
+                await refreshStructure(createdGeneratedCampaignId);
+                pushLog({
+                  action: "meta.adset.get",
+                  ok: true,
+                  details: { metaAdSetId: adSetEntityId, metaAdSet: res?.metaAdSet ?? null },
+                });
               } catch (err) {
                 const captured = captureError(err, "Falha ao consultar AdSet no Graph.");
                 pushLog({
@@ -613,7 +624,13 @@ export default function MetaPausedTest() {
                   metaAd: res.metaAd ?? prev?.metaAd ?? null,
                 }));
                 setSuccess("Ad atualizado via Graph.");
-                pushLog({ action: "meta.ad.get", ok: true, details: { metaAdId: adEntityId } });
+                await refreshLocalGenerated();
+                await refreshStructure(createdGeneratedCampaignId);
+                pushLog({
+                  action: "meta.ad.get",
+                  ok: true,
+                  details: { metaAdId: adEntityId, metaAd: res?.metaAd ?? null },
+                });
               } catch (err) {
                 const captured = captureError(err, "Falha ao consultar Ad no Graph.");
                 pushLog({
