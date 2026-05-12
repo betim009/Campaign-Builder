@@ -67,6 +67,13 @@
 
 - Estrutura persistida (AdSet/Ad) por `generated_campaign_id`: `GET /api/generated-campaigns/{generated_campaign_id}/structure`
 
+### Ops Logs — Persistência (dev)
+
+Última atualização: [2026-05-12 18:28]
+
+- Listar logs persistidos (padrão `source=meta-test`): `GET /api/ops-logs?limit=200`
+- Inserir logs (best-effort, usado pelo `/meta-test`): `POST /api/ops-logs` com body `{ "source": "meta-test", "entries": [...] }`
+
 ### Registros operacionais (cronológico)
 
 Esta seção deve ser atualizada sempre que:
