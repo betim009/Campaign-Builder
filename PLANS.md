@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-12 18:16]
+Última atualização: [2026-05-12 18:17]
 
 Regras:
 
@@ -186,6 +186,7 @@ Regras:
 - [x] `/meta-test`: permitir dismiss de erro em “Validar token (Graph /me)” (commit: e7459f7)
 - [ ] Melhorar feedback visual de persistência
 - [x] `/meta-test`: destacar registro recém-criado/atualizado em `generated_campaigns`
+- [x] `/meta-test`: botão “Copiar IDs” na tabela de `generated_campaigns` (commit: 8db1a26)
 - [x] Exibir provider/fallback no resultado do sync (Campanha Detalhes)
 - [ ] Melhorar timeline/log operacional
 - [x] `/meta-test`: logs exibem `error` + `details` em falhas
