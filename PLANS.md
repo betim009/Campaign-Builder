@@ -239,7 +239,7 @@ Regras:
 - [x] Persistir logs operacionais (ops_logs + POST best-effort no `/meta-test`) (commit: 6ab378e)
 - [x] `/meta-test`: exibir logs persistidos (DB) via `GET /api/ops-logs` (commit: ad17b42)
 - [x] Persistir estados REAL/STUB (`generated_campaigns.meta_run_mode`) (commit: b8ac3bc)
-- [ ] Persistir falhas operacionais
+- [x] Persistir falhas operacionais (ops_logs com `ok=false` + `error/details`) (commit: 6ab378e)
 - [ ] Persistir histórico Meta
 - [x] `/meta-test`: registrar snapshots do Graph em `ops_logs` (meta.*.get) (commit: 7489ed7)
 - [ ] Persistir status de execução
