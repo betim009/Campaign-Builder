@@ -1,4 +1,4 @@
-function getBaseUrl() {
+export function getBackendBaseUrl() {
   const raw = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
   return String(raw).replace(/\/+$/, "");
 }
@@ -6,7 +6,7 @@ function getBaseUrl() {
 function buildUrl(path) {
   const p = String(path || "");
   const normalized = p.startsWith("/") ? p : `/${p}`;
-  return `${getBaseUrl()}${normalized}`;
+  return `${getBackendBaseUrl()}${normalized}`;
 }
 
 async function readJson(res) {

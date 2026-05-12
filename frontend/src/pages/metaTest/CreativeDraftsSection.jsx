@@ -1,3 +1,5 @@
+import { getBackendBaseUrl } from "../../services/http.js";
+
 export default function CreativeDraftsSection({
   generatedCampaignId,
   assets,
@@ -24,6 +26,10 @@ export default function CreativeDraftsSection({
   destinationUrl,
   setDestinationUrl,
 }) {
+  const baseUrl = getBackendBaseUrl();
+  const selectedAsset = (assets ?? []).find((a) => a.id === draftAssetId) ?? null;
+  const selectedAssetUrl = selectedAsset?.url ? `${baseUrl}${selectedAsset.url}` : null;
+
   return (
     <div id="meta-test-creative-drafts" className="card" style={{ padding: 0, marginTop: 16 }}>
       <div style={{ padding: 16, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
@@ -190,6 +196,45 @@ export default function CreativeDraftsSection({
             Requer seleção de `generated_campaigns`.
           </div>
         </div>
+
+        <div className="card" style={{ padding: 14, marginTop: 12 }}>
+          <div className="muted" style={{ fontWeight: 900 }}>
+            Preview (operacional)
+          </div>
+          <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
+            <div className="card" style={{ padding: 12 }}>
+              <div className="muted" style={{ fontWeight: 900 }}>Mídia</div>
+              <div style={{ marginTop: 10 }}>
+                {selectedAssetUrl ? (
+                  <img
+                    src={selectedAssetUrl}
+                    alt={selectedAsset?.original_name || selectedAsset?.stored_name || "asset"}
+                    style={{ maxWidth: "100%", borderRadius: 12, border: "1px solid #e5e7eb" }}
+                  />
+                ) : (
+                  <div className="muted" style={{ fontWeight: 800 }}>—</div>
+                )}
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: 12 }}>
+              <div className="muted" style={{ fontWeight: 900 }}>Texto</div>
+              <div style={{ marginTop: 8, fontWeight: 900 }}>{headline || "—"}</div>
+              <div className="muted" style={{ marginTop: 8, fontWeight: 800, whiteSpace: "pre-wrap" }}>
+                {primaryText || "—"}
+              </div>
+              <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
+                {description ? `Descrição: ${description}` : "Descrição: —"}
+              </div>
+              <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
+                {ctaType ? `CTA: ${ctaType}` : "CTA: —"}
+              </div>
+              <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
+                {destinationUrl ? `URL: ${destinationUrl}` : "URL: —"}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {error ? (
@@ -264,4 +309,3 @@ export default function CreativeDraftsSection({
     </div>
   );
 }
-

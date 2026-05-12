@@ -1,3 +1,5 @@
+import { getBackendBaseUrl } from "../../services/http.js";
+
 export default function CreativeAssetsSection({
   loading,
   error,
@@ -10,6 +12,7 @@ export default function CreativeAssetsSection({
   uploadDisabled,
   safeJson,
 }) {
+  const baseUrl = getBackendBaseUrl();
   return (
     <div id="meta-test-creative-assets" className="card" style={{ padding: 0, marginTop: 16 }}>
       <div style={{ padding: 16, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
@@ -95,7 +98,7 @@ export default function CreativeAssetsSection({
                 <td className="muted" style={{ fontWeight: 800 }}>{a.mime_type || "—"}</td>
                 <td className="muted" style={{ fontWeight: 800 }}>{typeof a.size_bytes === "number" ? a.size_bytes : "—"}</td>
                 <td className="muted" style={{ fontWeight: 800 }}>
-                  {a.url || "—"}
+                  {a.url ? `${baseUrl}${a.url}` : "—"}
                 </td>
                 <td>
                   <button
@@ -104,7 +107,7 @@ export default function CreativeAssetsSection({
                     disabled={!a.url}
                     onClick={async () => {
                       try {
-                        await navigator.clipboard.writeText(String(a.url || ""));
+                        await navigator.clipboard.writeText(a.url ? `${baseUrl}${a.url}` : "");
                       } catch {
                         // ignore
                       }
@@ -129,4 +132,3 @@ export default function CreativeAssetsSection({
     </div>
   );
 }
-
