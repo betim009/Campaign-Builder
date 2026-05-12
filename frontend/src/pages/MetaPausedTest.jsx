@@ -346,7 +346,7 @@ export default function MetaPausedTest() {
 
   function selectGeneratedCampaignRow(gc) {
     const metaCampaignId = normalizeNonEmptyString(gc?.meta_campaign_id);
-    const inferredMode = metaCampaignId ? (metaCampaignId.startsWith("stub-") ? "STUB" : "REAL") : "REAL";
+    const inferredMode = normalizeNonEmptyString(gc?.meta_run_mode) || (metaCampaignId ? (metaCampaignId.startsWith("stub-") ? "STUB" : "REAL") : "REAL");
     const nextCountryCode = normalizeNonEmptyString(gc?.country_code) || countryCode;
     const nextName = normalizeNonEmptyString(gc?.name) || name;
 

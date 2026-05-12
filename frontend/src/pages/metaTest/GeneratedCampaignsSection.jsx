@@ -83,7 +83,9 @@ export default function GeneratedCampaignsSection({
           <tbody>
             {localGenerated.map((gc) => {
               const metaId = gc.meta_campaign_id || "";
-              const mode = metaId && String(metaId).startsWith("stub-") ? "STUB" : metaId ? "REAL" : "—";
+              const mode =
+                gc.meta_run_mode ||
+                (metaId && String(metaId).startsWith("stub-") ? "STUB" : metaId ? "REAL" : "—");
               const isFocused = createdGeneratedCampaignId && gc.id === createdGeneratedCampaignId;
               return (
                 <tr

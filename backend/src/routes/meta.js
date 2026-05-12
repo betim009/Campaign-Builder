@@ -298,6 +298,7 @@ export function metaRouter() {
             UPDATE generated_campaigns
             SET
               meta_campaign_id = $2,
+              meta_run_mode = 'REAL',
               meta_ad_account_id = $3,
               meta_user_id = $4,
               meta_status = $5,
@@ -309,6 +310,7 @@ export function metaRouter() {
               campaign_id,
               country_code,
               meta_campaign_id,
+              meta_run_mode,
               meta_ad_account_id,
               meta_user_id,
               meta_status,
@@ -433,6 +435,7 @@ export function metaRouter() {
               campaign_id,
               country_code,
               meta_campaign_id,
+              meta_run_mode,
               meta_ad_account_id,
               meta_user_id,
               meta_status,
@@ -470,6 +473,7 @@ export function metaRouter() {
             UPDATE generated_campaigns
             SET
               meta_campaign_id = $2,
+              meta_run_mode = $8,
               meta_ad_account_id = $3,
               meta_user_id = $4,
               meta_status = $5,
@@ -481,6 +485,7 @@ export function metaRouter() {
               campaign_id,
               country_code,
               meta_campaign_id,
+              meta_run_mode,
               meta_ad_account_id,
               meta_user_id,
               meta_status,
@@ -497,7 +502,8 @@ export function metaRouter() {
             metaUserId,
             normalizeNonEmptyString(created?.status),
             normalizeNonEmptyString(created?.effective_status),
-            normalizeNonEmptyString(created?.objective)
+            normalizeNonEmptyString(created?.objective),
+            mode
           ]
         )
 
@@ -631,13 +637,15 @@ export function metaRouter() {
               SET
                 meta_adset_id = $2,
                 meta_adset_status = $3,
-                meta_adset_effective_status = $4
+                meta_adset_effective_status = $4,
+                meta_run_mode = $5
               WHERE id = $1
               RETURNING
                 id,
                 campaign_id,
                 country_code,
                 meta_campaign_id,
+                meta_run_mode,
                 meta_ad_account_id,
                 meta_user_id,
                 meta_status,
@@ -657,7 +665,8 @@ export function metaRouter() {
               generatedCampaignId,
               String(created.id),
               normalizeNonEmptyString(created?.status),
-              normalizeNonEmptyString(created?.effective_status)
+              normalizeNonEmptyString(created?.effective_status),
+              mode
             ]
           )
 
@@ -667,15 +676,17 @@ export function metaRouter() {
                 generated_campaign_id,
                 meta_adset_id,
                 name,
+                run_mode,
                 status,
                 effective_status
               )
-              VALUES ($1, $2, $3, $4, $5)
+              VALUES ($1, $2, $3, $4, $5, $6)
             `,
             [
               generatedCampaignId,
               String(created.id),
               name,
+              mode,
               normalizeNonEmptyString(created?.status) ?? 'PAUSED',
               normalizeNonEmptyString(created?.effective_status)
             ]
@@ -780,13 +791,15 @@ export function metaRouter() {
               SET
                 meta_ad_id = $2,
                 meta_ad_status = $3,
-                meta_ad_effective_status = $4
+                meta_ad_effective_status = $4,
+                meta_run_mode = $5
               WHERE id = $1
               RETURNING
                 id,
                 campaign_id,
                 country_code,
                 meta_campaign_id,
+                meta_run_mode,
                 meta_ad_account_id,
                 meta_user_id,
                 meta_status,
@@ -806,7 +819,8 @@ export function metaRouter() {
               generatedCampaignId,
               String(created.id),
               normalizeNonEmptyString(created?.status),
-              normalizeNonEmptyString(created?.effective_status)
+              normalizeNonEmptyString(created?.effective_status),
+              mode
             ]
           )
 
@@ -829,16 +843,18 @@ export function metaRouter() {
                 generated_adset_id,
                 meta_ad_id,
                 name,
+                run_mode,
                 status,
                 effective_status
               )
-              VALUES ($1, $2, $3, $4, $5, $6)
+              VALUES ($1, $2, $3, $4, $5, $6, $7)
             `,
             [
               generatedCampaignId,
               generatedAdSetRowId,
               String(created.id),
               name,
+              mode,
               normalizeNonEmptyString(created?.status) ?? 'PAUSED',
               normalizeNonEmptyString(created?.effective_status)
             ]
