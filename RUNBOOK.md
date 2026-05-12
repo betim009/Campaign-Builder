@@ -74,6 +74,12 @@
 - Listar logs persistidos (padrão `source=meta-test`): `GET /api/ops-logs?limit=200`
 - Inserir logs (best-effort, usado pelo `/meta-test`): `POST /api/ops-logs` com body `{ "source": "meta-test", "entries": [...] }`
 
+### DB — Run Mode (REAL/STUB)
+
+Última atualização: [2026-05-12 18:40]
+
+- `generated_campaigns.meta_run_mode` persiste o modo operacional inferido/executado (`REAL`/`STUB`) para reduzir ambiguidade no `/meta-test`.
+
 ### Registros operacionais (cronológico)
 
 Esta seção deve ser atualizada sempre que:
