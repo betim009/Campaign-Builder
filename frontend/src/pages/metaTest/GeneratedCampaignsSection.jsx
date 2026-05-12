@@ -9,6 +9,7 @@ export default function GeneratedCampaignsSection({
   onDismissError,
   selectDisabled,
   onSelect,
+  onCopyIds,
   safeJson,
   countryCodeToFlag,
 }) {
@@ -134,15 +135,26 @@ export default function GeneratedCampaignsSection({
                     </div>
                   </td>
                   <td>
-                    <button
-                      type="button"
-                      className="pillOutline"
-                      onClick={() => onSelect(gc)}
-                      disabled={selectDisabled}
-                      style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 900 }}
-                    >
-                      Selecionar
-                    </button>
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      <button
+                        type="button"
+                        className="pillOutline"
+                        onClick={() => onSelect(gc)}
+                        disabled={selectDisabled}
+                        style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 900 }}
+                      >
+                        Selecionar
+                      </button>
+                      <button
+                        type="button"
+                        className="pillOutline"
+                        onClick={() => onCopyIds(gc)}
+                        disabled={!gc?.id}
+                        style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 900 }}
+                      >
+                        Copiar IDs
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
@@ -166,4 +178,3 @@ export default function GeneratedCampaignsSection({
     </div>
   );
 }
-

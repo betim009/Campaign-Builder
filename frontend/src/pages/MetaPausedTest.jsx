@@ -244,6 +244,31 @@ export default function MetaPausedTest() {
     selectGeneratedCampaignRow(gc);
   }
 
+  async function handleCopyGeneratedCampaignIds(gc) {
+    setError("");
+    setErrorDetails(null);
+    setSuccess("");
+    try {
+      const payload = {
+        generatedCampaignId: gc?.id ?? null,
+        metaCampaignId: gc?.meta_campaign_id ?? null,
+        metaAdSetId: gc?.meta_adset_id ?? null,
+        metaAdId: gc?.meta_ad_id ?? null,
+      };
+      await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+      setSuccess("IDs copiados para a área de transferência.");
+      pushLog({ action: "db.generated_campaigns.copy_ids", ok: true, details: payload });
+    } catch (err) {
+      setError("Não foi possível copiar os IDs.");
+      setErrorDetails(err?.message ? String(err.message) : null);
+      pushLog({
+        action: "db.generated_campaigns.copy_ids",
+        ok: false,
+        error: err?.message ? String(err.message) : "error",
+      });
+    }
+  }
+
   function selectGeneratedCampaignRow(gc) {
     const metaCampaignId = normalizeNonEmptyString(gc?.meta_campaign_id);
     const inferredMode = metaCampaignId ? (metaCampaignId.startsWith("stub-") ? "STUB" : "REAL") : "REAL";
@@ -474,6 +499,7 @@ export default function MetaPausedTest() {
         }}
         selectDisabled={localLoading || isCreatingAny}
         onSelect={handleSelectGeneratedCampaignRow}
+        onCopyIds={handleCopyGeneratedCampaignIds}
         safeJson={safeJson}
         countryCodeToFlag={countryCodeToFlag}
       />
