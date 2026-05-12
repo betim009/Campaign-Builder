@@ -1,0 +1,129 @@
+import { Router } from 'express'
+import { getPool } from '../db.js'
+import { asyncHandler } from '../lib/asyncHandler.js'
+import { jsonError, parseLimit } from '../lib/http.js'
+import { isUuid } from '../lib/validate.js'
+
+function normalizeNonEmptyString(value, { maxLen } = {}) {
+  if (typeof value !== 'string') return null
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  if (maxLen && trimmed.length > maxLen) return trimmed.slice(0, maxLen)
+  return trimmed
+}
+
+export function creativeDraftsRouter() {
+  const router = Router()
+
+  router.get(
+    '/',
+    asyncHandler(async (req, res) => {
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      const limit = parseLimit(req.query.limit, 50, 200)
+      const generatedCampaignId = normalizeNonEmptyString(req.query.generatedCampaignId)
+      if (generatedCampaignId && !isUuid(generatedCampaignId)) {
+        return jsonError(res, 400, 'Invalid generatedCampaignId')
+      }
+
+      const pool = getPool()
+      const { rows } = await pool.query(
+        `
+          SELECT
+            cd.id,
+            cd.generated_campaign_id,
+            cd.creative_asset_id,
+            cd.primary_text,
+            cd.headline,
+            cd.description,
+            cd.cta_type,
+            cd.destination_url,
+            cd.status,
+            cd.meta_creative_id,
+            cd.created_at,
+            ca.stored_name AS asset_stored_name,
+            ca.original_name AS asset_original_name,
+            ca.mime_type AS asset_mime_type
+          FROM creative_drafts cd
+          LEFT JOIN creative_assets ca ON ca.id = cd.creative_asset_id
+          WHERE ($1::uuid IS NULL OR cd.generated_campaign_id = $1::uuid)
+          ORDER BY cd.created_at DESC
+          LIMIT $2
+        `,
+        [generatedCampaignId, limit]
+      )
+
+      const drafts = rows.map((d) => ({
+        ...d,
+        asset_url: d.asset_stored_name ? `/uploads/creative-assets/${encodeURIComponent(d.asset_stored_name)}` : null
+      }))
+
+      return res.json({ ok: true, creative_drafts: drafts })
+    })
+  )
+
+  router.post(
+    '/',
+    asyncHandler(async (req, res) => {
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      const generatedCampaignId = normalizeNonEmptyString(req.body?.generatedCampaignId)
+      if (!generatedCampaignId || !isUuid(generatedCampaignId)) {
+        return jsonError(res, 400, 'Invalid generatedCampaignId')
+      }
+
+      const creativeAssetId = normalizeNonEmptyString(req.body?.creativeAssetId)
+      if (creativeAssetId && !isUuid(creativeAssetId)) {
+        return jsonError(res, 400, 'Invalid creativeAssetId')
+      }
+
+      const primaryText = normalizeNonEmptyString(req.body?.primaryText, { maxLen: 5000 })
+      const headline = normalizeNonEmptyString(req.body?.headline, { maxLen: 255 })
+      const description = normalizeNonEmptyString(req.body?.description, { maxLen: 1000 })
+      const ctaType = normalizeNonEmptyString(req.body?.ctaType, { maxLen: 60 })
+      const destinationUrl = normalizeNonEmptyString(req.body?.destinationUrl, { maxLen: 2048 })
+
+      if (!primaryText && !headline && !description && !creativeAssetId) {
+        return jsonError(res, 400, 'Draft is empty (provide text and/or creativeAssetId)')
+      }
+
+      const pool = getPool()
+      const { rows } = await pool.query(
+        `
+          INSERT INTO creative_drafts (
+            generated_campaign_id,
+            creative_asset_id,
+            primary_text,
+            headline,
+            description,
+            cta_type,
+            destination_url
+          )
+          VALUES ($1, $2::uuid, $3, $4, $5, $6, $7)
+          RETURNING
+            id,
+            generated_campaign_id,
+            creative_asset_id,
+            primary_text,
+            headline,
+            description,
+            cta_type,
+            destination_url,
+            status,
+            meta_creative_id,
+            created_at
+        `,
+        [generatedCampaignId, creativeAssetId, primaryText, headline, description, ctaType, destinationUrl]
+      )
+
+      return res.status(201).json({ ok: true, creative_draft: rows[0] })
+    })
+  )
+
+  return router
+}
+
