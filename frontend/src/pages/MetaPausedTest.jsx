@@ -247,6 +247,8 @@ export default function MetaPausedTest() {
   function selectGeneratedCampaignRow(gc) {
     const metaCampaignId = normalizeNonEmptyString(gc?.meta_campaign_id);
     const inferredMode = metaCampaignId ? (metaCampaignId.startsWith("stub-") ? "STUB" : "REAL") : "REAL";
+    const nextCountryCode = normalizeNonEmptyString(gc?.country_code) || countryCode;
+    const nextName = normalizeNonEmptyString(gc?.name) || name;
 
     setMode(inferredMode);
 
@@ -281,14 +283,19 @@ export default function MetaPausedTest() {
     if (normalizeNonEmptyString(gc?.meta_ad_account_id)) {
       setMetaAdAccountId(gc.meta_ad_account_id);
     }
-    if (normalizeNonEmptyString(gc?.country_code)) {
-      setCountryCode(gc.country_code);
-    }
-    if (normalizeNonEmptyString(gc?.name)) {
-      setName(gc.name);
-    }
+    if (nextCountryCode) setCountryCode(nextCountryCode);
+    if (nextName) setName(nextName);
     if (normalizeNonEmptyString(gc?.meta_objective)) {
       setObjective(gc.meta_objective);
+    }
+
+    if (!normalizeNonEmptyString(adSetName)) {
+      const code = nextCountryCode || "XX";
+      setAdSetName(`AdSet ${code} — Broad`);
+    }
+    if (!normalizeNonEmptyString(adName)) {
+      const code = nextCountryCode || "XX";
+      setAdName(`Ad ${code} — Image 1`);
     }
 
     pushLog({
@@ -511,6 +518,14 @@ export default function MetaPausedTest() {
           setSuccess("");
           setCreated(null);
           try {
+            if (!normalizeNonEmptyString(adSetName)) {
+              const code = countryCode || "XX";
+              setAdSetName(`AdSet ${code} — Broad`);
+            }
+            if (!normalizeNonEmptyString(adName)) {
+              const code = countryCode || "XX";
+              setAdName(`Ad ${code} — Image 1`);
+            }
             const res = await createMetaCampaignSimple({
               name: name.trim(),
               objective,
