@@ -5,6 +5,7 @@ import FlowProgressCard from "./metaTest/FlowProgressCard.jsx";
 import ModeStatusCard from "./metaTest/ModeStatusCard.jsx";
 import BackendStatusSection from "./metaTest/BackendStatusSection.jsx";
 import OpsLogsSection from "./metaTest/OpsLogsSection.jsx";
+import OpsLogsDbSection from "./metaTest/OpsLogsDbSection.jsx";
 import GeneratedCampaignsSection from "./metaTest/GeneratedCampaignsSection.jsx";
 import GeneratedStructureSection from "./metaTest/GeneratedStructureSection.jsx";
 import StepAdSetSection from "./metaTest/StepAdSetSection.jsx";
@@ -21,6 +22,7 @@ import { createMetaAd, getMetaAd } from "../services/metaAds.js";
 import { getMetaStatus, validateMetaToken } from "../services/metaStatus.js";
 import { countryCodeToFlag } from "../services/fallbacks.js";
 import { getGeneratedCampaignStructure, listGeneratedCampaigns } from "../services/generatedCampaigns.js";
+import { listOpsLogs } from "../services/opsLogs.js";
 import useOpsLogs from "./metaTest/useOpsLogs.js";
 import {
   isRealMetaId,
@@ -92,6 +94,11 @@ export default function MetaPausedTest() {
   const [structureAdSets, setStructureAdSets] = useState([]);
   const [structureAds, setStructureAds] = useState([]);
   const [structureForId, setStructureForId] = useState("");
+
+  const [dbOpsLogsLoading, setDbOpsLogsLoading] = useState(false);
+  const [dbOpsLogsError, setDbOpsLogsError] = useState("");
+  const [dbOpsLogsErrorDetails, setDbOpsLogsErrorDetails] = useState(null);
+  const [dbOpsLogs, setDbOpsLogs] = useState([]);
 
   const { opsLogs, setOpsLogs, opsLogsFilter, setOpsLogsFilter, filteredOpsLogs, pushLog } = useOpsLogs();
 
@@ -286,6 +293,22 @@ export default function MetaPausedTest() {
       });
     } finally {
       setStructureLoading(false);
+    }
+  }
+
+  async function refreshDbOpsLogs() {
+    setDbOpsLogsLoading(true);
+    setDbOpsLogsError("");
+    setDbOpsLogsErrorDetails(null);
+    try {
+      const res = await listOpsLogs({ source: "meta-test", limit: 200 });
+      setDbOpsLogs(res.opsLogs ?? []);
+    } catch (err) {
+      setDbOpsLogs([]);
+      setDbOpsLogsError(err?.message ? String(err.message) : "Falha ao carregar ops_logs (DB/API indisponível).");
+      setDbOpsLogsErrorDetails(err?.body?.error?.details ?? err?.body ?? null);
+    } finally {
+      setDbOpsLogsLoading(false);
     }
   }
 
@@ -699,6 +722,20 @@ export default function MetaPausedTest() {
         setError={setError}
         setErrorDetails={setErrorDetails}
         setSuccess={setSuccess}
+      />
+
+      <OpsLogsDbSection
+        loading={dbOpsLogsLoading}
+        error={dbOpsLogsError}
+        errorDetails={dbOpsLogsErrorDetails}
+        opsLogs={dbOpsLogs}
+        refreshDisabled={dbOpsLogsLoading || loading || isCreatingAny}
+        onRefresh={refreshDbOpsLogs}
+        onDismissError={() => {
+          setDbOpsLogsError("");
+          setDbOpsLogsErrorDetails(null);
+        }}
+        safeJson={safeJson}
       />
 
       <StepCampaignSection
