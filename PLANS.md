@@ -193,6 +193,7 @@ Regras:
 - [x] `/meta-test`: estrutura Meta exibe IDs/status de AdSet/Ad quando disponíveis
 - [ ] Melhorar estados de sucesso/erro
 - [x] `/meta-test`: garantir consistência de alertas (erro limpa sucesso; dismiss manual)
+- [x] `/meta-test`: ao validar token, limpar resultado anterior antes de revalidar (commit: e5dd3f1)
 - [ ] Melhorar navegação operacional
 - [x] `/meta-test`: adicionar atalhos (anchors) para navegação entre seções
 - [ ] Melhorar percepção REAL vs STUB
