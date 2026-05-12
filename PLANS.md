@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-12 18:42]
+Última atualização: [2026-05-12 18:43]
 
 Regras:
 
@@ -198,6 +198,7 @@ Regras:
 - [x] `/meta-test`: ao validar token, limpar resultado anterior antes de revalidar (commit: e5dd3f1)
 - [ ] Melhorar navegação operacional
 - [x] `/meta-test`: adicionar atalhos (anchors) para navegação entre seções
+- [x] `/meta-test`: atalhos incluem Graph/DB estrutura/logs DB (commit: c6b5eee)
 - [ ] Melhorar percepção REAL vs STUB
 - [x] `/meta-test`: exibir REAL/STUB por entidade (Campaign/AdSet/Ad) na estrutura Meta
 - [ ] Refinar responsividade
