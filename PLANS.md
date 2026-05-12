@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-12 18:44]
+Última atualização: [2026-05-12 18:45]
 
 Regras:
 
@@ -241,7 +241,7 @@ Regras:
 - [x] `/meta-test`: exibir logs persistidos (DB) via `GET /api/ops-logs` (commit: ad17b42)
 - [x] Persistir estados REAL/STUB (`generated_campaigns.meta_run_mode`) (commit: b8ac3bc)
 - [x] Persistir falhas operacionais (ops_logs com `ok=false` + `error/details`) (commit: 6ab378e)
-- [ ] Persistir histórico Meta
+- [x] Persistir histórico Meta (ops_logs + snapshots Graph) (commit: 7489ed7)
 - [x] `/meta-test`: registrar snapshots do Graph em `ops_logs` (meta.*.get) (commit: 7489ed7)
 - [ ] Persistir status de execução
 - [x] Persistir estrutura Campaign/AdSet/Ad
