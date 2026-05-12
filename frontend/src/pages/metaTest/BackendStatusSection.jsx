@@ -150,7 +150,20 @@ export default function BackendStatusSection({
 
       {validateError ? (
         <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
-          <div style={{ fontWeight: 900 }}>Erro (validate)</div>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+            <div style={{ fontWeight: 900 }}>Erro (validate)</div>
+            <button
+              type="button"
+              className="pillOutline"
+              onClick={() => {
+                setValidateError("");
+                setValidateErrorDetails(null);
+              }}
+              style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 900 }}
+            >
+              Fechar
+            </button>
+          </div>
           <div style={{ marginTop: 6, fontWeight: 700 }}>{validateError}</div>
           {validateErrorDetails ? (
             <pre
@@ -183,4 +196,3 @@ export default function BackendStatusSection({
     </div>
   );
 }
-
