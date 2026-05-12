@@ -163,7 +163,59 @@ export default function MetaPausedTest() {
     refresh();
     refreshBackendStatus();
     refreshLocalGenerated();
+    try {
+      const raw = localStorage.getItem("metaTest.draft.v1");
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed && typeof parsed === "object") {
+        if (typeof parsed.mode === "string") setMode(parsed.mode === "STUB" ? "STUB" : "REAL");
+        if (typeof parsed.name === "string") setName(parsed.name);
+        if (typeof parsed.objective === "string") setObjective(parsed.objective);
+        if (typeof parsed.metaAdAccountId === "string") setMetaAdAccountId(parsed.metaAdAccountId);
+        if (typeof parsed.countryCode === "string") setCountryCode(parsed.countryCode);
+        if (typeof parsed.adSetName === "string") setAdSetName(parsed.adSetName);
+        if (typeof parsed.adSetDailyBudget === "string") setAdSetDailyBudget(parsed.adSetDailyBudget);
+        if (typeof parsed.adSetBillingEvent === "string") setAdSetBillingEvent(parsed.adSetBillingEvent);
+        if (typeof parsed.adSetOptimizationGoal === "string") setAdSetOptimizationGoal(parsed.adSetOptimizationGoal);
+        if (typeof parsed.adName === "string") setAdName(parsed.adName);
+        if (typeof parsed.adCreativeId === "string") setAdCreativeId(parsed.adCreativeId);
+      }
+    } catch {
+      // ignore
+    }
   }, []);
+
+  useEffect(() => {
+    try {
+      const draft = {
+        mode,
+        name,
+        objective,
+        metaAdAccountId,
+        countryCode,
+        adSetName,
+        adSetDailyBudget,
+        adSetBillingEvent,
+        adSetOptimizationGoal,
+        adName,
+        adCreativeId,
+      };
+      localStorage.setItem("metaTest.draft.v1", JSON.stringify(draft));
+    } catch {
+      // ignore
+    }
+  }, [
+    mode,
+    name,
+    objective,
+    metaAdAccountId,
+    countryCode,
+    adSetName,
+    adSetDailyBudget,
+    adSetBillingEvent,
+    adSetOptimizationGoal,
+    adName,
+    adCreativeId,
+  ]);
 
   const countryOptions = useMemo(() => countries ?? [], [countries]);
   const countryNameByCode = useMemo(
@@ -466,9 +518,32 @@ export default function MetaPausedTest() {
       <div id="meta-test-recovery" className="card" style={{ padding: 18, marginTop: 16 }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
           <div style={{ fontWeight: 900 }}>Recuperação operacional</div>
-          <button type="button" className="pillOutline" disabled={!createdGeneratedCampaignId} onClick={handleCopyRecoveryBundle}>
-            Copiar bundle (DB + logs)
-          </button>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="pillOutline"
+              onClick={() => {
+                try {
+                  localStorage.removeItem("metaTest.draft.v1");
+                } catch {
+                  // ignore
+                }
+                setSuccess("Draft local limpo.");
+                setError("");
+                setErrorDetails(null);
+              }}
+            >
+              Limpar draft
+            </button>
+            <button
+              type="button"
+              className="pillOutline"
+              disabled={!createdGeneratedCampaignId}
+              onClick={handleCopyRecoveryBundle}
+            >
+              Copiar bundle (DB + logs)
+            </button>
+          </div>
         </div>
         <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
           Exporta um JSON com IDs, registro selecionado, estrutura persistida e logs do DB para troubleshooting rápido.
