@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-12 18:30]
+Última atualização: [2026-05-12 18:38]
 
 Regras:
 
@@ -242,7 +242,7 @@ Regras:
 - [ ] Persistir falhas operacionais
 - [ ] Persistir histórico Meta
 - [ ] Persistir status de execução
-- [ ] Persistir estrutura Campaign/AdSet/Ad
+- [x] Persistir estrutura Campaign/AdSet/Ad
 - [x] `/meta-test`: exibir estrutura persistida (generated_adsets/generated_ads) para registro selecionado (commit: 402f699)
 - [ ] Criar recuperação operacional
 
