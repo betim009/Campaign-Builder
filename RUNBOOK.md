@@ -88,6 +88,13 @@
 - Upload (multipart): `POST /api/creative-assets/upload` (field `file`)
 - Acesso ao arquivo: `GET /uploads/creative-assets/<stored_name>` (servido pelo backend)
 
+### Creative Drafts — Copy/headline (dev)
+
+Última atualização: [2026-05-12 18:59]
+
+- Listar drafts: `GET /api/creative-drafts?generatedCampaignId=<uuid>&limit=50`
+- Criar draft: `POST /api/creative-drafts`
+
 ### Registros operacionais (cronológico)
 
 Esta seção deve ser atualizada sempre que:
