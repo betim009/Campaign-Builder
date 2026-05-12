@@ -21,3 +21,11 @@ export async function updateGeneratedStatus(id, { status }) {
   return { ok: true, generatedCampaign: data?.generated_campaign ?? null };
 }
 
+export async function getGeneratedCampaignStructure(id) {
+  const data = await apiGet(`/api/generated-campaigns/${encodeURIComponent(String(id))}/structure`);
+  return {
+    ok: true,
+    generatedAdSets: Array.isArray(data?.generated_adsets) ? data.generated_adsets : [],
+    generatedAds: Array.isArray(data?.generated_ads) ? data.generated_ads : [],
+  };
+}

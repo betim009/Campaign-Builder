@@ -59,6 +59,72 @@ export function generatedCampaignsRouter() {
     })
   )
 
+  router.get(
+    '/:id/structure',
+    asyncHandler(async (req, res) => {
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      if (!isUuid(req.params.id)) {
+        return jsonError(res, 400, 'Invalid generated campaign id')
+      }
+
+      const pool = getPool()
+
+      const { rowCount: exists } = await pool.query(
+        `
+          SELECT 1
+          FROM generated_campaigns
+          WHERE id = $1
+        `,
+        [req.params.id]
+      )
+      if (exists === 0) {
+        return jsonError(res, 404, 'Generated campaign not found')
+      }
+
+      const { rows: adsets } = await pool.query(
+        `
+          SELECT
+            id,
+            generated_campaign_id,
+            meta_adset_id,
+            name,
+            status,
+            effective_status,
+            created_at
+          FROM generated_adsets
+          WHERE generated_campaign_id = $1
+          ORDER BY created_at DESC
+          LIMIT 50
+        `,
+        [req.params.id]
+      )
+
+      const { rows: ads } = await pool.query(
+        `
+          SELECT
+            id,
+            generated_campaign_id,
+            generated_adset_id,
+            meta_ad_id,
+            name,
+            status,
+            effective_status,
+            created_at
+          FROM generated_ads
+          WHERE generated_campaign_id = $1
+          ORDER BY created_at DESC
+          LIMIT 200
+        `,
+        [req.params.id]
+      )
+
+      return res.json({ ok: true, generated_adsets: adsets, generated_ads: ads })
+    })
+  )
+
   router.post(
     '/:id/status',
     asyncHandler(async (req, res) => {

@@ -6,6 +6,7 @@ import ModeStatusCard from "./metaTest/ModeStatusCard.jsx";
 import BackendStatusSection from "./metaTest/BackendStatusSection.jsx";
 import OpsLogsSection from "./metaTest/OpsLogsSection.jsx";
 import GeneratedCampaignsSection from "./metaTest/GeneratedCampaignsSection.jsx";
+import GeneratedStructureSection from "./metaTest/GeneratedStructureSection.jsx";
 import StepAdSetSection from "./metaTest/StepAdSetSection.jsx";
 import StepAdSection from "./metaTest/StepAdSection.jsx";
 import StepCampaignSection from "./metaTest/StepCampaignSection.jsx";
@@ -19,7 +20,7 @@ import { createMetaAdSet, getMetaAdSet } from "../services/metaAdSets.js";
 import { createMetaAd, getMetaAd } from "../services/metaAds.js";
 import { getMetaStatus, validateMetaToken } from "../services/metaStatus.js";
 import { countryCodeToFlag } from "../services/fallbacks.js";
-import { listGeneratedCampaigns } from "../services/generatedCampaigns.js";
+import { getGeneratedCampaignStructure, listGeneratedCampaigns } from "../services/generatedCampaigns.js";
 import useOpsLogs from "./metaTest/useOpsLogs.js";
 import {
   isRealMetaId,
@@ -84,6 +85,13 @@ export default function MetaPausedTest() {
   const [localError, setLocalError] = useState("");
   const [localErrorDetails, setLocalErrorDetails] = useState(null);
   const [localGenerated, setLocalGenerated] = useState([]);
+
+  const [structureLoading, setStructureLoading] = useState(false);
+  const [structureError, setStructureError] = useState("");
+  const [structureErrorDetails, setStructureErrorDetails] = useState(null);
+  const [structureAdSets, setStructureAdSets] = useState([]);
+  const [structureAds, setStructureAds] = useState([]);
+  const [structureForId, setStructureForId] = useState("");
 
   const { opsLogs, setOpsLogs, opsLogsFilter, setOpsLogsFilter, filteredOpsLogs, pushLog } = useOpsLogs();
 
@@ -241,6 +249,46 @@ export default function MetaPausedTest() {
     }
   }
 
+  async function refreshStructure(forId) {
+    const id = normalizeNonEmptyString(forId);
+    if (!id) {
+      setStructureForId("");
+      setStructureAdSets([]);
+      setStructureAds([]);
+      return;
+    }
+
+    setStructureLoading(true);
+    setStructureError("");
+    setStructureErrorDetails(null);
+    try {
+      const res = await getGeneratedCampaignStructure(id);
+      setStructureForId(id);
+      setStructureAdSets(res.generatedAdSets ?? []);
+      setStructureAds(res.generatedAds ?? []);
+      pushLog({
+        action: "db.generated_structure.get",
+        ok: true,
+        details: { generatedCampaignId: id, adsets: (res.generatedAdSets ?? []).length, ads: (res.generatedAds ?? []).length },
+      });
+    } catch (err) {
+      setStructureForId(id);
+      setStructureAdSets([]);
+      setStructureAds([]);
+      setStructureError(err?.message ? String(err.message) : "Falha ao carregar estrutura (generated_adsets/generated_ads).");
+      const details = err?.body?.error?.details ?? err?.body ?? null;
+      setStructureErrorDetails(details);
+      pushLog({
+        action: "db.generated_structure.get",
+        ok: false,
+        error: err?.message ? String(err.message) : "error",
+        details,
+      });
+    } finally {
+      setStructureLoading(false);
+    }
+  }
+
   function handleSelectGeneratedCampaignRow(gc) {
     setError("");
     setErrorDetails(null);
@@ -333,6 +381,8 @@ export default function MetaPausedTest() {
       details: { generatedCampaignId: gc?.id ?? null, metaCampaignId: metaCampaignId || null },
     });
     setSuccess("Registro selecionado. Você pode continuar o fluxo incremental a partir do DB.");
+
+    refreshStructure(gc?.id);
   }
 
   return (
@@ -622,6 +672,23 @@ export default function MetaPausedTest() {
         countryCodeToFlag={countryCodeToFlag}
       />
 
+      <GeneratedStructureSection
+        generatedCampaignId={createdGeneratedCampaignId}
+        structureForId={structureForId}
+        loading={structureLoading}
+        error={structureError}
+        errorDetails={structureErrorDetails}
+        generatedAdSets={structureAdSets}
+        generatedAds={structureAds}
+        refreshDisabled={structureLoading || loading || isCreatingAny || !createdGeneratedCampaignId}
+        onRefresh={() => refreshStructure(createdGeneratedCampaignId)}
+        onDismissError={() => {
+          setStructureError("");
+          setStructureErrorDetails(null);
+        }}
+        safeJson={safeJson}
+      />
+
       <OpsLogsSection
         opsLogs={opsLogs}
         filteredOpsLogs={filteredOpsLogs}
@@ -806,6 +873,7 @@ export default function MetaPausedTest() {
             });
             setSuccess(`AdSet criado (${res.mode || flowMode}) — status obrigatório: PAUSED.`);
             await refreshLocalGenerated();
+            await refreshStructure(createdGeneratedCampaignId);
           } catch (err) {
             const captured = captureError(err, "Falha ao criar AdSet.");
             pushLog({
@@ -864,6 +932,7 @@ export default function MetaPausedTest() {
             });
             setSuccess(`Ad criado (${res.mode || flowMode}) — status obrigatório: PAUSED.`);
             await refreshLocalGenerated();
+            await refreshStructure(createdGeneratedCampaignId);
           } catch (err) {
             const captured = captureError(err, "Falha ao criar Ad.");
             pushLog({
