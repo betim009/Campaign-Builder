@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-12 18:43]
+Última atualização: [2026-05-12 18:44]
 
 Regras:
 
@@ -246,7 +246,7 @@ Regras:
 - [ ] Persistir status de execução
 - [x] Persistir estrutura Campaign/AdSet/Ad
 - [x] `/meta-test`: exibir estrutura persistida (generated_adsets/generated_ads) para registro selecionado (commit: 402f699)
-- [ ] Criar recuperação operacional
+- [x] Criar recuperação operacional (bundle export + seleção do DB) (commit: 86995d6)
 
 ### P4 — Creative Flow MVP
 
@@ -297,7 +297,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-12 18:42]
+Última atualização: [2026-05-12 18:44]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -373,6 +373,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-12 18:30] Decisão: adicionar visualização de logs persistidos (DB) no `/meta-test` para auditoria/trace sem depender do localStorage do navegador. (commit: ad17b42)
 - [2026-05-12 18:40] Decisão: persistir estado operacional REAL/STUB no DB (`generated_campaigns.meta_run_mode`) para reduzir inferência via prefixo `stub-*` e melhorar rastreabilidade. (commit: b8ac3bc)
 - [2026-05-12 18:42] Decisão: usar `ops_logs` como trilha histórica mínima para snapshots do Graph (Campaign/AdSet/Ad) no `/meta-test`, evitando schema de histórico dedicado nesta fase. (commit: 7489ed7)
+- [2026-05-12 18:44] Decisão: adicionar “recovery bundle” (JSON export) no `/meta-test` para rastreabilidade e troubleshooting rápido sem depender de prints/descrições manuais. (commit: 86995d6)
 
 ## Blockers
 
