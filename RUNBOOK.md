@@ -61,6 +61,12 @@
 - Executor de automação (dry-run): `curl -X POST http://localhost:3001/api/automation/run -H 'Content-Type: application/json' -d '{"dryRun":true}'`
 - Executor de automação (persistindo logs): `curl -X POST http://localhost:3001/api/automation/run -H 'Content-Type: application/json' -d '{}'`
 
+### DB — Evidência operacional (dev)
+
+Última atualização: [2026-05-12 18:26]
+
+- Estrutura persistida (AdSet/Ad) por `generated_campaign_id`: `GET /api/generated-campaigns/{generated_campaign_id}/structure`
+
 ### Registros operacionais (cronológico)
 
 Esta seção deve ser atualizada sempre que:
