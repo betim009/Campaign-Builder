@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-12 18:47]
+Última atualização: [2026-05-12 18:48]
 
 Regras:
 
@@ -236,7 +236,7 @@ Regras:
 
 ### P3 — Persistência operacional
 
-- [ ] Persistir drafts operacionais
+- [x] Persistir drafts operacionais (`localStorage` no `/meta-test`) (commit: 378296d)
 - [x] Persistir logs operacionais (ops_logs + POST best-effort no `/meta-test`) (commit: 6ab378e)
 - [x] `/meta-test`: exibir logs persistidos (DB) via `GET /api/ops-logs` (commit: ad17b42)
 - [x] Persistir estados REAL/STUB (`generated_campaigns.meta_run_mode`) (commit: b8ac3bc)
@@ -297,7 +297,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-12 18:47]
+Última atualização: [2026-05-12 18:48]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -375,6 +375,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-12 18:42] Decisão: usar `ops_logs` como trilha histórica mínima para snapshots do Graph (Campaign/AdSet/Ad) no `/meta-test`, evitando schema de histórico dedicado nesta fase. (commit: 7489ed7)
 - [2026-05-12 18:44] Decisão: adicionar “recovery bundle” (JSON export) no `/meta-test` para rastreabilidade e troubleshooting rápido sem depender de prints/descrições manuais. (commit: 86995d6)
 - [2026-05-12 18:47] Decisão: persistir resumo de execução no `generated_campaigns` (`ops_last_action/ok/at`) para visibilidade rápida sem abrir `ops_logs`. (commit: 7c329b1)
+- [2026-05-12 18:48] Decisão: drafts do `/meta-test` persistem localmente (`localStorage`) nesta fase para evitar schema/persistência de usuário no DB antes de definir auth/ownership. (commit: 378296d)
 
 ## Blockers
 
