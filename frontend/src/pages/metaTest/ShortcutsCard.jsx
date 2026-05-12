@@ -15,8 +15,17 @@ export default function ShortcutsCard({ stepCampaignOk, stepAdSetOk, stepAdOk })
         <a className="pillOutline" href="#meta-test-db">
           DB (generated_campaigns)
         </a>
+        <a className="pillOutline" href="#meta-test-db-structure">
+          DB (estrutura)
+        </a>
         <a className="pillOutline" href="#meta-test-ops-logs">
           Logs
+        </a>
+        <a className="pillOutline" href="#meta-test-ops-logs-db">
+          Logs (DB)
+        </a>
+        <a className="pillOutline" href="#meta-test-graph-refresh">
+          Graph refresh
         </a>
         <a
           className="pillOutline"
@@ -52,4 +61,3 @@ export default function ShortcutsCard({ stepCampaignOk, stepAdSetOk, stepAdOk })
     </div>
   );
 }
-

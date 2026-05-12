@@ -522,7 +522,7 @@ export default function MetaPausedTest() {
         countryNameByCode={countryNameByCode}
       />
 
-      <div className="card" style={{ padding: 18, marginTop: 16 }}>
+      <div id="meta-test-graph-refresh" className="card" style={{ padding: 18, marginTop: 16 }}>
         <div style={{ fontWeight: 900, fontSize: 16 }}>Graph (REAL) — atualizar status</div>
         <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
           Usa `GET /api/meta/*/:id` via backend. STUB não consulta Graph.
