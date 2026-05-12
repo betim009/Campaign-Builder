@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-12 18:22]
+Última atualização: [2026-05-12 18:23]
 
 Regras:
 
@@ -205,7 +205,7 @@ Regras:
 
 ### P2 — Fluxo progressivo Meta
 
-- [ ] Consolidar fluxo Campaign → AdSet → Ad
+- [x] Consolidar fluxo Campaign → AdSet → Ad
 - [x] `/meta-test`: prefill de nomes padrão (AdSet/Ad) ao criar/selecionar Campaign (commit: a0a5494)
 - [x] `/meta-test`: refresh Graph de AdSet/Ad via backend (GET `/api/meta/adsets/:id`, `/api/meta/ads/:id`) (commit: 7df3fad)
 - [x] Separar estados operacionais por entidade
