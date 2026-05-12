@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-12 18:13]
+Última atualização: [2026-05-12 18:14]
 
 Regras:
 
@@ -182,7 +182,7 @@ Regras:
 - [ ] Melhorar error states
 - [x] `/meta-test`: exibir detalhes (`error.details`) em falhas (validate/meta/db)
 - [x] `/meta-test`: permitir dismiss de errors de seção (Meta/DB/status backend)
-- [x] `/meta-test`: permitir dismiss de erro em “Validar token (Graph /me)”
+- [x] `/meta-test`: permitir dismiss de erro em “Validar token (Graph /me)” (commit: e7459f7)
 - [ ] Melhorar feedback visual de persistência
 - [x] `/meta-test`: destacar registro recém-criado/atualizado em `generated_campaigns`
 - [x] Exibir provider/fallback no resultado do sync (Campanha Detalhes)
