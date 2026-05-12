@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-12 19:02]
+Última atualização: [2026-05-12 19:03]
 
 Regras:
 
@@ -256,7 +256,7 @@ Regras:
 - [x] Criar estrutura headline/description (commits: 07757eb, 6ca9629)
 - [x] Associar creative ao Ad (creative_draft_id em `generated_ads` + UI seleção) (commits: 1fa8d8f, 5a6e520)
 - [ ] Validar creative REAL
-- [ ] Exibir preview operacional
+- [x] Exibir preview operacional (preview texto + mídia) (commit: f8689c5)
 - [ ] Preparar variações futuras
 
 ### P5 — Ad REAL mínimo
@@ -297,7 +297,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-12 19:02]
+Última atualização: [2026-05-12 19:03]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -379,6 +379,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-12 18:54] Decisão: Creative Flow começa com upload local (backend serve `/uploads/*` + tabela `creative_assets`) para evidência operacional sem integrar storage externo nesta fase. (commits: 1101817, 649a800)
 - [2026-05-12 18:59] Decisão: persistir Creative como draft local (`creative_drafts`) vinculado a `generated_campaign_id` + asset opcional, para evoluir criação REAL gradualmente sem exigir Meta creative de imediato. (commits: 07757eb, 6ca9629)
 - [2026-05-12 19:02] Decisão: associar Ad ↔ Creative local por referência (`generated_ads.creative_draft_id`) para rastreabilidade e futura criação REAL baseada no draft. (commits: 1fa8d8f, 5a6e520)
+- [2026-05-12 19:03] Decisão: preview operacional é local e simples (texto + mídia via `/uploads`), suficiente para troubleshooting antes de integrar preview real da Meta. (commit: f8689c5)
 
 ## Blockers
 
