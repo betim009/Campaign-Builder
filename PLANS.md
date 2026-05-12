@@ -150,7 +150,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-12 18:28]
+Última atualização: [2026-05-12 18:30]
 
 Regras:
 
@@ -237,6 +237,7 @@ Regras:
 
 - [ ] Persistir drafts operacionais
 - [x] Persistir logs operacionais (ops_logs + POST best-effort no `/meta-test`) (commit: 6ab378e)
+- [x] `/meta-test`: exibir logs persistidos (DB) via `GET /api/ops-logs` (commit: ad17b42)
 - [ ] Persistir estados REAL/STUB
 - [ ] Persistir falhas operacionais
 - [ ] Persistir histórico Meta
@@ -294,7 +295,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-12 18:28]
+Última atualização: [2026-05-12 18:30]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -367,6 +368,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-12 18:22] Decisão: expor endpoints de leitura via backend para AdSet/Ad (`GET /api/meta/adsets/:id`, `GET /api/meta/ads/:id`) para troubleshooting no `/meta-test` sem token no frontend. (commit: 7df3fad)
 - [2026-05-12 18:26] Decisão: expor endpoint de leitura da estrutura persistida por `generated_campaign_id` para evidência operacional (`GET /api/generated-campaigns/:id/structure`) e exibir no `/meta-test`. (commit: 402f699)
 - [2026-05-12 18:28] Decisão: persistir logs operacionais do `/meta-test` no Postgres (`ops_logs`) via `POST /api/ops-logs`, com redaction best-effort de chaves sensíveis e tolerância a DB offline. (commit: 6ab378e)
+- [2026-05-12 18:30] Decisão: adicionar visualização de logs persistidos (DB) no `/meta-test` para auditoria/trace sem depender do localStorage do navegador. (commit: ad17b42)
 
 ## Blockers
 
