@@ -258,7 +258,7 @@ Regras:
 - [x] Criar estrutura headline/description (commits: 07757eb, 6ca9629)
 - [x] Associar creative ao Ad (creative_draft_id em `generated_ads` + UI seleção) (commits: 1fa8d8f, 5a6e520)
 - [x] Publicar Creative REAL a partir de `creative_drafts` (endpoint + UI) (commit: cac550e)
-- [x] `/meta-test`: consultar Creative REAL (Graph) para evidência operacional
+- [x] `/meta-test`: consultar Creative REAL (Graph) para evidência operacional (commit: f3e7472)
 - [ ] Validar creative REAL
 - [x] Exibir preview operacional (preview texto + mídia) (commit: f8689c5)
 - [x] Preparar variações futuras (duplicar creative drafts) (commits: ba2322f, 41c1d13)
