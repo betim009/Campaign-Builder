@@ -129,6 +129,12 @@ export default function MetaPausedTest() {
   const [draftCtaType, setDraftCtaType] = useState("");
   const [draftDestinationUrl, setDraftDestinationUrl] = useState("");
 
+  const selectedCreativeDraft = useMemo(
+    () => (creativeDrafts ?? []).find((d) => d?.id === adCreativeDraftId) ?? null,
+    [creativeDrafts, adCreativeDraftId],
+  );
+  const selectedCreativeDraftHasUrl = normalizeNonEmptyString(selectedCreativeDraft?.destination_url) !== "";
+
   const { opsLogs, setOpsLogs, opsLogsFilter, setOpsLogsFilter, filteredOpsLogs, pushLog } = useOpsLogs();
 
   const isCreatingAny = campaignCreating || adSetCreating || adCreating;
@@ -328,7 +334,8 @@ export default function MetaPausedTest() {
     !creativePublishing &&
     flowMode === "REAL" &&
     Boolean(backendStatus?.hasAccessToken) &&
-    normalizeNonEmptyString(adCreativeDraftId) !== "";
+    normalizeNonEmptyString(adCreativeDraftId) !== "" &&
+    selectedCreativeDraftHasUrl;
 
   const canFetchCreative =
     !loading &&
@@ -1321,6 +1328,7 @@ export default function MetaPausedTest() {
         metaInstagramActorId={metaInstagramActorId}
         setMetaInstagramActorId={setMetaInstagramActorId}
         canPublishCreative={canPublishCreative}
+        creativeDraftHasUrl={selectedCreativeDraftHasUrl}
         creativePublishing={creativePublishing}
         canFetchCreative={canFetchCreative}
         creativeGetLoading={creativeGetLoading}

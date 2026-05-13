@@ -12,6 +12,7 @@ export default function StepAdSection({
   metaInstagramActorId,
   setMetaInstagramActorId,
   canPublishCreative,
+  creativeDraftHasUrl,
   creativePublishing,
   onPublishCreative,
   canFetchCreative,
@@ -202,6 +203,11 @@ export default function StepAdSection({
             Requer modo REAL + token no backend + `creativeDraftId` com `destinationUrl`.
           </div>
         </div>
+        {creativeDraftId && !creativeDraftHasUrl ? (
+          <div className="muted" style={{ marginTop: 8, fontWeight: 900, color: "#991b1b" }}>
+            Draft selecionado sem `destinationUrl` — publique só depois de preencher a URL no draft.
+          </div>
+        ) : null}
 
         <details style={{ marginTop: 12 }}>
           <summary style={{ cursor: "pointer", fontWeight: 900 }}>Evidência: Creative (Graph)</summary>
