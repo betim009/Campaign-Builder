@@ -115,6 +115,12 @@ Esta seção deve ser atualizada sempre que:
 - Um bug for encontrado
 - Um fluxo estiver incompleto
 
+[2026-05-13 13:19]
+
+- Bloqueio (ambiente): Docker daemon indisponível neste host (erro ao rodar `docker compose ps`).
+  - Impacto: não dá para validar P4/P5 com DB + `/meta-test` (creative drafts/assets exigem Postgres).
+  - Ação: iniciar Docker Desktop/daemon e repetir `docker compose up -d` + smoke tests (ver `### Setup rápido (Docker + DB)`).
+
 [2026-05-06 17:15]
 
 - Bloqueio: não foi possível subir o Postgres via Docker neste ambiente (`docker compose up` falha por não conseguir conectar ao Docker daemon).
