@@ -63,6 +63,37 @@ async function createUniqueSlug(pool, base) {
 export function metaRouter() {
   const router = Router()
 
+  async function insertOpsLogBestEffort(pool, entry) {
+    try {
+      const source = normalizeNonEmptyString(entry?.source) ?? 'meta-test'
+      const entity = normalizeNonEmptyString(entry?.entity)
+      const action = normalizeNonEmptyString(entry?.action)
+      if (!action) return
+
+      const ok = typeof entry?.ok === 'boolean' ? entry.ok : Boolean(entry?.ok)
+      const error = normalizeNonEmptyString(entry?.error)
+
+      let details = entry?.details
+      if (!details || typeof details !== 'object') details = {}
+      let detailsJson = '{}'
+      try {
+        detailsJson = JSON.stringify(details)
+      } catch {
+        detailsJson = JSON.stringify({ unserializable: true })
+      }
+
+      await pool.query(
+        `
+          INSERT INTO ops_logs (source, entity, action, ok, error, details, client_at)
+          VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7)
+        `,
+        [source, entity, action, ok, error, detailsJson, null]
+      )
+    } catch {
+      // best-effort
+    }
+  }
+
   router.get(
     '/tokens',
     asyncHandler(async (req, res) => {
@@ -204,32 +235,83 @@ export function metaRouter() {
           imageHash
         })
 
-        const { rows: updatedRows } = await pool.query(
-          `
-            UPDATE creative_drafts
-            SET
-              meta_creative_id = $2,
-              status = 'meta_published'
-            WHERE id = $1
-            RETURNING
-              id,
-              generated_campaign_id,
-              creative_asset_id,
-              primary_text,
-              headline,
-              description,
-              cta_type,
-              destination_url,
-              status,
-              meta_creative_id,
-              created_at
-          `,
-          [creativeDraftId, String(created?.id ?? '')]
-        )
+        const client = await pool.connect()
+        try {
+          await client.query('BEGIN')
 
-        return res.status(201).json({ ok: true, meta_creative: created, creative_draft: updatedRows[0] })
+          const { rows: updatedRows } = await client.query(
+            `
+              UPDATE creative_drafts
+              SET
+                meta_creative_id = $2,
+                status = 'meta_published'
+              WHERE id = $1
+              RETURNING
+                id,
+                generated_campaign_id,
+                creative_asset_id,
+                primary_text,
+                headline,
+                description,
+                cta_type,
+                destination_url,
+                status,
+                meta_creative_id,
+                created_at
+            `,
+            [creativeDraftId, String(created?.id ?? '')]
+          )
+
+          await client.query(
+            `
+              UPDATE generated_campaigns
+              SET
+                ops_last_action = 'creative.publish',
+                ops_last_ok = true,
+                ops_last_at = now()
+              WHERE id = $1
+            `,
+            [draft.generated_campaign_id]
+          )
+
+          await client.query('COMMIT')
+
+          void insertOpsLogBestEffort(pool, {
+            source: 'meta-test',
+            entity: 'creative',
+            action: 'creative.publish',
+            ok: true,
+            details: {
+              creative_draft_id: creativeDraftId,
+              generated_campaign_id: draft.generated_campaign_id,
+              meta_creative_id: normalizeNonEmptyString(created?.id) ?? null,
+              image_hash: imageHash
+            }
+          })
+
+          return res.status(201).json({ ok: true, meta_creative: created, creative_draft: updatedRows[0] })
+        } catch (err) {
+          await client.query('ROLLBACK')
+          throw err
+        } finally {
+          client.release()
+        }
+
       } catch (err) {
         const status = typeof err?.status === 'number' ? err.status : 502
+        void insertOpsLogBestEffort(pool, {
+          source: 'meta-test',
+          entity: 'creative',
+          action: 'creative.publish',
+          ok: false,
+          error: err?.message ? String(err.message) : 'Meta ad creative creation failed',
+          details: {
+            creative_draft_id: creativeDraftId,
+            generated_campaign_id: draft.generated_campaign_id,
+            status,
+            meta_error: err?.details ?? null
+          }
+        })
         return jsonError(res, status, err?.message ?? 'Meta ad creative creation failed', err?.details)
       }
     })
