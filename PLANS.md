@@ -53,7 +53,7 @@ Construir o **Campaign Builder**, uma aplicação web que substitui a planilha o
 
 ## Snapshot (Estado Atual)
 
-Última atualização: [2026-05-07 22:44]
+Última atualização: [2026-05-13 13:15]
 
 O que está funcional hoje:
 
@@ -72,6 +72,7 @@ O que está funcional hoje:
   - evidência de persistência local (`generated_campaigns`)
   - logs operacionais básicos (frontend-only, sem token)
   - visualização explícita de estrutura Meta (Campaign → AdSet → Ad)
+  - publicação de Creative REAL (AdCreative) a partir de `creative_drafts` (page_id via env/body; upload de imagem via backend quando houver asset)
 - O fluxo operacional começou a ser separado conceitualmente entre:
   - Campaign
   - AdSet
@@ -150,7 +151,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-12 19:05]
+Última atualização: [2026-05-13 13:15]
 
 Regras:
 
@@ -255,6 +256,7 @@ Regras:
 - [x] Criar estrutura de copy (primary_text) (commits: 07757eb, 6ca9629)
 - [x] Criar estrutura headline/description (commits: 07757eb, 6ca9629)
 - [x] Associar creative ao Ad (creative_draft_id em `generated_ads` + UI seleção) (commits: 1fa8d8f, 5a6e520)
+- [x] Publicar Creative REAL a partir de `creative_drafts` (endpoint + UI)
 - [ ] Validar creative REAL
 - [x] Exibir preview operacional (preview texto + mídia) (commit: f8689c5)
 - [x] Preparar variações futuras (duplicar creative drafts) (commits: ba2322f, 41c1d13)
@@ -297,7 +299,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-12 19:05]
+Última atualização: [2026-05-13 13:15]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -381,6 +383,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-12 19:02] Decisão: associar Ad ↔ Creative local por referência (`generated_ads.creative_draft_id`) para rastreabilidade e futura criação REAL baseada no draft. (commits: 1fa8d8f, 5a6e520)
 - [2026-05-12 19:03] Decisão: preview operacional é local e simples (texto + mídia via `/uploads`), suficiente para troubleshooting antes de integrar preview real da Meta. (commit: f8689c5)
 - [2026-05-12 19:05] Decisão: variações futuras começam com duplicação de `creative_drafts` (sem abstrações), permitindo iterar copy/mídia rapidamente no lab. (commits: ba2322f, 41c1d13)
+- [2026-05-13 13:15] Decisão: publicação de Creative REAL (AdCreative) é feita via backend (`POST /api/meta/creative-drafts/:id/publish`), exigindo `destination_url` no draft; `META_PAGE_ID` é obrigatório (ou body `pageId`); `META_INSTAGRAM_ACTOR_ID` é opcional; se houver asset local, o backend faz upload para Meta (`adimages`) e usa `image_hash`.
 
 ## Blockers
 

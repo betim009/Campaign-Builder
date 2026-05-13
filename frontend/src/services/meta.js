@@ -10,5 +10,6 @@ export {
 export { createMetaAdSet } from "./metaAdSets.js";
 export { createMetaAd } from "./metaAds.js";
 
-export { getMetaStatus, validateMetaToken } from "./metaStatus.js";
+export { publishMetaCreativeDraft, getMetaCreative } from "./metaCreatives.js";
 
+export { getMetaStatus, validateMetaToken } from "./metaStatus.js";

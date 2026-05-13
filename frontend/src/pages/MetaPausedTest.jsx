@@ -27,6 +27,7 @@ import { getGeneratedCampaignStructure, listGeneratedCampaigns } from "../servic
 import { listOpsLogs } from "../services/opsLogs.js";
 import { listCreativeAssets, uploadCreativeAsset } from "../services/creativeAssets.js";
 import { createCreativeDraft, duplicateCreativeDraft, listCreativeDrafts } from "../services/creativeDrafts.js";
+import { publishMetaCreativeDraft } from "../services/metaCreatives.js";
 import useOpsLogs from "./metaTest/useOpsLogs.js";
 import {
   isRealMetaId,
@@ -85,7 +86,10 @@ export default function MetaPausedTest() {
   const [adName, setAdName] = useState("");
   const [adCreativeId, setAdCreativeId] = useState("");
   const [adCreativeDraftId, setAdCreativeDraftId] = useState("");
+  const [metaPageId, setMetaPageId] = useState("");
+  const [metaInstagramActorId, setMetaInstagramActorId] = useState("");
   const [adCreating, setAdCreating] = useState(false);
+  const [creativePublishing, setCreativePublishing] = useState(false);
 
   // Evidência de persistência local
   const [localLoading, setLocalLoading] = useState(false);
@@ -204,6 +208,8 @@ export default function MetaPausedTest() {
         if (typeof parsed.adName === "string") setAdName(parsed.adName);
         if (typeof parsed.adCreativeId === "string") setAdCreativeId(parsed.adCreativeId);
         if (typeof parsed.adCreativeDraftId === "string") setAdCreativeDraftId(parsed.adCreativeDraftId);
+        if (typeof parsed.metaPageId === "string") setMetaPageId(parsed.metaPageId);
+        if (typeof parsed.metaInstagramActorId === "string") setMetaInstagramActorId(parsed.metaInstagramActorId);
       }
     } catch {
       // ignore
@@ -225,6 +231,8 @@ export default function MetaPausedTest() {
         adName,
         adCreativeId,
         adCreativeDraftId,
+        metaPageId,
+        metaInstagramActorId,
       };
       localStorage.setItem("metaTest.draft.v1", JSON.stringify(draft));
     } catch {
@@ -243,6 +251,8 @@ export default function MetaPausedTest() {
     adName,
     adCreativeId,
     adCreativeDraftId,
+    metaPageId,
+    metaInstagramActorId,
   ]);
 
   const countryOptions = useMemo(() => countries ?? [], [countries]);
@@ -309,6 +319,14 @@ export default function MetaPausedTest() {
     createdMetaAdSetId !== "" &&
     normalizeNonEmptyString(adName) !== "" &&
     (flowMode === "STUB" || (Boolean(backendStatus?.hasAccessToken) && normalizeNonEmptyString(adCreativeId) !== ""));
+
+  const canPublishCreative =
+    !loading &&
+    !isCreatingAny &&
+    !creativePublishing &&
+    flowMode === "REAL" &&
+    Boolean(backendStatus?.hasAccessToken) &&
+    normalizeNonEmptyString(adCreativeDraftId) !== "";
 
   async function refreshLocalGenerated() {
     setLocalLoading(true);
@@ -1288,6 +1306,50 @@ export default function MetaPausedTest() {
         creativeDraftId={adCreativeDraftId}
         setCreativeDraftId={setAdCreativeDraftId}
         creativeDraftOptions={creativeDrafts}
+        metaPageId={metaPageId}
+        setMetaPageId={setMetaPageId}
+        metaInstagramActorId={metaInstagramActorId}
+        setMetaInstagramActorId={setMetaInstagramActorId}
+        canPublishCreative={canPublishCreative}
+        creativePublishing={creativePublishing}
+        onPublishCreative={async () => {
+          const id = normalizeNonEmptyString(adCreativeDraftId);
+          if (!id) return;
+
+          setCreativePublishing(true);
+          setError("");
+          setErrorDetails(null);
+          setSuccess("");
+          try {
+            const res = await publishMetaCreativeDraft(id, {
+              pageId: normalizeNonEmptyString(metaPageId) || null,
+              instagramActorId: normalizeNonEmptyString(metaInstagramActorId) || null,
+            });
+            const metaId =
+              normalizeNonEmptyString(res?.metaCreative?.id) ||
+              normalizeNonEmptyString(res?.creativeDraft?.meta_creative_id) ||
+              "";
+            if (metaId) setAdCreativeId(metaId);
+
+            pushLog({
+              action: "creative.publish",
+              ok: true,
+              details: { creativeDraftId: id, metaCreativeId: metaId || null },
+            });
+            setSuccess(`Creative REAL publicado — meta_creative_id: ${metaId || "—"}`);
+            await refreshCreativeDrafts(createdGeneratedCampaignId);
+          } catch (err) {
+            const captured = captureError(err, "Falha ao publicar Creative REAL.");
+            pushLog({
+              action: "creative.publish",
+              ok: false,
+              error: captured.message || "error",
+              details: { creativeDraftId: id, errorDetails: captured.details },
+            });
+          } finally {
+            setCreativePublishing(false);
+          }
+        }}
         canCreateAd={canCreateAd}
         adCreating={adCreating}
         onCreateAd={async () => {

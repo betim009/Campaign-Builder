@@ -37,7 +37,7 @@ export default function CreativeDraftsSection({
         <div>
           <div style={{ fontWeight: 900, fontSize: 16 }}>Creative drafts (local)</div>
           <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
-            Persistência de copy/headline/description + asset vinculado (sem Meta ainda).
+            Persistência de copy/headline/description + asset vinculado (publicação Meta opcional na Etapa 3).
           </div>
           <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
             `generated_campaign_id`: <b>{generatedCampaignId || "—"}</b>

@@ -7,6 +7,13 @@ export default function StepAdSection({
   creativeDraftId,
   setCreativeDraftId,
   creativeDraftOptions,
+  metaPageId,
+  setMetaPageId,
+  metaInstagramActorId,
+  setMetaInstagramActorId,
+  canPublishCreative,
+  creativePublishing,
+  onPublishCreative,
   canCreateAd,
   adCreating,
   onCreateAd,
@@ -123,6 +130,71 @@ export default function StepAdSection({
             Persistido no DB; útil para rastreabilidade e futura criação de Creative REAL.
           </div>
         </label>
+      </div>
+
+      <div className="card" style={{ padding: 14, marginTop: 12 }}>
+        <div style={{ fontWeight: 900 }}>Creative REAL (a partir do draft)</div>
+        <div className="muted" style={{ marginTop: 6, fontWeight: 800, lineHeight: 1.55 }}>
+          Publica um AdCreative na Meta via backend (token no backend). Se vazio, usa `META_PAGE_ID` / `META_INSTAGRAM_ACTOR_ID`.
+        </div>
+
+        <div
+          style={{
+            marginTop: 12,
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+            gap: 12,
+          }}
+        >
+          <label style={{ display: "grid", gap: 6 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>Page ID</span>
+            <input
+              value={metaPageId}
+              onChange={(e) => setMetaPageId(e.target.value)}
+              placeholder="Opcional (env: META_PAGE_ID)"
+              disabled={flowMode === "STUB"}
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 700,
+                outline: "none",
+                background: flowMode === "STUB" ? "#f9fafb" : "#ffffff",
+              }}
+            />
+          </label>
+
+          <label style={{ display: "grid", gap: 6 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>Instagram Actor ID</span>
+            <input
+              value={metaInstagramActorId}
+              onChange={(e) => setMetaInstagramActorId(e.target.value)}
+              placeholder="Opcional (env: META_INSTAGRAM_ACTOR_ID)"
+              disabled={flowMode === "STUB"}
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 700,
+                outline: "none",
+                background: flowMode === "STUB" ? "#f9fafb" : "#ffffff",
+              }}
+            />
+          </label>
+        </div>
+
+        <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+          <button type="button" className="pillOutline" disabled={!canPublishCreative} onClick={onPublishCreative}>
+            {creativePublishing ? "Publicando..." : "Publicar Creative REAL"}
+          </button>
+          <div className="muted" style={{ fontWeight: 800 }}>
+            Requer modo REAL + token no backend + `creativeDraftId` com `destinationUrl`.
+          </div>
+        </div>
       </div>
 
       <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>

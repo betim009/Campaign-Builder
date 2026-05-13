@@ -1,3 +1,5 @@
+import path from 'node:path'
+import fsp from 'node:fs/promises'
 import { Router } from 'express'
 import { getPool } from '../db.js'
 import { asyncHandler } from '../lib/asyncHandler.js'
@@ -10,6 +12,7 @@ import { metaCreateCampaign, metaFetchCampaign, metaListAdAccountCampaigns } fro
 import { slugify } from '../lib/slugify.js'
 import { metaCreateAdSet, metaCreateAdSetStub, metaFetchAdSet } from '../meta/adsets.js'
 import { metaCreateAd, metaCreateAdStub, metaFetchAd } from '../meta/ads.js'
+import { metaCreateAdCreative, metaFetchAdCreative, metaUploadAdImage } from '../meta/creatives.js'
 
 function parseDateOrNull(value) {
   if (typeof value !== 'string' || !value.trim()) return null
@@ -38,6 +41,10 @@ function normalizeCountryCode(value) {
   const code = raw.toUpperCase()
   if (!/^[A-Z]{2}$/.test(code)) return null
   return code
+}
+
+function getCreativeUploadsDir() {
+  return path.resolve('uploads', 'creative-assets')
 }
 
 async function createUniqueSlug(pool, base) {
@@ -74,6 +81,189 @@ export function metaRouter() {
       )
 
       return res.json({ ok: true, tokens: rows })
+    })
+  )
+
+  router.post(
+    '/creative-drafts/:id/publish',
+    asyncHandler(async (req, res) => {
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      const creativeDraftId = req.params.id
+      if (!isUuid(creativeDraftId)) {
+        return jsonError(res, 400, 'Invalid creative draft id')
+      }
+
+      const pool = getPool()
+      const accessToken = await resolveAccessToken(pool, req)
+      if (!accessToken) {
+        return jsonError(
+          res,
+          400,
+          'Missing accessToken (provide body.accessToken, META_ACCESS_TOKEN, or save via /tokens)'
+        )
+      }
+
+      const { rows, rowCount } = await pool.query(
+        `
+          SELECT
+            cd.id,
+            cd.generated_campaign_id,
+            cd.creative_asset_id,
+            cd.primary_text,
+            cd.headline,
+            cd.description,
+            cd.cta_type,
+            cd.destination_url,
+            cd.status,
+            cd.meta_creative_id,
+            gc.meta_ad_account_id,
+            ca.stored_name AS asset_stored_name,
+            ca.original_name AS asset_original_name,
+            ca.mime_type AS asset_mime_type
+          FROM creative_drafts cd
+          JOIN generated_campaigns gc ON gc.id = cd.generated_campaign_id
+          LEFT JOIN creative_assets ca ON ca.id = cd.creative_asset_id
+          WHERE cd.id = $1
+        `,
+        [creativeDraftId]
+      )
+
+      if (rowCount === 0) {
+        return jsonError(res, 404, 'Creative draft not found')
+      }
+
+      const draft = rows[0]
+      const existing = normalizeNonEmptyString(draft.meta_creative_id)
+      if (existing && !existing.startsWith('stub-') && req.body?.force !== true) {
+        return jsonError(res, 409, 'Creative draft already has meta_creative_id', { meta_creative_id: existing })
+      }
+
+      const metaAdAccountId = normalizeNonEmptyString(draft.meta_ad_account_id)
+      if (!metaAdAccountId) {
+        return jsonError(res, 400, 'Missing meta_ad_account_id on generated campaign (create Campaign first)')
+      }
+
+      const pageId =
+        normalizeNonEmptyString(req.body?.pageId) ?? normalizeNonEmptyString(process.env.META_PAGE_ID)
+      if (!pageId) {
+        return jsonError(res, 400, 'Missing pageId (provide body.pageId or META_PAGE_ID env)')
+      }
+
+      const instagramActorId =
+        normalizeNonEmptyString(req.body?.instagramActorId) ??
+        normalizeNonEmptyString(process.env.META_INSTAGRAM_ACTOR_ID)
+
+      const destinationUrl = normalizeNonEmptyString(draft.destination_url)
+      if (!destinationUrl) {
+        return jsonError(res, 400, 'Missing destination_url on creative draft (set destinationUrl)')
+      }
+
+      let imageHash = null
+      if (normalizeNonEmptyString(draft.creative_asset_id)) {
+        const storedName = normalizeNonEmptyString(draft.asset_stored_name)
+        if (!storedName) {
+          return jsonError(res, 400, 'Creative asset is missing stored_name')
+        }
+        const fullPath = path.join(getCreativeUploadsDir(), storedName)
+        try {
+          await fsp.stat(fullPath)
+        } catch {
+          return jsonError(res, 400, 'Creative asset file not found on disk', { stored_name: storedName })
+        }
+
+        try {
+          const uploaded = await metaUploadAdImage({
+            metaAdAccountId,
+            accessToken,
+            filePath: fullPath,
+            mimeType: draft.asset_mime_type,
+            originalName: draft.asset_original_name ?? storedName
+          })
+          imageHash = uploaded.hash
+        } catch (err) {
+          const status = typeof err?.status === 'number' ? err.status : 502
+          return jsonError(res, status, err?.message ?? 'Meta image upload failed', err?.details)
+        }
+      }
+
+      try {
+        const created = await metaCreateAdCreative({
+          metaAdAccountId,
+          accessToken,
+          pageId,
+          instagramActorId,
+          name: normalizeNonEmptyString(draft.headline) ?? `Creative Draft ${draft.id}`,
+          message: normalizeNonEmptyString(draft.primary_text),
+          link: destinationUrl,
+          headline: normalizeNonEmptyString(draft.headline),
+          description: normalizeNonEmptyString(draft.description),
+          ctaType: normalizeNonEmptyString(draft.cta_type),
+          imageHash
+        })
+
+        const { rows: updatedRows } = await pool.query(
+          `
+            UPDATE creative_drafts
+            SET
+              meta_creative_id = $2,
+              status = 'meta_published'
+            WHERE id = $1
+            RETURNING
+              id,
+              generated_campaign_id,
+              creative_asset_id,
+              primary_text,
+              headline,
+              description,
+              cta_type,
+              destination_url,
+              status,
+              meta_creative_id,
+              created_at
+          `,
+          [creativeDraftId, String(created?.id ?? '')]
+        )
+
+        return res.status(201).json({ ok: true, meta_creative: created, creative_draft: updatedRows[0] })
+      } catch (err) {
+        const status = typeof err?.status === 'number' ? err.status : 502
+        return jsonError(res, status, err?.message ?? 'Meta ad creative creation failed', err?.details)
+      }
+    })
+  )
+
+  router.get(
+    '/creatives/:id',
+    asyncHandler(async (req, res) => {
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      const metaCreativeId = normalizeNonEmptyString(req.params.id)
+      if (!metaCreativeId) {
+        return jsonError(res, 400, 'Invalid meta creative id')
+      }
+
+      const pool = getPool()
+      const accessToken = await resolveAccessToken(pool, req)
+      if (!accessToken) {
+        return jsonError(
+          res,
+          400,
+          'Missing accessToken (provide body.accessToken, META_ACCESS_TOKEN, or save via /tokens)'
+        )
+      }
+
+      try {
+        const creative = await metaFetchAdCreative({ metaCreativeId, accessToken })
+        return res.json({ ok: true, meta_creative: creative })
+      } catch (err) {
+        const status = typeof err?.status === 'number' ? err.status : 502
+        return jsonError(res, status, err?.message ?? 'Meta creative fetch failed', err?.details)
+      }
     })
   )
 

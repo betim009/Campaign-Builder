@@ -96,6 +96,17 @@
 - Listar drafts: `GET /api/creative-drafts?generatedCampaignId=<uuid>&limit=50`
 - Criar draft: `POST /api/creative-drafts`
 
+### Meta — Creative REAL (AdCreative)
+
+Última atualização: [2026-05-13 13:15]
+
+- Publicar Creative REAL a partir de um `creative_draft` (token no backend): `POST /api/meta/creative-drafts/:id/publish`
+  - Requer `creative_drafts.destination_url` preenchido (use `destinationUrl` ao criar o draft).
+  - `pageId` pode vir do body (`{ "pageId": "..." }`) ou do env `META_PAGE_ID` (obrigatório).
+  - `instagramActorId` é opcional (body ou env `META_INSTAGRAM_ACTOR_ID`).
+  - Se houver `creative_asset_id`, o backend faz upload da imagem na Meta (`adimages`) e usa `image_hash`.
+- Consultar Creative no Graph (via backend): `GET /api/meta/creatives/{meta_creative_id}`
+
 ### Registros operacionais (cronológico)
 
 Esta seção deve ser atualizada sempre que:
