@@ -152,7 +152,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-13 14:09]
+Última atualização: [2026-05-13 16:03]
 
 Regras:
 
@@ -247,6 +247,7 @@ Regras:
 - [x] Persistir histórico Meta (ops_logs + snapshots Graph) (commit: 7489ed7)
 - [x] `/meta-test`: registrar snapshots do Graph em `ops_logs` (meta.*.get) (commit: 7489ed7)
 - [x] Persistir status de execução (`ops_last_*` em `generated_campaigns`) (commit: 7c329b1)
+- [x] Registrar publish de Creative REAL em `ops_last_*` + `ops_logs` (backend) (commit: 4454499)
 - [x] Persistir estrutura Campaign/AdSet/Ad
 - [x] `/meta-test`: exibir estrutura persistida (generated_adsets/generated_ads) para registro selecionado (commit: 402f699)
 - [x] Criar recuperação operacional (bundle export + seleção do DB) (commit: 86995d6)
