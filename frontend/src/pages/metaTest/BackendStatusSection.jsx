@@ -84,6 +84,17 @@ export default function BackendStatusSection({
       >
         <div className="card" style={{ padding: 14 }}>
           <div className="muted" style={{ fontWeight: 900 }}>
+            DB habilitado
+          </div>
+          <div style={{ marginTop: 6, fontWeight: 900 }}>
+            {backendStatusLoading ? "LOADING" : backendStatus?.dbEnabled ? "SIM" : "NÃO"}
+          </div>
+          <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
+            Sem DB, `/meta-test` não consegue persistir drafts/assets.
+          </div>
+        </div>
+        <div className="card" style={{ padding: 14 }}>
+          <div className="muted" style={{ fontWeight: 900 }}>
             Provider
           </div>
           <div style={{ marginTop: 6, fontWeight: 900 }}>

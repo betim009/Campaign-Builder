@@ -393,14 +393,20 @@ export function metaRouter() {
   router.post(
     '/validate',
     asyncHandler(async (req, res) => {
-      if (!req.app.locals.dbEnabled) {
-        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
-      }
+      const dbEnabled = Boolean(req.app.locals.dbEnabled)
+      const pool = dbEnabled ? getPool() : null
+      const accessToken = dbEnabled
+        ? await resolveAccessToken(pool, req)
+        : coerceAccessToken(process.env.META_ACCESS_TOKEN)
 
-      const pool = getPool()
-      const accessToken = await resolveAccessToken(pool, req)
       if (!accessToken) {
-        return jsonError(res, 400, 'Missing accessToken (provide body.accessToken, META_ACCESS_TOKEN, or save via /tokens)')
+        return jsonError(
+          res,
+          400,
+          dbEnabled
+            ? 'Missing accessToken (provide body.accessToken, META_ACCESS_TOKEN, or save via /tokens)'
+            : 'Missing accessToken (set META_ACCESS_TOKEN env; DB is disabled)'
+        )
       }
 
       try {
@@ -416,14 +422,15 @@ export function metaRouter() {
   router.get(
     '/status',
     asyncHandler(async (req, res) => {
-      if (!req.app.locals.dbEnabled) {
-        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
-      }
+      const dbEnabled = Boolean(req.app.locals.dbEnabled)
+      const pool = dbEnabled ? getPool() : null
+      const accessToken = dbEnabled
+        ? await resolveAccessToken(pool, req)
+        : coerceAccessToken(process.env.META_ACCESS_TOKEN)
 
-      const pool = getPool()
-      const accessToken = await resolveAccessToken(pool, req)
       return res.json({
         ok: true,
+        db_enabled: dbEnabled,
         provider: process.env.META_SYNC_PROVIDER ?? null,
         graph_version: process.env.META_GRAPH_VERSION ?? null,
         has_access_token: Boolean(accessToken),

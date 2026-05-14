@@ -4,6 +4,7 @@ export async function getMetaStatus() {
   const data = await apiGet("/api/meta/status");
   return {
     ok: true,
+    dbEnabled: Boolean(data?.db_enabled),
     provider: data?.provider ?? null,
     graphVersion: data?.graph_version ?? null,
     hasAccessToken: Boolean(data?.has_access_token),
