@@ -22,6 +22,7 @@ import { createMetaCampaignSimple, getMetaCampaign, listMetaAdAccountCampaigns }
 import { getMetaAdSet } from "../services/metaAdSets.js";
 import { getMetaAd } from "../services/metaAds.js";
 import { getMetaStatus, validateMetaToken } from "../services/metaStatus.js";
+import { listMetaPages } from "../services/metaPages.js";
 import { countryCodeToFlag } from "../services/fallbacks.js";
 import { getGeneratedCampaignStructure, listGeneratedCampaigns } from "../services/generatedCampaigns.js";
 import { listOpsLogs } from "../services/opsLogs.js";
@@ -95,6 +96,10 @@ export default function MetaPausedTest() {
   const [creativePublishForce, setCreativePublishForce] = useState(false);
   const [creativeGetLoading, setCreativeGetLoading] = useState(false);
   const [creativeGetResult, setCreativeGetResult] = useState(null);
+  const [pagesLoading, setPagesLoading] = useState(false);
+  const [pagesError, setPagesError] = useState("");
+  const [pagesErrorDetails, setPagesErrorDetails] = useState(null);
+  const [pagesResult, setPagesResult] = useState(null);
 
   // Evidência de persistência local
   const [localLoading, setLocalLoading] = useState(false);
@@ -1339,6 +1344,7 @@ export default function MetaPausedTest() {
         creativeDraftId={adCreativeDraftId}
         setCreativeDraftId={setAdCreativeDraftId}
         creativeDraftOptions={creativeDrafts}
+        metaAdAccountId={metaAdAccountId}
         metaPageId={metaPageId}
         setMetaPageId={setMetaPageId}
         metaInstagramActorId={metaInstagramActorId}
@@ -1355,6 +1361,31 @@ export default function MetaPausedTest() {
         canFetchCreative={canFetchCreative}
         creativeGetLoading={creativeGetLoading}
         creativeGetResult={creativeGetResult}
+        pagesLoading={pagesLoading}
+        pagesResult={pagesResult}
+        pagesError={pagesError}
+        pagesErrorDetails={pagesErrorDetails}
+        onListPages={async () => {
+          setPagesLoading(true);
+          setPagesError("");
+          setPagesErrorDetails(null);
+          try {
+            const res = await listMetaPages({ metaAdAccountId: normalizeMetaAdAccountId(metaAdAccountId) });
+            setPagesResult({
+              metaAdAccountId: res?.metaAdAccountId ?? null,
+              myPages: res?.myPages ?? [],
+              promotePages: res?.promotePages ?? [],
+            });
+            pushLog({ action: "meta.pages.list", ok: true, details: { metaAdAccountId: res?.metaAdAccountId ?? null } });
+          } catch (err) {
+            setPagesResult(null);
+            setPagesError(err?.message ? String(err.message) : "Falha ao listar Pages (Graph).");
+            setPagesErrorDetails(err?.body?.error?.details ?? err?.body ?? null);
+            pushLog({ action: "meta.pages.list", ok: false, error: err?.message ? String(err.message) : "error" });
+          } finally {
+            setPagesLoading(false);
+          }
+        }}
         onFetchCreative={async () => {
           const id = normalizeNonEmptyString(adCreativeId);
           if (!id) return;

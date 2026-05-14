@@ -7,6 +7,7 @@ export default function StepAdSection({
   creativeDraftId,
   setCreativeDraftId,
   creativeDraftOptions,
+  metaAdAccountId,
   metaPageId,
   setMetaPageId,
   metaInstagramActorId,
@@ -25,6 +26,11 @@ export default function StepAdSection({
   creativeGetLoading,
   creativeGetResult,
   onFetchCreative,
+  pagesLoading,
+  pagesResult,
+  pagesError,
+  pagesErrorDetails,
+  onListPages,
   canCreateAd,
   adCreating,
   onCreateAd,
@@ -205,6 +211,14 @@ export default function StepAdSection({
           <button type="button" className="pillOutline" disabled={!canFetchCreative} onClick={onFetchCreative}>
             {creativeGetLoading ? "Consultando..." : "Consultar Creative (Graph)"}
           </button>
+          <button
+            type="button"
+            className="pillOutline"
+            disabled={flowMode === "STUB" || pagesLoading}
+            onClick={onListPages}
+          >
+            {pagesLoading ? "Listando..." : "Listar Pages (Graph)"}
+          </button>
           <div className="muted" style={{ fontWeight: 800 }}>
             Requer modo REAL + token no backend + `creativeDraftId` com `destinationUrl`.
           </div>
@@ -225,6 +239,50 @@ export default function StepAdSection({
             ? "env (META_INSTAGRAM_ACTOR_ID)"
             : "— (opcional)"}
         </div>
+
+        {pagesError ? (
+          <div className="muted" style={{ marginTop: 10, fontWeight: 900, color: "#991b1b" }}>
+            Falha ao listar Pages: {pagesError}
+            {pagesErrorDetails ? (
+              <pre
+                style={{
+                  marginTop: 10,
+                  background: "#0b1220",
+                  color: "#e5e7eb",
+                  padding: 12,
+                  borderRadius: 12,
+                  overflowX: "auto",
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+{JSON.stringify(pagesErrorDetails ?? null, null, 2)}
+              </pre>
+            ) : null}
+          </div>
+        ) : null}
+
+        {pagesResult ? (
+          <details style={{ marginTop: 12 }}>
+            <summary style={{ cursor: "pointer", fontWeight: 900 }}>
+              Pages (Graph) — `metaAdAccountId`: {metaAdAccountId || "—"}
+            </summary>
+            <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
+              Se vazio, o token provavelmente não tem acesso a uma Page. Você ainda pode informar `pageId` manualmente.
+            </div>
+            <pre
+              style={{
+                marginTop: 10,
+                background: "#0b1220",
+                color: "#e5e7eb",
+                padding: 12,
+                borderRadius: 12,
+                overflowX: "auto",
+              }}
+            >
+{JSON.stringify(pagesResult ?? null, null, 2)}
+            </pre>
+          </details>
+        ) : null}
 
         <label style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 10, userSelect: "none" }}>
           <input

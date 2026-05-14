@@ -13,6 +13,7 @@ import { slugify } from '../lib/slugify.js'
 import { metaCreateAdSet, metaCreateAdSetStub, metaFetchAdSet } from '../meta/adsets.js'
 import { metaCreateAd, metaCreateAdStub, metaFetchAd } from '../meta/ads.js'
 import { metaCreateAdCreative, metaFetchAdCreative, metaUploadAdImage } from '../meta/creatives.js'
+import { metaListAdAccountPromotePages, metaListMyPages } from '../meta/pages.js'
 
 function parseDateOrNull(value) {
   if (typeof value !== 'string' || !value.trim()) return null
@@ -345,6 +346,40 @@ export function metaRouter() {
       } catch (err) {
         const status = typeof err?.status === 'number' ? err.status : 502
         return jsonError(res, status, err?.message ?? 'Meta creative fetch failed', err?.details)
+      }
+    })
+  )
+
+  router.get(
+    '/pages',
+    asyncHandler(async (req, res) => {
+      const dbEnabled = Boolean(req.app.locals.dbEnabled)
+      const pool = dbEnabled ? getPool() : null
+      const accessToken = dbEnabled
+        ? await resolveAccessToken(pool, req)
+        : coerceAccessToken(process.env.META_ACCESS_TOKEN)
+
+      if (!accessToken) {
+        return jsonError(res, 400, 'Missing accessToken (set META_ACCESS_TOKEN env or save via /tokens)')
+      }
+
+      const metaAdAccountId = normalizeMetaAdAccountId(req.query?.metaAdAccountId)
+
+      try {
+        const myPages = await metaListMyPages({ accessToken })
+        const promotePages = metaAdAccountId
+          ? await metaListAdAccountPromotePages({ metaAdAccountId, accessToken })
+          : []
+
+        return res.json({
+          ok: true,
+          meta_ad_account_id: metaAdAccountId,
+          my_pages: myPages,
+          promote_pages: promotePages
+        })
+      } catch (err) {
+        const status = typeof err?.status === 'number' ? err.status : 502
+        return jsonError(res, status, err?.message ?? 'Meta pages fetch failed', err?.details)
       }
     })
   )
