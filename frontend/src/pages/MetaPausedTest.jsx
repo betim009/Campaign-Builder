@@ -338,6 +338,10 @@ export default function MetaPausedTest() {
     normalizeNonEmptyString(adName) !== "" &&
     (flowMode === "STUB" || (Boolean(backendStatus?.hasAccessToken) && normalizeNonEmptyString(adCreativeId) !== ""));
 
+  const hasPageIdFromEnv = Boolean(backendStatus?.hasPageId);
+  const hasInstagramActorIdFromEnv = Boolean(backendStatus?.hasInstagramActorId);
+  const hasPageIdFromUi = normalizeNonEmptyString(metaPageId) !== "";
+
   const canPublishCreative =
     !loading &&
     !isCreatingAny &&
@@ -346,6 +350,7 @@ export default function MetaPausedTest() {
     Boolean(backendStatus?.hasAccessToken) &&
     normalizeNonEmptyString(adCreativeDraftId) !== "" &&
     selectedCreativeDraftHasUrl &&
+    (hasPageIdFromUi || hasPageIdFromEnv) &&
     (!selectedCreativeDraftMetaCreativeIdIsReal || creativePublishForce);
 
   const canFetchCreative =
@@ -1338,6 +1343,8 @@ export default function MetaPausedTest() {
         setMetaPageId={setMetaPageId}
         metaInstagramActorId={metaInstagramActorId}
         setMetaInstagramActorId={setMetaInstagramActorId}
+        backendHasPageId={hasPageIdFromEnv}
+        backendHasInstagramActorId={hasInstagramActorIdFromEnv}
         creativePublishForce={creativePublishForce}
         setCreativePublishForce={setCreativePublishForce}
         selectedCreativeDraftMetaCreativeId={selectedCreativeDraftMetaCreativeId}

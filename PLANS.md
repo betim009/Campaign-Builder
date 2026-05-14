@@ -53,7 +53,7 @@ Construir o **Campaign Builder**, uma aplicação web que substitui a planilha o
 
 ## Snapshot (Estado Atual)
 
-Última atualização: [2026-05-14 16:59]
+Última atualização: [2026-05-14 19:59]
 
 O que está funcional hoje:
 
@@ -76,6 +76,7 @@ O que está funcional hoje:
   - evidência de Creative REAL via Graph (consulta do AdCreative no backend + exibição no `/meta-test`)
   - operação mais segura de Creative REAL: opção `force` no publish (evita bloqueio por `meta_creative_id` já persistido) + evidência imediata no UI (commit: 98cc5c0)
   - status do backend agora evidencia `META_PAGE_ID`/`META_INSTAGRAM_ACTOR_ID` (sem expor tokens) para reduzir erro operacional no Creative REAL (commit: 8bed865)
+  - publish de Creative REAL agora faz preflight de `META_PAGE_ID` (UI/env) e explica o que está faltando (reduz erro operacional 400)
 - O fluxo operacional começou a ser separado conceitualmente entre:
   - Campaign
   - AdSet

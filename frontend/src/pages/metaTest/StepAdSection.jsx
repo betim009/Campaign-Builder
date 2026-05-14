@@ -11,6 +11,8 @@ export default function StepAdSection({
   setMetaPageId,
   metaInstagramActorId,
   setMetaInstagramActorId,
+  backendHasPageId,
+  backendHasInstagramActorId,
   creativePublishForce,
   setCreativePublishForce,
   selectedCreativeDraftMetaCreativeId,
@@ -208,6 +210,22 @@ export default function StepAdSection({
           </div>
         </div>
 
+        <div className="muted" style={{ marginTop: 10, fontWeight: 900 }}>
+          Page ID:{" "}
+          {normalizeNonEmptyString(metaPageId)
+            ? "UI"
+            : backendHasPageId
+            ? "env (META_PAGE_ID)"
+            : "AUSENTE (preencha no UI ou no env)"}
+          {" · "}
+          Instagram Actor ID:{" "}
+          {normalizeNonEmptyString(metaInstagramActorId)
+            ? "UI"
+            : backendHasInstagramActorId
+            ? "env (META_INSTAGRAM_ACTOR_ID)"
+            : "— (opcional)"}
+        </div>
+
         <label style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 10, userSelect: "none" }}>
           <input
             type="checkbox"
@@ -229,6 +247,14 @@ export default function StepAdSection({
           <div className="muted" style={{ marginTop: 8, fontWeight: 900, color: "#991b1b" }}>
             Draft já possui `meta_creative_id`: <b>{selectedCreativeDraftMetaCreativeId}</b>. Marque{" "}
             <b>Force republish</b> para publicar novamente.
+          </div>
+        ) : null}
+        {flowMode === "REAL" &&
+        creativeDraftId &&
+        !normalizeNonEmptyString(metaPageId) &&
+        !backendHasPageId ? (
+          <div className="muted" style={{ marginTop: 8, fontWeight: 900, color: "#991b1b" }}>
+            Faltando <b>Page ID</b> (obrigatório) — preencha acima ou configure <b>META_PAGE_ID</b> no backend.
           </div>
         ) : null}
 
