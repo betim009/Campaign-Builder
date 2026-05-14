@@ -53,7 +53,7 @@ Construir o **Campaign Builder**, uma aplicação web que substitui a planilha o
 
 ## Snapshot (Estado Atual)
 
-Última atualização: [2026-05-14 20:01]
+Última atualização: [2026-05-14 20:07]
 
 O que está funcional hoje:
 
@@ -78,6 +78,7 @@ O que está funcional hoje:
   - status do backend agora evidencia `META_PAGE_ID`/`META_INSTAGRAM_ACTOR_ID` (sem expor tokens) para reduzir erro operacional no Creative REAL (commit: 8bed865)
   - publish de Creative REAL agora faz preflight de `META_PAGE_ID` (UI/env) e explica o que está faltando (reduz erro operacional 400) (commit: d6dd5ed)
   - `/api/meta/status` e `/api/meta/validate` agora funcionam mesmo sem DB (usam apenas `META_ACCESS_TOKEN` env) para troubleshooting mais rápido quando o Postgres/Docker estiver indisponível (commit: 2eabf2d)
+  - `docker-compose.yml` agora permite override de portas do host (`DB_HOST_PORT`/`BACKEND_HOST_PORT`/`FRONTEND_HOST_PORT`) para evitar conflitos locais (defaults mantidos) (commit: bb1c792)
 - O fluxo operacional começou a ser separado conceitualmente entre:
   - Campaign
   - AdSet
@@ -307,7 +308,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-13 13:17]
+Última atualização: [2026-05-14 20:07]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -392,12 +393,15 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-12 19:03] Decisão: preview operacional é local e simples (texto + mídia via `/uploads`), suficiente para troubleshooting antes de integrar preview real da Meta. (commit: f8689c5)
 - [2026-05-12 19:05] Decisão: variações futuras começam com duplicação de `creative_drafts` (sem abstrações), permitindo iterar copy/mídia rapidamente no lab. (commits: ba2322f, 41c1d13)
 - [2026-05-13 13:17] Decisão: publicação de Creative REAL (AdCreative) é feita via backend (`POST /api/meta/creative-drafts/:id/publish`), exigindo `destination_url` no draft; `META_PAGE_ID` é obrigatório (ou body `pageId`); `META_INSTAGRAM_ACTOR_ID` é opcional; se houver asset local, o backend faz upload para Meta (`adimages`) e usa `image_hash`. (commit: cac550e)
+- [2026-05-14 20:07] Decisão: endpoints `/api/meta/status` e `/api/meta/validate` devem funcionar mesmo sem DB (modo troubleshooting via `META_ACCESS_TOKEN` env), sem expor token no frontend. (commit: 2eabf2d)
+- [2026-05-14 20:07] Decisão: `docker-compose.yml` suporta override de portas do host por env (`DB_HOST_PORT`/`BACKEND_HOST_PORT`/`FRONTEND_HOST_PORT`), mantendo defaults (5433/3001/5173). (commit: bb1c792)
 
 ## Blockers
 
-Última atualização: [2026-05-08 10:46]
+Última atualização: [2026-05-14 20:07]
 
 - Execução com DB/stack depende do daemon do Docker estar rodando (`docker compose up -d`). Ver `RUNBOOK.md`.
+- Para validar P4/P5 (Creative/Ad REAL) é necessário `META_PAGE_ID` (env) ou `pageId` no `/meta-test` + token com acesso a uma Page (no momento, nenhuma Page foi listada via Graph com o token atual).
 
 ## Risks
 
