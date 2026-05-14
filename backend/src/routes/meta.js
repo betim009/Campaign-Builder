@@ -426,7 +426,9 @@ export function metaRouter() {
         ok: true,
         provider: process.env.META_SYNC_PROVIDER ?? null,
         graph_version: process.env.META_GRAPH_VERSION ?? null,
-        has_access_token: Boolean(accessToken)
+        has_access_token: Boolean(accessToken),
+        has_page_id: Boolean(normalizeNonEmptyString(process.env.META_PAGE_ID)),
+        has_instagram_actor_id: Boolean(normalizeNonEmptyString(process.env.META_INSTAGRAM_ACTOR_ID))
       })
     })
   )

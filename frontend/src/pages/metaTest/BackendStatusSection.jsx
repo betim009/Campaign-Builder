@@ -110,6 +110,28 @@ export default function BackendStatusSection({
               : "NÃO (somente STUB)"}
           </div>
         </div>
+        <div className="card" style={{ padding: 14 }}>
+          <div className="muted" style={{ fontWeight: 900 }}>
+            `META_PAGE_ID` (env)
+          </div>
+          <div style={{ marginTop: 6, fontWeight: 900 }}>
+            {backendStatusLoading ? "LOADING" : backendStatus?.hasPageId ? "SIM" : "NÃO"}
+          </div>
+          <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
+            Requerido para publish de Creative REAL (se não for enviado no UI).
+          </div>
+        </div>
+        <div className="card" style={{ padding: 14 }}>
+          <div className="muted" style={{ fontWeight: 900 }}>
+            `META_INSTAGRAM_ACTOR_ID` (env)
+          </div>
+          <div style={{ marginTop: 6, fontWeight: 900 }}>
+            {backendStatusLoading ? "LOADING" : backendStatus?.hasInstagramActorId ? "SIM" : "NÃO"}
+          </div>
+          <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
+            Opcional (pode ser enviado no UI).
+          </div>
+        </div>
       </div>
 
       <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
