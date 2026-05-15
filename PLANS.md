@@ -180,7 +180,7 @@ GOVERNANÇA CONTÍNUA:
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-15 17:13]
+Última atualização: [2026-05-15 17:14]
 
 Regras:
 
@@ -257,10 +257,10 @@ Regras:
 
 #### Separação contextual
 - [x] Separar visualmente (commit: 8c6f584):
-  - [ ] operação
-  - [ ] persistência
-  - [ ] debug
-  - [ ] Graph
+  - [x] operação
+  - [x] persistência
+  - [x] debug
+  - [x] Graph
   - [x] `/meta-test`: “Campanhas PAUSED na Meta” colapsável e dentro do bloco Graph (commit: 75527a5)
 
 ### P2 — Fluxo progressivo Meta
