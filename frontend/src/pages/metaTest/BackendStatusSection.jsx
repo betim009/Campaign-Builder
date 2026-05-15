@@ -1,5 +1,6 @@
 import CollapsibleCard from "./CollapsibleCard.jsx";
 import JsonAccordion from "./JsonAccordion.jsx";
+import { useState } from "react";
 
 export default function BackendStatusSection({
   refreshBackendStatus,
@@ -32,6 +33,8 @@ export default function BackendStatusSection({
   getMetaDiagnostics,
   pushLog,
 }) {
+  const [copyStatus, setCopyStatus] = useState("");
+
   return (
     <CollapsibleCard
       id="meta-test-backend-status"
@@ -39,16 +42,43 @@ export default function BackendStatusSection({
       description="Diagnóstico rápido de token/provider sem expor segredo."
       defaultOpen={false}
       headerRight={
-        <button
-          type="button"
-          className="pillOutline"
-          onClick={refreshBackendStatus}
-          disabled={isCreatingAny || loading || backendStatusLoading}
-        >
-          {backendStatusLoading ? "Atualizando..." : "Atualizar status"}
-        </button>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <button
+            type="button"
+            className="pillOutline"
+            onClick={async () => {
+              setCopyStatus("");
+              const text = safeJson(backendStatus ?? null);
+              try {
+                await navigator.clipboard.writeText(text);
+                setCopyStatus("Status copiado.");
+              } catch {
+                setCopyStatus("Falha ao copiar.");
+              } finally {
+                window.setTimeout(() => setCopyStatus(""), 3500);
+              }
+            }}
+            disabled={!backendStatus || backendStatusLoading}
+          >
+            Copiar JSON
+          </button>
+          <button
+            type="button"
+            className="pillOutline"
+            onClick={refreshBackendStatus}
+            disabled={isCreatingAny || loading || backendStatusLoading}
+          >
+            {backendStatusLoading ? "Atualizando..." : "Atualizar status"}
+          </button>
+        </div>
       }
     >
+
+      {copyStatus ? (
+        <div className="muted" style={{ marginTop: 12, fontWeight: 900 }}>
+          {copyStatus}
+        </div>
+      ) : null}
 
       {backendStatusError ? (
         <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
