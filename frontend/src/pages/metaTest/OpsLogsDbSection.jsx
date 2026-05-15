@@ -1,5 +1,6 @@
 import CollapsibleCard from "./CollapsibleCard.jsx";
 import JsonAccordion from "./JsonAccordion.jsx";
+import { useState } from "react";
 
 export default function OpsLogsDbSection({
   loading,
@@ -11,6 +12,8 @@ export default function OpsLogsDbSection({
   onDismissError,
   safeJson,
 }) {
+  const [compactMode, setCompactMode] = useState(true);
+
   return (
     <CollapsibleCard
       id="meta-test-ops-logs-db"
@@ -23,9 +26,23 @@ export default function OpsLogsDbSection({
       meta={<>{loading ? "Carregando..." : `${opsLogs.length} log(s)`}</>}
       defaultOpen={false}
       headerRight={
-        <button type="button" className="pillOutline" onClick={onRefresh} disabled={refreshDisabled}>
-          {loading ? "Atualizando..." : "Atualizar do DB"}
-        </button>
+        <>
+          <button
+            type="button"
+            className="pillOutline"
+            onClick={() => setCompactMode((v) => !v)}
+            style={{
+              borderColor: compactMode ? "#2563eb" : undefined,
+              background: compactMode ? "#dbeafe" : undefined,
+              fontWeight: 900,
+            }}
+          >
+            Compacto: {compactMode ? "ON" : "OFF"}
+          </button>
+          <button type="button" className="pillOutline" onClick={onRefresh} disabled={refreshDisabled}>
+            {loading ? "Atualizando..." : "Atualizar do DB"}
+          </button>
+        </>
       }
     >
 
@@ -48,7 +65,7 @@ export default function OpsLogsDbSection({
       ) : null}
 
       <div style={{ borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
-        <table className="dataTable" style={{ marginTop: 0 }}>
+        <table className="dataTable" style={{ marginTop: 0, fontSize: compactMode ? 12 : undefined }}>
           <thead>
             <tr>
               <th>Quando (DB)</th>
@@ -69,7 +86,16 @@ export default function OpsLogsDbSection({
                 <td style={{ fontWeight: 900 }}>{l.action || "—"}</td>
                 <td className="muted" style={{ fontWeight: 900 }}>{l.ok ? "SIM" : "NÃO"}</td>
                 <td className="muted" style={{ fontWeight: 800 }}>{l.error || "—"}</td>
-                <td className="muted" style={{ fontWeight: 800, maxWidth: 520 }}>{safeJson(l.details ?? null)}</td>
+                <td className="muted" style={{ fontWeight: 800, maxWidth: 520 }}>
+                  {compactMode ? (
+                    <details>
+                      <summary style={{ cursor: "pointer", fontWeight: 900 }}>Ver detalhes</summary>
+                      <pre style={{ marginTop: 10, whiteSpace: "pre-wrap" }}>{safeJson(l.details ?? null)}</pre>
+                    </details>
+                  ) : (
+                    safeJson(l.details ?? null)
+                  )}
+                </td>
               </tr>
             ))}
             {!opsLogs.length && !loading ? (

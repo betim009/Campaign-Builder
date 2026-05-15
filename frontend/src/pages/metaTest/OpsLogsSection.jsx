@@ -14,6 +14,7 @@ export default function OpsLogsSection({
 }) {
   const [statusFilter, setStatusFilter] = useState("all"); // all | ok | error
   const [query, setQuery] = useState("");
+  const [compactMode, setCompactMode] = useState(true);
 
   const viewLogs = useMemo(() => {
     let list = Array.isArray(filteredOpsLogs) ? filteredOpsLogs : [];
@@ -45,6 +46,18 @@ export default function OpsLogsSection({
       defaultOpen={false}
       headerRight={
         <>
+          <button
+            type="button"
+            className="pillOutline"
+            onClick={() => setCompactMode((v) => !v)}
+            style={{
+              borderColor: compactMode ? "#2563eb" : undefined,
+              background: compactMode ? "#dbeafe" : undefined,
+              fontWeight: 900,
+            }}
+          >
+            Compacto: {compactMode ? "ON" : "OFF"}
+          </button>
           <button
             type="button"
             className="pillOutline"
@@ -172,7 +185,7 @@ export default function OpsLogsSection({
       </div>
 
       <div style={{ marginTop: 12, borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
-        <table className="dataTable" style={{ marginTop: 0 }}>
+        <table className="dataTable" style={{ marginTop: 0, fontSize: compactMode ? 12 : undefined }}>
           <thead>
             <tr>
               <th>Quando</th>
@@ -192,9 +205,22 @@ export default function OpsLogsSection({
                   {l.ok ? "SIM" : "NÃO"}
                 </td>
                 <td className="muted" style={{ fontWeight: 800, maxWidth: 520 }}>
-                  {l.ok
-                    ? safeJson(l.details ?? null)
-                    : `${l.error || "—"}${l.details ? `\n${safeJson(l.details)}` : ""}`}
+                  {compactMode ? (
+                    <details>
+                      <summary style={{ cursor: "pointer", fontWeight: 900 }}>
+                        Ver detalhes
+                      </summary>
+                      <pre style={{ marginTop: 10, whiteSpace: "pre-wrap" }}>
+                        {l.ok
+                          ? safeJson(l.details ?? null)
+                          : `${l.error || "—"}${l.details ? `\n${safeJson(l.details)}` : ""}`}
+                      </pre>
+                    </details>
+                  ) : l.ok ? (
+                    safeJson(l.details ?? null)
+                  ) : (
+                    `${l.error || "—"}${l.details ? `\n${safeJson(l.details)}` : ""}`
+                  )}
                 </td>
               </tr>
             ))}
