@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import CollapsibleCard from "./CollapsibleCard.jsx";
 
 export default function OpsLogsSection({
   opsLogs,
@@ -32,18 +33,18 @@ export default function OpsLogsSection({
   }, [filteredOpsLogs, statusFilter, query]);
 
   return (
-    <div id="meta-test-ops-logs" className="card" style={{ padding: 0, marginTop: 16 }}>
-      <div style={{ padding: 16, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
-        <div>
-          <div style={{ fontWeight: 900, fontSize: 16 }}>Logs operacionais (básico)</div>
-          <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
-            Timeline local do navegador (sem token) para auditoria rápida do lab.
-          </div>
-          <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
-            Mostrando <b>{viewLogs.length}</b> de <b>{opsLogs.length}</b> log(s).
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+    <CollapsibleCard
+      id="meta-test-ops-logs"
+      title="Logs operacionais (básico)"
+      description="Timeline local do navegador (sem token) para auditoria rápida do lab."
+      meta={
+        <>
+          Mostrando <b>{viewLogs.length}</b> de <b>{opsLogs.length}</b> log(s).
+        </>
+      }
+      defaultOpen={false}
+      headerRight={
+        <>
           <button
             type="button"
             className="pillOutline"
@@ -79,10 +80,11 @@ export default function OpsLogsSection({
           >
             Copiar JSON
           </button>
-        </div>
-      </div>
+        </>
+      }
+    >
 
-      <div style={{ padding: "0 16px 16px", display: "flex", gap: 10, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
         {[
           { id: "all", label: "Todos" },
           { id: "campaign", label: "Campaign" },
@@ -110,7 +112,7 @@ export default function OpsLogsSection({
         })}
       </div>
 
-      <div style={{ padding: "0 16px 16px", display: "flex", gap: 10, flexWrap: "wrap", alignItems: "end" }}>
+      <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "end" }}>
         <label style={{ display: "grid", gap: 6, minWidth: 220 }}>
           <span className="muted" style={{ fontWeight: 900 }}>
             Status
@@ -169,7 +171,7 @@ export default function OpsLogsSection({
         </button>
       </div>
 
-      <div style={{ borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
+      <div style={{ marginTop: 12, borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
         <table className="dataTable" style={{ marginTop: 0 }}>
           <thead>
             <tr>
@@ -206,6 +208,6 @@ export default function OpsLogsSection({
           </tbody>
         </table>
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }

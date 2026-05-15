@@ -10,6 +10,7 @@ import GeneratedCampaignsSection from "./metaTest/GeneratedCampaignsSection.jsx"
 import GeneratedStructureSection from "./metaTest/GeneratedStructureSection.jsx";
 import CreativeAssetsSection from "./metaTest/CreativeAssetsSection.jsx";
 import CreativeDraftsSection from "./metaTest/CreativeDraftsSection.jsx";
+import CollapsibleCard from "./metaTest/CollapsibleCard.jsx";
 import StepAdSetSection from "./metaTest/StepAdSetSection.jsx";
 import StepAdSection from "./metaTest/StepAdSection.jsx";
 import StepCampaignSection from "./metaTest/StepCampaignSection.jsx";
@@ -167,7 +168,11 @@ export default function MetaPausedTest() {
   function scrollToSection(sectionId) {
     try {
       const el = document.getElementById(sectionId);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (el) {
+        const details = el.getAttribute("data-collapsible-card") ? el.querySelector("details") : null;
+        if (details && !details.open) details.open = true;
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     } catch {
       // ignore
     }
@@ -643,10 +648,13 @@ export default function MetaPausedTest() {
         syncProviderLabel={syncProviderLabel}
       />
 
-      <div id="meta-test-recovery" className="card" style={{ padding: 18, marginTop: 16 }}>
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
-          <div style={{ fontWeight: 900 }}>Recuperação operacional</div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+      <CollapsibleCard
+        id="meta-test-recovery"
+        title="Recuperação operacional"
+        description="Exporta um JSON com IDs, registro selecionado, estrutura persistida e logs do DB para troubleshooting rápido."
+        defaultOpen={false}
+        headerRight={
+          <>
             <button
               type="button"
               className="pillOutline"
@@ -671,25 +679,30 @@ export default function MetaPausedTest() {
             >
               Copiar bundle (DB + logs)
             </button>
-          </div>
-        </div>
-        <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
-          Exporta um JSON com IDs, registro selecionado, estrutura persistida e logs do DB para troubleshooting rápido.
-        </div>
-      </div>
+          </>
+        }
+      />
 
-      <div className="card" style={{ padding: 18 }}>
-        <div style={{ fontWeight: 900 }}>Regras (segurança)</div>
-        <ul className="muted" style={{ marginTop: 10, fontWeight: 800, lineHeight: 1.55 }}>
+      <CollapsibleCard
+        id="meta-test-rules"
+        title="Regras (segurança)"
+        description="Guardrails do lab (token no backend + REAL sempre PAUSED)."
+        defaultOpen={false}
+      >
+        <ul className="muted" style={{ marginTop: 0, fontWeight: 800, lineHeight: 1.55, paddingLeft: 18 }}>
           <li>Esta página NÃO envia token para o frontend.</li>
           <li>O backend deve ter token via `META_ACCESS_TOKEN` ou `POST /api/meta/tokens`.</li>
           <li>Toda criação REAL deve nascer como `PAUSED` (forçado no backend).</li>
         </ul>
-      </div>
+      </CollapsibleCard>
 
-      <div className="card" style={{ padding: 18, marginTop: 16 }}>
-        <div style={{ fontWeight: 900 }}>Modos operacionais</div>
-        <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
+      <CollapsibleCard
+        id="meta-test-modes"
+        title="Modos operacionais"
+        description="REAL chama Meta; STUB simula IDs; FALLBACK usa dados locais quando API/DB falha."
+        defaultOpen={false}
+      >
+        <div className="muted" style={{ fontWeight: 800, lineHeight: 1.55 }}>
           <div>
             <b>REAL</b>: backend chama Meta Graph/Marketing API (token válido) e persiste IDs reais.
           </div>
@@ -700,7 +713,7 @@ export default function MetaPausedTest() {
             <b>FALLBACK</b>: UI usa dados locais quando API/DB não estiverem disponíveis (sempre sinalizado).
           </div>
         </div>
-      </div>
+      </CollapsibleCard>
 
       {error ? (
         <div className="card" style={{ padding: 18, marginTop: 16, borderColor: "#fecaca", color: "#991b1b" }}>
@@ -776,13 +789,13 @@ export default function MetaPausedTest() {
         countryNameByCode={countryNameByCode}
       />
 
-      <div id="meta-test-graph-refresh" className="card" style={{ padding: 18, marginTop: 16 }}>
-        <div style={{ fontWeight: 900, fontSize: 16 }}>Graph (REAL) — atualizar status</div>
-        <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
-          Usa `GET /api/meta/*/:id` via backend. STUB não consulta Graph.
-        </div>
-
-        <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+      <CollapsibleCard
+        id="meta-test-graph-refresh"
+        title="Graph (REAL) — atualizar status"
+        description="Usa `GET /api/meta/*/:id` via backend. STUB não consulta Graph."
+        defaultOpen={false}
+      >
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
           <button
             type="button"
             className="pillOutline"
@@ -905,7 +918,7 @@ export default function MetaPausedTest() {
             Requer token no backend + IDs reais (não `stub-*`).
           </div>
         </div>
-      </div>
+      </CollapsibleCard>
       <CampaignBatchSection
         isBusy={loading || isCreatingAny}
         countriesSource={countriesSource}

@@ -195,6 +195,54 @@ button {
   box-shadow: var(--shadow-sm);
 }
 
+.collapsibleCard details {
+  padding: 0;
+}
+
+.collapsibleCardSummary {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.collapsibleCardSummary::-webkit-details-marker {
+  display: none;
+}
+
+.collapsibleCardSummary::marker {
+  content: "";
+}
+
+.collapsibleCardTitle {
+  font-weight: 900;
+  font-size: 16px;
+}
+
+.collapsibleCardDescription {
+  margin-top: 6px;
+  font-weight: 800;
+}
+
+.collapsibleCardMeta {
+  margin-top: 8px;
+  font-weight: 800;
+}
+
+.collapsibleCardBody {
+  padding: 0 16px 16px;
+}
+
+.collapsibleCardSummaryRight {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .gridMetrics {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));

@@ -1,3 +1,5 @@
+import CollapsibleCard from "./CollapsibleCard.jsx";
+
 export default function GeneratedStructureSection({
   generatedCampaignId,
   structureForId,
@@ -15,31 +17,32 @@ export default function GeneratedStructureSection({
   const isStale = hasSelection && structureForId && structureForId !== generatedCampaignId;
 
   return (
-    <div id="meta-test-db-structure" className="card" style={{ padding: 0, marginTop: 16 }}>
-      <div style={{ padding: 16, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
-        <div>
-          <div style={{ fontWeight: 900, fontSize: 16 }}>Estrutura persistida (DB) — AdSet/Ad</div>
-          <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
-            Evidência de persistência em `generated_adsets` / `generated_ads` por `generated_campaign_id`.
-          </div>
-          <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
-            Seleção: <b>{generatedCampaignId || "—"}</b>
-            {isStale ? " (carregado para outro id — atualize)" : ""}
-          </div>
-        </div>
+    <CollapsibleCard
+      id="meta-test-db-structure"
+      title="Estrutura persistida (DB) — AdSet/Ad"
+      description="Evidência de persistência em `generated_adsets` / `generated_ads` por `generated_campaign_id`."
+      meta={
+        <>
+          Seleção: <b>{generatedCampaignId || "—"}</b>
+          {isStale ? " (carregado para outro id — atualize)" : ""}
+        </>
+      }
+      defaultOpen={false}
+      headerRight={
         <button type="button" className="pillOutline" onClick={onRefresh} disabled={refreshDisabled}>
           {loading ? "Carregando..." : "Carregar estrutura"}
         </button>
-      </div>
+      }
+    >
 
       {!hasSelection ? (
-        <div className="muted" style={{ padding: "0 16px 16px", fontWeight: 800 }}>
+        <div className="muted" style={{ fontWeight: 800 }}>
           Selecione um registro em `generated_campaigns` para listar a estrutura persistida.
         </div>
       ) : null}
 
       {error ? (
-        <div className="card" style={{ padding: 14, margin: "0 16px 16px", borderColor: "#fecaca", color: "#991b1b" }}>
+        <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
             <div style={{ fontWeight: 900 }}>Erro</div>
             <button
@@ -70,7 +73,7 @@ export default function GeneratedStructureSection({
         </div>
       ) : null}
 
-      <div style={{ borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
+      <div style={{ marginTop: hasSelection ? 12 : 0, borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
         <table className="dataTable" style={{ marginTop: 0 }}>
           <thead>
             <tr>
@@ -137,6 +140,6 @@ export default function GeneratedStructureSection({
           </tbody>
         </table>
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }

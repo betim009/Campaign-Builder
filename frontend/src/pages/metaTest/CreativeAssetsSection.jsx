@@ -1,4 +1,5 @@
 import { getBackendBaseUrl } from "../../services/http.js";
+import CollapsibleCard from "./CollapsibleCard.jsx";
 
 export default function CreativeAssetsSection({
   loading,
@@ -14,23 +15,20 @@ export default function CreativeAssetsSection({
 }) {
   const baseUrl = getBackendBaseUrl();
   return (
-    <div id="meta-test-creative-assets" className="card" style={{ padding: 0, marginTop: 16 }}>
-      <div style={{ padding: 16, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
-        <div>
-          <div style={{ fontWeight: 900, fontSize: 16 }}>Mídia (dev) — upload local</div>
-          <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
-            Upload via backend + persistência no Postgres. Não cria Creative na Meta (ainda).
-          </div>
-          <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
-            {loading ? "Carregando..." : `${assets.length} asset(s)`}
-          </div>
-        </div>
+    <CollapsibleCard
+      id="meta-test-creative-assets"
+      title="Mídia (dev) — upload local"
+      description="Upload via backend + persistência no Postgres. Não cria Creative na Meta (ainda)."
+      meta={<>{loading ? "Carregando..." : `${assets.length} asset(s)`}</>}
+      defaultOpen={false}
+      headerRight={
         <button type="button" className="pillOutline" onClick={onRefresh} disabled={refreshDisabled}>
           {loading ? "Atualizando..." : "Atualizar"}
         </button>
-      </div>
+      }
+    >
 
-      <div style={{ padding: "0 16px 16px", display: "flex", gap: 10, flexWrap: "wrap", alignItems: "end" }}>
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "end" }}>
         <label style={{ display: "grid", gap: 6 }}>
           <span className="muted" style={{ fontWeight: 900 }}>
             Arquivo
@@ -43,7 +41,7 @@ export default function CreativeAssetsSection({
       </div>
 
       {error ? (
-        <div className="card" style={{ padding: 14, margin: "0 16px 16px", borderColor: "#fecaca", color: "#991b1b" }}>
+        <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
             <div style={{ fontWeight: 900 }}>Erro</div>
             <button
@@ -74,7 +72,7 @@ export default function CreativeAssetsSection({
         </div>
       ) : null}
 
-      <div style={{ borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
+      <div style={{ marginTop: 12, borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
         <table className="dataTable" style={{ marginTop: 0 }}>
           <thead>
             <tr>
@@ -129,6 +127,6 @@ export default function CreativeAssetsSection({
           </tbody>
         </table>
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }

@@ -1,4 +1,5 @@
 import { getBackendBaseUrl } from "../../services/http.js";
+import CollapsibleCard from "./CollapsibleCard.jsx";
 
 export default function CreativeDraftsSection({
   generatedCampaignId,
@@ -32,23 +33,23 @@ export default function CreativeDraftsSection({
   const selectedAssetUrl = selectedAsset?.url ? `${baseUrl}${selectedAsset.url}` : null;
 
   return (
-    <div id="meta-test-creative-drafts" className="card" style={{ padding: 0, marginTop: 16 }}>
-      <div style={{ padding: 16, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
-        <div>
-          <div style={{ fontWeight: 900, fontSize: 16 }}>Creative drafts (local)</div>
-          <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
-            Persistência de copy/headline/description + asset vinculado (publicação Meta opcional na Etapa 3).
-          </div>
-          <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
-            `generated_campaign_id`: <b>{generatedCampaignId || "—"}</b>
-          </div>
-        </div>
+    <CollapsibleCard
+      id="meta-test-creative-drafts"
+      title="Creative drafts (local)"
+      description="Persistência de copy/headline/description + asset vinculado (publicação Meta opcional na Etapa 3)."
+      meta={
+        <>
+          `generated_campaign_id`: <b>{generatedCampaignId || "—"}</b>
+        </>
+      }
+      defaultOpen={false}
+      headerRight={
         <button type="button" className="pillOutline" onClick={onRefresh} disabled={refreshDisabled}>
           {loading ? "Atualizando..." : "Atualizar"}
         </button>
-      </div>
-
-      <div style={{ padding: "0 16px 16px" }}>
+      }
+    >
+      <div>
         <div className="muted" style={{ fontWeight: 800 }}>
           Crie um draft depois de selecionar um registro em `generated_campaigns`.
         </div>
@@ -239,7 +240,7 @@ export default function CreativeDraftsSection({
       </div>
 
       {error ? (
-        <div className="card" style={{ padding: 14, margin: "0 16px 16px", borderColor: "#fecaca", color: "#991b1b" }}>
+        <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
             <div style={{ fontWeight: 900 }}>Erro</div>
             <button
@@ -270,7 +271,7 @@ export default function CreativeDraftsSection({
         </div>
       ) : null}
 
-      <div style={{ borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
+      <div style={{ marginTop: 12, borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
         <table className="dataTable" style={{ marginTop: 0 }}>
           <thead>
             <tr>
@@ -318,6 +319,6 @@ export default function CreativeDraftsSection({
           </tbody>
         </table>
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }

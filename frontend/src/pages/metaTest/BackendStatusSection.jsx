@@ -1,3 +1,5 @@
+import CollapsibleCard from "./CollapsibleCard.jsx";
+
 export default function BackendStatusSection({
   refreshBackendStatus,
   isCreatingAny,
@@ -30,14 +32,12 @@ export default function BackendStatusSection({
   pushLog,
 }) {
   return (
-    <div id="meta-test-backend-status" className="card" style={{ padding: 18, marginTop: 16 }}>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
-        <div>
-          <div style={{ fontWeight: 900, fontSize: 16 }}>Status do backend (Meta)</div>
-          <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
-            Diagnóstico rápido de token/provider sem expor segredo.
-          </div>
-        </div>
+    <CollapsibleCard
+      id="meta-test-backend-status"
+      title="Status do backend (Meta)"
+      description="Diagnóstico rápido de token/provider sem expor segredo."
+      defaultOpen={false}
+      headerRight={
         <button
           type="button"
           className="pillOutline"
@@ -46,7 +46,8 @@ export default function BackendStatusSection({
         >
           {backendStatusLoading ? "Atualizando..." : "Atualizar status"}
         </button>
-      </div>
+      }
+    >
 
       {backendStatusError ? (
         <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
@@ -321,6 +322,6 @@ export default function BackendStatusSection({
           </pre>
         </details>
       ) : null}
-    </div>
+    </CollapsibleCard>
   );
 }

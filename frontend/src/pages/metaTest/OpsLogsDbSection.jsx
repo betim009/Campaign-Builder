@@ -1,3 +1,5 @@
+import CollapsibleCard from "./CollapsibleCard.jsx";
+
 export default function OpsLogsDbSection({
   loading,
   error,
@@ -9,24 +11,25 @@ export default function OpsLogsDbSection({
   safeJson,
 }) {
   return (
-    <div id="meta-test-ops-logs-db" className="card" style={{ padding: 0, marginTop: 16 }}>
-      <div style={{ padding: 16, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
-        <div>
-          <div style={{ fontWeight: 900, fontSize: 16 }}>Logs persistidos (DB) — ops_logs</div>
-          <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
-            Evidência de persistência operacional (source: <b>meta-test</b>).
-          </div>
-          <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
-            {loading ? "Carregando..." : `${opsLogs.length} log(s)`}
-          </div>
-        </div>
+    <CollapsibleCard
+      id="meta-test-ops-logs-db"
+      title="Logs persistidos (DB) — ops_logs"
+      description={
+        <>
+          Evidência de persistência operacional (source: <b>meta-test</b>).
+        </>
+      }
+      meta={<>{loading ? "Carregando..." : `${opsLogs.length} log(s)`}</>}
+      defaultOpen={false}
+      headerRight={
         <button type="button" className="pillOutline" onClick={onRefresh} disabled={refreshDisabled}>
           {loading ? "Atualizando..." : "Atualizar do DB"}
         </button>
-      </div>
+      }
+    >
 
       {error ? (
-        <div className="card" style={{ padding: 14, margin: "0 16px 16px", borderColor: "#fecaca", color: "#991b1b" }}>
+        <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
             <div style={{ fontWeight: 900 }}>Erro</div>
             <button
@@ -92,7 +95,6 @@ export default function OpsLogsDbSection({
           </tbody>
         </table>
       </div>
-    </div>
+    </CollapsibleCard>
   );
 }
-
