@@ -199,6 +199,28 @@ export async function metaFetchAdAccountBusiness({ metaAdAccountId, accessToken 
     : null
 }
 
+export async function metaFetchPage({ metaPageId, accessToken, fields = ['id', 'name'] } = {}) {
+  const id = normalizeNonEmptyString(metaPageId)
+  if (!id) {
+    const err = new Error('metaPageId is required')
+    err.status = 400
+    throw err
+  }
+
+  const token = normalizeNonEmptyString(accessToken)
+  if (!token) {
+    const err = new Error('accessToken is required')
+    err.status = 400
+    throw err
+  }
+
+  const url = buildUrl(id, {
+    access_token: token,
+    fields: Array.isArray(fields) ? fields.join(',') : String(fields)
+  })
+  return fetchJson(url, { retries: 2 })
+}
+
 export async function metaListAdAccountPromotePages({ metaAdAccountId, accessToken, limit = 50 } = {}) {
   const act = normalizeMetaAdAccountId(metaAdAccountId)
   if (!act) {

@@ -16,6 +16,7 @@ import { metaCreateAdCreative, metaFetchAdCreative, metaUploadAdImage } from '..
 import {
   metaListAdAccountPromotePages,
   metaFetchAdAccountBusiness,
+  metaFetchPage,
   metaListBusinessOwnedPages,
   metaListMyBusinesses,
   metaListMyPages
@@ -418,6 +419,34 @@ export function metaRouter() {
       } catch (err) {
         const status = typeof err?.status === 'number' ? err.status : 502
         return jsonError(res, status, err?.message ?? 'Meta pages fetch failed', err?.details)
+      }
+    })
+  )
+
+  router.get(
+    '/pages/:id',
+    asyncHandler(async (req, res) => {
+      const dbEnabled = Boolean(req.app.locals.dbEnabled)
+      const pool = dbEnabled ? getPool() : null
+      const accessToken = dbEnabled
+        ? await resolveAccessToken(pool, req)
+        : coerceAccessToken(process.env.META_ACCESS_TOKEN)
+
+      if (!accessToken) {
+        return jsonError(res, 400, 'Missing accessToken (set META_ACCESS_TOKEN env or save via /tokens)')
+      }
+
+      const metaPageId = normalizeNonEmptyString(req.params.id)
+      if (!metaPageId) {
+        return jsonError(res, 400, 'Invalid metaPageId')
+      }
+
+      try {
+        const page = await metaFetchPage({ metaPageId, accessToken, fields: ['id', 'name'] })
+        return res.json({ ok: true, meta_page: page })
+      } catch (err) {
+        const status = typeof err?.status === 'number' ? err.status : 502
+        return jsonError(res, status, err?.message ?? 'Meta page fetch failed', err?.details)
       }
     })
   )
