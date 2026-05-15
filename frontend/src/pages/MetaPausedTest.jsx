@@ -1016,6 +1016,8 @@ export default function MetaPausedTest() {
               metaAdAccountId: res?.metaAdAccountId ?? null,
               myPages: res?.myPages ?? [],
               promotePages: res?.promotePages ?? [],
+              businesses: res?.businesses ?? [],
+              ownedPagesByBusiness: res?.ownedPagesByBusiness ?? [],
             });
             pushLog({ action: "meta.pages.list", ok: true, details: { metaAdAccountId: res?.metaAdAccountId ?? null } });
           } catch (err) {

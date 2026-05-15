@@ -40,6 +40,32 @@ export default function StepAdSection({
   flowMode,
   normalizeNonEmptyString,
 }) {
+  const candidates = (() => {
+    const list = [];
+
+    const myPages = Array.isArray(pagesResult?.myPages) ? pagesResult.myPages : [];
+    const promotePages = Array.isArray(pagesResult?.promotePages) ? pagesResult.promotePages : [];
+    const ownedPagesByBusiness = Array.isArray(pagesResult?.ownedPagesByBusiness) ? pagesResult.ownedPagesByBusiness : [];
+
+    for (const p of myPages) list.push({ id: p?.id ?? null, name: p?.name ?? null, source: "me/accounts" });
+    for (const p of promotePages) list.push({ id: p?.id ?? null, name: p?.name ?? null, source: "act/promote_pages" });
+    for (const b of ownedPagesByBusiness) {
+      const pages = Array.isArray(b?.pages) ? b.pages : [];
+      for (const p of pages) {
+        list.push({ id: p?.id ?? null, name: p?.name ?? null, source: `business:${b?.business_id ?? "—"}` });
+      }
+    }
+
+    const seen = new Set();
+    return list
+      .filter((p) => typeof p.id === "string" && p.id.trim())
+      .filter((p) => {
+        if (seen.has(p.id)) return false;
+        seen.add(p.id);
+        return true;
+      });
+  })();
+
   return (
     <div id="meta-test-step-ad" className="card" style={{ padding: 18, marginTop: 16 }}>
       <div style={{ fontWeight: 900, fontSize: 16 }}>Etapa 3 — Ad (PAUSED)</div>
@@ -254,6 +280,58 @@ export default function StepAdSection({
             <div className="muted" style={{ marginTop: 10, fontWeight: 800 }}>
               Se vazio, o token provavelmente não tem acesso a uma Page. Você ainda pode informar `pageId` manualmente.
             </div>
+            {candidates.length ? (
+              <div className="card" style={{ padding: 12, marginTop: 10 }}>
+                <div className="muted" style={{ fontWeight: 900 }}>Sugestões de Page ID</div>
+                <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
+                  {candidates.slice(0, 8).map((p) => (
+                    <div
+                      key={p.id}
+                      style={{ display: "flex", gap: 10, alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap" }}
+                    >
+                      <div style={{ fontWeight: 900 }}>
+                        {p.name || "—"} <span className="muted" style={{ fontWeight: 800 }}>({p.id})</span>
+                        <div className="muted" style={{ marginTop: 4, fontWeight: 800 }}>Fonte: {p.source}</div>
+                      </div>
+                      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          className="pillOutline"
+                          onClick={() => setMetaPageId(String(p.id))}
+                          disabled={flowMode === "STUB"}
+                          style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 900 }}
+                        >
+                          Usar pageId
+                        </button>
+                        <button
+                          type="button"
+                          className="pillOutline"
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(String(p.id));
+                            } catch {
+                              // ignore
+                            }
+                          }}
+                          style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 900 }}
+                        >
+                          Copiar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {candidates.length > 8 ? (
+                  <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
+                    +{candidates.length - 8} Page(s) ocultas…
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <div className="muted" style={{ marginTop: 10, fontWeight: 900, color: "#991b1b" }}>
+                Nenhuma Page encontrada via Graph nas fontes atuais (`me/accounts`, `act_*/promote_pages`, `owned_pages`).
+              </div>
+            )}
             <JsonAccordion
               title={`Pages (Graph) — metaAdAccountId: ${metaAdAccountId || "—"}`}
               value={pagesResult}
