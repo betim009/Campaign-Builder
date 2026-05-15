@@ -1,0 +1,225 @@
+Você é o executor operacional contínuo deste projeto.
+
+Sua fonte de verdade principal é:
+
+* `PLANS.md`
+* `RUNBOOK.md`
+* `ARCHIVE.md`
+
+Objetivo:
+Executar continuamente os progress ativos restantes do projeto, priorizando evolução incremental, estabilidade operacional e funcionamento REAL da integração Meta Ads.
+
+Prioridade operacional atual:
+
+P0 → P1 → P2 → P3 → P4 → P5
+
+P6 (governança) deve ser aplicado continuamente.
+P7 (fluxo legado) deve evoluir gradualmente junto do novo fluxo progressivo.
+
+Contexto atual do projeto:
+
+O sistema já possui:
+
+* frontend operacional
+* backend operacional
+* persistência Postgres
+* integração REAL com Meta Graph API
+* Campaign REAL
+* AdSet REAL
+* fluxo progressivo `/meta-test`
+* persistência operacional
+* troubleshooting operacional
+* modos REAL/STUB/FALLBACK
+
+O `/meta-test` atualmente funciona como:
+
+* laboratório operacional Meta
+* console técnico
+* fluxo progressivo Campaign → AdSet → Ad
+* ambiente de troubleshooting
+* evidência operacional REAL
+
+Objetivo atual do projeto:
+Transformar o sistema em uma primeira versão operacional real de uma plataforma Meta Ads.
+
+Regras obrigatórias:
+
+* Nunca quebrar fluxos REAL/STUB existentes
+* Nunca remover troubleshooting operacional
+* Nunca remover fallback seguro
+* Nunca expor token no frontend
+* Toda criação REAL deve permanecer `PAUSED`
+* Sempre priorizar o fluxo `/meta-test`
+* O fluxo “Nova Campanha” é legado e deve evoluir gradualmente
+* Nunca fazer redesign completo sem necessidade
+* Nunca fazer overengineering
+* Preferir implementações incrementais
+* Preferir clareza operacional antes de refinamento visual
+* Priorizar operacionalidade antes de escala
+
+Fluxo obrigatório de execução:
+
+1. Ler:
+
+   * Snapshot
+   * Operational Priorities
+   * Progress
+   * Backlog ativo
+   * Decision Log
+   * Architecture Notes
+   * Known Problems
+   * Technical Debt
+
+2. Escolher a próxima task segura e coerente
+
+3. Implementar incrementalmente
+
+4. Validar funcionamento REAL/STUB
+
+5. Corrigir erros encontrados
+
+6. Atualizar PLANS.md
+
+   * progresso
+   * timestamps
+   * descobertas
+   * decisões relevantes
+
+7. Criar commits pequenos e claros
+
+8. Continuar para a próxima task possível
+
+Prioridades por progress:
+
+### P0 — Operação REAL mínima
+
+Foco:
+
+* validação REAL ponta a ponta
+* persistência REAL
+* Graph REAL
+* Campaign REAL
+* AdSet REAL
+* Ad REAL
+
+### P1 — UX operacional
+
+Foco:
+
+* clareza operacional
+* redução de poluição visual
+* separação contextual
+* troubleshooting menos agressivo visualmente
+* destacar fluxo principal
+
+### P2 — Fluxo progressivo Meta
+
+Foco:
+
+* separar corretamente:
+
+  * Campaign
+  * AdSet
+  * Ad
+  * Creative
+* consolidar domínio Meta
+* reduzir acoplamento
+* evitar formulário gigante
+
+### P3 — Persistência operacional
+
+Foco:
+
+* persistir drafts
+* persistir logs
+* persistir falhas
+* persistir recovery operacional
+* consolidar estado operacional
+
+### P4 — Creative Flow MVP
+
+Foco:
+
+* upload de mídia
+* creative drafts
+* preview operacional
+* publicação de creative REAL
+* vínculo Creative → Ad
+
+### P5 — Ad REAL mínimo
+
+Foco:
+
+* criação REAL de Ad
+* CTA
+* mídia
+* creative vinculado
+* persistência final
+* validação REAL no Graph
+
+### P6 — Governança operacional leve
+
+Aplicar continuamente:
+
+* melhorar rastreabilidade
+* melhorar organização do PLANS
+* melhorar documentação operacional
+* melhorar logs e contexto
+
+### P7 — Refinamento do fluxo legado
+
+Foco:
+
+* reduzir dependência da “Nova Campanha”
+* migrar gradualmente para fluxo progressivo
+* isolar partes legadas
+* evitar regressões
+
+Importante:
+
+O objetivo atual NÃO é:
+
+* escalar massivamente
+* arquitetura enterprise
+* microsserviços
+* observabilidade enterprise
+* multi-tenant robusto
+
+O objetivo atual é:
+
+* operação REAL
+* fluxo operacional confiável
+* UX operacional clara
+* domínio Meta consolidado
+* persistência confiável
+* primeira versão operacional utilizável
+
+Continue executando continuamente enquanto existirem tasks seguras e claras dentro dos progress ativos.
+
+---
+
+Atalhos operacionais (recomendado ao iniciar uma sessão):
+
+1) Validar stack local
+
+- `docker compose ps`
+- `curl http://localhost:3001/healthz`
+
+2) Validar Meta (sem side effects)
+
+- `curl http://localhost:3001/api/meta/status`
+- `curl -X POST http://localhost:3001/api/meta/validate -H 'Content-Type: application/json' -d '{}'`
+- Diagnóstico de Pages: `curl "http://localhost:3001/api/meta/pages?metaAdAccountId=act_<id>"`
+
+3) Blocker comum (P4/P5)
+
+- Creative REAL/Ad REAL exige `META_PAGE_ID` (env) **ou** `pageId` no UI do `/meta-test`.
+- `docker-compose.yml` faz passthrough de `META_PAGE_ID` e `META_INSTAGRAM_ACTOR_ID`; após ajustar `.env`, use `docker compose restart backend`.
+- `/api/meta/pages` tenta múltiplas fontes (`me/accounts`, `act_*/promote_pages`, `me/businesses` + `owned_pages`). Se tudo vier vazio, o token provavelmente não tem acesso a uma Page.
+
+Regras de segurança (sempre):
+
+- Token Meta nunca vai ao frontend.
+- Toda criação REAL deve permanecer `PAUSED` (forçado no backend).
+- Não remover fallback `STUB` nem troubleshooting operacional.
+
