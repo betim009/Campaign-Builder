@@ -427,10 +427,11 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 
 ## Blockers
 
-Última atualização: [2026-05-14 20:07]
+Última atualização: [2026-05-15 12:58]
 
 - Execução com DB/stack depende do daemon do Docker estar rodando (`docker compose up -d`). Ver `RUNBOOK.md`.
 - Para validar P4/P5 (Creative/Ad REAL) é necessário `META_PAGE_ID` (env) ou `pageId` no `/meta-test` + token com acesso a uma Page (no momento, nenhuma Page foi listada via Graph com o token atual).
+  - Evidência (ambiente atual): `GET /api/meta/status` → `has_access_token=true` e `has_page_id=false`; `POST /api/meta/validate` OK; `GET /api/meta/pages?metaAdAccountId=act_259174718403969` → `my_pages=[]` e `promote_pages=[]`; permissões incluem `pages_show_list` (ver `GET /api/meta/diagnostics`).
 
 ## Risks
 
