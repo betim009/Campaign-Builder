@@ -11,5 +11,9 @@ export async function listMetaPages({ metaAdAccountId } = {}) {
     promotePages: Array.isArray(data?.promote_pages) ? data.promote_pages : [],
     businesses: Array.isArray(data?.businesses) ? data.businesses : [],
     ownedPagesByBusiness: Array.isArray(data?.owned_pages_by_business) ? data.owned_pages_by_business : [],
+    adAccountBusiness: data?.ad_account_business ?? null,
+    ownedPagesFromAdAccountBusiness: Array.isArray(data?.owned_pages_from_ad_account_business)
+      ? data.owned_pages_from_ad_account_business
+      : [],
   };
 }

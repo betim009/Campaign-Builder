@@ -46,6 +46,9 @@ export default function StepAdSection({
     const myPages = Array.isArray(pagesResult?.myPages) ? pagesResult.myPages : [];
     const promotePages = Array.isArray(pagesResult?.promotePages) ? pagesResult.promotePages : [];
     const ownedPagesByBusiness = Array.isArray(pagesResult?.ownedPagesByBusiness) ? pagesResult.ownedPagesByBusiness : [];
+    const ownedPagesFromAdAccountBusiness = Array.isArray(pagesResult?.ownedPagesFromAdAccountBusiness)
+      ? pagesResult.ownedPagesFromAdAccountBusiness
+      : [];
 
     for (const p of myPages) list.push({ id: p?.id ?? null, name: p?.name ?? null, source: "me/accounts" });
     for (const p of promotePages) list.push({ id: p?.id ?? null, name: p?.name ?? null, source: "act/promote_pages" });
@@ -54,6 +57,10 @@ export default function StepAdSection({
       for (const p of pages) {
         list.push({ id: p?.id ?? null, name: p?.name ?? null, source: `business:${b?.business_id ?? "—"}` });
       }
+    }
+    for (const p of ownedPagesFromAdAccountBusiness) {
+      const bizId = pagesResult?.adAccountBusiness?.id ?? null;
+      list.push({ id: p?.id ?? null, name: p?.name ?? null, source: `adaccount.business:${bizId || "—"}` });
     }
 
     const seen = new Set();

@@ -1018,6 +1018,8 @@ export default function MetaPausedTest() {
               promotePages: res?.promotePages ?? [],
               businesses: res?.businesses ?? [],
               ownedPagesByBusiness: res?.ownedPagesByBusiness ?? [],
+              adAccountBusiness: res?.adAccountBusiness ?? null,
+              ownedPagesFromAdAccountBusiness: res?.ownedPagesFromAdAccountBusiness ?? [],
             });
             pushLog({ action: "meta.pages.list", ok: true, details: { metaAdAccountId: res?.metaAdAccountId ?? null } });
           } catch (err) {
