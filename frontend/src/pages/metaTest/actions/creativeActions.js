@@ -1,10 +1,5 @@
 import { getMetaCreative, publishMetaCreativeDraft } from "../../../services/metaCreatives.js";
-
-function normalizeNonEmptyString(value) {
-  if (typeof value !== "string") return "";
-  const trimmed = value.trim();
-  return trimmed ? trimmed : "";
-}
+import { normalizeNonEmptyString } from "../metaTestUtils.js";
 
 export async function publishCreativeDraftAndExtractId(
   creativeDraftId,

@@ -472,10 +472,11 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 
 ## Technical Debt
 
-Última atualização: [2026-05-15 16:57]
+Última atualização: [2026-05-15 17:07]
 
 - Frontend: `frontend/src/pages/MetaPausedTest.jsx` foi reduzido e teve seções extraídas, mas ainda concentra handlers/payloads. Próximo passo: extrair actions por entidade (Campaign/AdSet/Ad) para reduzir risco de regressão.
 - Frontend: padrão de `actions/` por entidade em `frontend/src/pages/metaTest/actions/*` (Creative/AdSet/Ad/Campaign) para reduzir complexidade incrementalmente.
+- Frontend: `actions/*` reutilizam helpers centrais (`normalizeNonEmptyString`) de `frontend/src/pages/metaTest/metaTestUtils.js` para reduzir duplicação e drift.
 - Frontend: ausência de um padrão compartilhado de alerts/toasts (cada tela implementa manualmente).
 - Legado: fluxo “Nova Campanha” segue monolítico e tende a acumular responsabilidades; manter compatível e migrar capacidades úteis para `/meta-test` (P7).
 

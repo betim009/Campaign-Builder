@@ -1,10 +1,5 @@
 import { createMetaCampaignSimple, listMetaAdAccountCampaigns } from "../../../services/metaCampaigns.js";
-
-function normalizeNonEmptyString(value) {
-  if (typeof value !== "string") return "";
-  const trimmed = value.trim();
-  return trimmed ? trimmed : "";
-}
+import { normalizeNonEmptyString } from "../metaTestUtils.js";
 
 export async function createCampaignSimple(payload) {
   const res = await createMetaCampaignSimple(payload ?? {});
@@ -23,4 +18,3 @@ export async function listPausedCampaigns({ metaAdAccountId, limit } = {}) {
   });
   return { metaCampaigns: Array.isArray(res?.metaCampaigns) ? res.metaCampaigns : [] };
 }
-

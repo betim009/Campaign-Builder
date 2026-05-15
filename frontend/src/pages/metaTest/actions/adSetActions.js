@@ -1,10 +1,5 @@
 import { createMetaAdSet } from "../../../services/metaAdSets.js";
-
-function normalizeNonEmptyString(value) {
-  if (typeof value !== "string") return "";
-  const trimmed = value.trim();
-  return trimmed ? trimmed : "";
-}
+import { normalizeNonEmptyString } from "../metaTestUtils.js";
 
 export async function createAdSet(payload) {
   const res = await createMetaAdSet(payload ?? {});
@@ -14,4 +9,3 @@ export async function createAdSet(payload) {
     generatedCampaign: res?.generatedCampaign ?? null,
   };
 }
-
