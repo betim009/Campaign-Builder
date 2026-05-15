@@ -21,7 +21,7 @@ import MetaStructureCard from "./metaTest/MetaStructureCard.jsx";
 import CampaignResultSection from "./metaTest/CampaignResultSection.jsx";
 import CampaignBatchSection from "./metaTest/CampaignBatchSection.jsx";
 import { getCountries } from "../services/reference.js";
-import { createMetaCampaignSimple, getMetaCampaign, listMetaAdAccountCampaigns } from "../services/metaCampaigns.js";
+import { getMetaCampaign } from "../services/metaCampaigns.js";
 import { getMetaAdSet } from "../services/metaAdSets.js";
 import { getMetaAd } from "../services/metaAds.js";
 import { getMetaStatus, validateMetaToken } from "../services/metaStatus.js";
@@ -33,6 +33,7 @@ import { listOpsLogs } from "../services/opsLogs.js";
 import { listCreativeAssets, uploadCreativeAsset } from "../services/creativeAssets.js";
 import { createCreativeDraft, duplicateCreativeDraft, listCreativeDrafts } from "../services/creativeDrafts.js";
 import { publishCreativeDraftAndExtractId, fetchMetaCreative } from "./metaTest/actions/creativeActions.js";
+import { createCampaignSimple, listPausedCampaigns } from "./metaTest/actions/campaignActions.js";
 import { createAdSet } from "./metaTest/actions/adSetActions.js";
 import { createAd } from "./metaTest/actions/adActions.js";
 import useOpsLogs from "./metaTest/useOpsLogs.js";
@@ -824,7 +825,7 @@ export default function MetaPausedTest() {
               const code = countryCode || "XX";
               setAdName(`Ad ${code} — Image 1`);
             }
-            const res = await createMetaCampaignSimple({
+            const res = await createCampaignSimple({
               name: name.trim(),
               objective,
               metaAdAccountId: adAccountNormalized,
@@ -867,11 +868,7 @@ export default function MetaPausedTest() {
           setMetaError("");
           setMetaErrorDetails(null);
           try {
-            const res = await listMetaAdAccountCampaigns({
-              metaAdAccountId: adAccountNormalized || metaAdAccountId.trim(),
-              limit: 100,
-              pausedOnly: true,
-            });
+            const res = await listPausedCampaigns({ metaAdAccountId: adAccountNormalized || metaAdAccountId.trim() });
             setMetaCampaigns(res.metaCampaigns ?? []);
             pushLog({
               action: "meta.adaccount.campaigns.list",
@@ -1194,7 +1191,7 @@ export default function MetaPausedTest() {
         name={name}
         objective={objective}
         adAccountNormalized={adAccountNormalized}
-        createMetaCampaignSimple={createMetaCampaignSimple}
+        createMetaCampaignSimple={createCampaignSimple}
         refreshBackendStatus={refreshBackendStatus}
         refreshLocalGenerated={refreshLocalGenerated}
         pushLog={pushLog}

@@ -147,6 +147,26 @@ Fontes únicas (para reduzir drift):
 - Preservar fallback `STUB` e sinalização explícita de `REAL/STUB/FALLBACK` na UI para evitar “dado falso”.
 - Mudanças pequenas e verificáveis (evidência via curl/DB quando aplicável) com commit incremental + timestamps.
 
+FOCO ATUAL:
+- P1 UX operacional
+- reduzir densidade visual
+- separar troubleshooting
+- melhorar clareza do fluxo Campaign → AdSet → Ad
+
+EXECUTAR DEPOIS:
+- P2 fluxo progressivo Meta
+- P3 persistência operacional
+
+NÃO FAZER AGORA:
+- redesign completo
+- troca de design system
+- microsserviços
+- evitar refactor massivo sem necessidade operacional clara
+- evitar mover arquitetura estável apenas por estética
+
+GOVERNANÇA CONTÍNUA:
+- P6 governança deve continuar sendo aplicada continuamente durante todos os progress
+
 ## Execution Rules
 
 Última atualização: [2026-05-08 10:47]
@@ -452,10 +472,10 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 
 ## Technical Debt
 
-Última atualização: [2026-05-13 16:06]
+Última atualização: [2026-05-15 16:57]
 
 - Frontend: `frontend/src/pages/MetaPausedTest.jsx` foi reduzido e teve seções extraídas, mas ainda concentra handlers/payloads. Próximo passo: extrair actions por entidade (Campaign/AdSet/Ad) para reduzir risco de regressão.
-- Frontend: iniciado o padrão de `actions/` por entidade (Creative/AdSet/Ad) em `frontend/src/pages/metaTest/actions/*` para reduzir complexidade incrementalmente.
+- Frontend: padrão de `actions/` por entidade em `frontend/src/pages/metaTest/actions/*` (Creative/AdSet/Ad/Campaign) para reduzir complexidade incrementalmente.
 - Frontend: ausência de um padrão compartilhado de alerts/toasts (cada tela implementa manualmente).
 - Legado: fluxo “Nova Campanha” segue monolítico e tende a acumular responsabilidades; manter compatível e migrar capacidades úteis para `/meta-test` (P7).
 
