@@ -160,7 +160,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-15 12:14]
+Última atualização: [2026-05-15 12:21]
 
 Regras:
 
@@ -222,9 +222,9 @@ Regras:
 - [ ] Melhorar spacing entre seções
 
 #### Fluxo principal
-- [ ] Destacar fluxo principal
-- [ ] Ocultar detalhes avançados por padrão
-- [ ] Separar operação de troubleshooting
+- [x] Destacar fluxo principal (commit: 2211df2)
+- [x] Ocultar detalhes avançados por padrão (commit: 2211df2)
+- [x] Separar operação de troubleshooting (commit: 2211df2)
 
 #### Troubleshooting UX
 - [ ] Criar modo compacto para troubleshooting
