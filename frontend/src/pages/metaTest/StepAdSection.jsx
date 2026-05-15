@@ -1,3 +1,5 @@
+import JsonAccordion from "./JsonAccordion.jsx";
+
 export default function StepAdSection({
   createdMetaAdSetId,
   adName,
@@ -243,45 +245,20 @@ export default function StepAdSection({
         {pagesError ? (
           <div className="muted" style={{ marginTop: 10, fontWeight: 900, color: "#991b1b" }}>
             Falha ao listar Pages: {pagesError}
-            {pagesErrorDetails ? (
-              <pre
-                style={{
-                  marginTop: 10,
-                  background: "#0b1220",
-                  color: "#e5e7eb",
-                  padding: 12,
-                  borderRadius: 12,
-                  overflowX: "auto",
-                  whiteSpace: "pre-wrap",
-                }}
-              >
-{JSON.stringify(pagesErrorDetails ?? null, null, 2)}
-              </pre>
-            ) : null}
+            <JsonAccordion title="Detalhes (erro Pages)" value={pagesErrorDetails} />
           </div>
         ) : null}
 
         {pagesResult ? (
-          <details style={{ marginTop: 12 }}>
-            <summary style={{ cursor: "pointer", fontWeight: 900 }}>
-              Pages (Graph) — `metaAdAccountId`: {metaAdAccountId || "—"}
-            </summary>
-            <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
+          <>
+            <div className="muted" style={{ marginTop: 10, fontWeight: 800 }}>
               Se vazio, o token provavelmente não tem acesso a uma Page. Você ainda pode informar `pageId` manualmente.
             </div>
-            <pre
-              style={{
-                marginTop: 10,
-                background: "#0b1220",
-                color: "#e5e7eb",
-                padding: 12,
-                borderRadius: 12,
-                overflowX: "auto",
-              }}
-            >
-{JSON.stringify(pagesResult ?? null, null, 2)}
-            </pre>
-          </details>
+            <JsonAccordion
+              title={`Pages (Graph) — metaAdAccountId: ${metaAdAccountId || "—"}`}
+              value={pagesResult}
+            />
+          </>
         ) : null}
 
         <label style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 10, userSelect: "none" }}>
@@ -316,21 +293,7 @@ export default function StepAdSection({
           </div>
         ) : null}
 
-        <details style={{ marginTop: 12 }}>
-          <summary style={{ cursor: "pointer", fontWeight: 900 }}>Evidência: Creative (Graph)</summary>
-          <pre
-            style={{
-              marginTop: 10,
-              background: "#0b1220",
-              color: "#e5e7eb",
-              padding: 12,
-              borderRadius: 12,
-              overflowX: "auto",
-            }}
-          >
-{JSON.stringify(creativeGetResult ?? null, null, 2)}
-          </pre>
-        </details>
+        <JsonAccordion title="Evidência: Creative (Graph)" value={creativeGetResult} />
       </div>
 
       <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
@@ -342,31 +305,16 @@ export default function StepAdSection({
         </div>
       </div>
 
-      <details style={{ marginTop: 12 }}>
-        <summary style={{ cursor: "pointer", fontWeight: 900 }}>Preview do payload</summary>
-        <pre
-          style={{
-            marginTop: 10,
-            background: "#0b1220",
-            color: "#e5e7eb",
-            padding: 12,
-            borderRadius: 12,
-            overflowX: "auto",
-          }}
-        >
-{JSON.stringify(
-  {
-    generatedCampaignId: createdGeneratedCampaignId || null,
-    name: normalizeNonEmptyString(adName) || null,
-    creativeId: flowMode === "REAL" ? normalizeNonEmptyString(adCreativeId) || null : undefined,
-    creativeDraftId: normalizeNonEmptyString(creativeDraftId) || null,
-    mode: flowMode,
-  },
-  null,
-  2,
-)}
-        </pre>
-      </details>
+      <JsonAccordion
+        title="Preview do payload"
+        value={{
+          generatedCampaignId: createdGeneratedCampaignId || null,
+          name: normalizeNonEmptyString(adName) || null,
+          creativeId: flowMode === "REAL" ? normalizeNonEmptyString(adCreativeId) || null : undefined,
+          creativeDraftId: normalizeNonEmptyString(creativeDraftId) || null,
+          mode: flowMode,
+        }}
+      />
     </div>
   );
 }
