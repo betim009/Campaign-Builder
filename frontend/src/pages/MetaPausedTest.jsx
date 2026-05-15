@@ -26,7 +26,7 @@ import { getMetaAdSet } from "../services/metaAdSets.js";
 import { getMetaAd } from "../services/metaAds.js";
 import { getMetaStatus, validateMetaToken } from "../services/metaStatus.js";
 import { getMetaDiagnostics } from "../services/metaStatus.js";
-import { listMetaPages } from "../services/metaPages.js";
+import { getMetaPage, listMetaPages } from "../services/metaPages.js";
 import { countryCodeToFlag } from "../services/fallbacks.js";
 import { getGeneratedCampaignStructure, listGeneratedCampaigns } from "../services/generatedCampaigns.js";
 import { listOpsLogs } from "../services/opsLogs.js";
@@ -108,6 +108,10 @@ export default function MetaPausedTest() {
   const [pagesError, setPagesError] = useState("");
   const [pagesErrorDetails, setPagesErrorDetails] = useState(null);
   const [pagesResult, setPagesResult] = useState(null);
+  const [pageValidateLoading, setPageValidateLoading] = useState(false);
+  const [pageValidateError, setPageValidateError] = useState("");
+  const [pageValidateErrorDetails, setPageValidateErrorDetails] = useState(null);
+  const [pageValidateResult, setPageValidateResult] = useState(null);
 
   // Evidência de persistência local
   const [localLoading, setLocalLoading] = useState(false);
@@ -992,6 +996,36 @@ export default function MetaPausedTest() {
         setMetaInstagramActorId={setMetaInstagramActorId}
         backendHasPageId={hasPageIdFromEnv}
         backendHasInstagramActorId={hasInstagramActorIdFromEnv}
+        pageValidateLoading={pageValidateLoading}
+        pageValidateError={pageValidateError}
+        pageValidateErrorDetails={pageValidateErrorDetails}
+        pageValidateResult={pageValidateResult}
+        onValidatePage={async () => {
+          const id = normalizeNonEmptyString(metaPageId);
+          if (!id) {
+            setPageValidateResult(null);
+            setPageValidateError("Page ID ausente. Preencha o campo Page ID acima.");
+            setPageValidateErrorDetails(null);
+            return;
+          }
+
+          setPageValidateLoading(true);
+          setPageValidateError("");
+          setPageValidateErrorDetails(null);
+          setPageValidateResult(null);
+          try {
+            const res = await getMetaPage({ metaPageId: id });
+            setPageValidateResult(res?.metaPage ?? null);
+            pushLog({ action: "meta.page.get", ok: true, details: { metaPageId: id } });
+          } catch (err) {
+            setPageValidateResult(null);
+            setPageValidateError(err?.message ? String(err.message) : "Falha ao validar Page ID.");
+            setPageValidateErrorDetails(err?.body?.error?.details ?? err?.body ?? null);
+            pushLog({ action: "meta.page.get", ok: false, error: err?.message ? String(err.message) : "error" });
+          } finally {
+            setPageValidateLoading(false);
+          }
+        }}
         creativePublishForce={creativePublishForce}
         setCreativePublishForce={setCreativePublishForce}
         selectedCreativeDraftMetaCreativeId={selectedCreativeDraftMetaCreativeId}

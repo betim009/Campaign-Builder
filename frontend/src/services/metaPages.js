@@ -17,3 +17,10 @@ export async function listMetaPages({ metaAdAccountId } = {}) {
       : [],
   };
 }
+
+export async function getMetaPage({ metaPageId } = {}) {
+  const id = String(metaPageId || "").trim();
+  if (!id) throw new Error("metaPageId is required");
+  const data = await apiGet(`/api/meta/pages/${encodeURIComponent(id)}`);
+  return { ok: true, metaPage: data?.meta_page ?? null };
+}

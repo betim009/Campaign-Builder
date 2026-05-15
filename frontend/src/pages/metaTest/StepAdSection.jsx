@@ -16,6 +16,11 @@ export default function StepAdSection({
   setMetaInstagramActorId,
   backendHasPageId,
   backendHasInstagramActorId,
+  pageValidateLoading,
+  pageValidateError,
+  pageValidateErrorDetails,
+  pageValidateResult,
+  onValidatePage,
   creativePublishForce,
   setCreativePublishForce,
   selectedCreativeDraftMetaCreativeId,
@@ -249,6 +254,15 @@ export default function StepAdSection({
           <button
             type="button"
             className="pillOutline"
+            disabled={flowMode === "STUB" || pageValidateLoading || !normalizeNonEmptyString(metaPageId)}
+            onClick={onValidatePage}
+            title="Valida se o token consegue ler a Page (GET /api/meta/pages/:id)."
+          >
+            {pageValidateLoading ? "Validando..." : "Validar Page ID"}
+          </button>
+          <button
+            type="button"
+            className="pillOutline"
             disabled={flowMode === "STUB" || pagesLoading}
             onClick={onListPages}
           >
@@ -279,6 +293,22 @@ export default function StepAdSection({
           <div className="muted" style={{ marginTop: 10, fontWeight: 900, color: "#991b1b" }}>
             Falha ao listar Pages: {pagesError}
             <JsonAccordion title="Detalhes (erro Pages)" value={pagesErrorDetails} />
+          </div>
+        ) : null}
+
+        {pageValidateError ? (
+          <div className="muted" style={{ marginTop: 10, fontWeight: 900, color: "#991b1b" }}>
+            Falha ao validar Page ID: {pageValidateError}
+            <JsonAccordion title="Detalhes (erro Page ID)" value={pageValidateErrorDetails} />
+          </div>
+        ) : null}
+
+        {pageValidateResult ? (
+          <div className="card" style={{ padding: 12, marginTop: 10 }}>
+            <div className="muted" style={{ fontWeight: 900 }}>Page OK</div>
+            <div style={{ marginTop: 6, fontWeight: 900 }}>
+              {pageValidateResult?.name ? `${pageValidateResult.name} (${pageValidateResult.id || "—"})` : pageValidateResult?.id || "—"}
+            </div>
           </div>
         ) : null}
 
