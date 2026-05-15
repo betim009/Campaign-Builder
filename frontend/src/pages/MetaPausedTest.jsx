@@ -776,385 +776,6 @@ export default function MetaPausedTest() {
         countryNameByCode={countryNameByCode}
       />
 
-      <CollapsibleCard
-        id="meta-test-graph-refresh"
-        title="Graph (REAL) — atualizar status"
-        description="Usa `GET /api/meta/*/:id` via backend. STUB não consulta Graph."
-        defaultOpen={false}
-      >
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-          <button
-            type="button"
-            className="pillOutline"
-            disabled={
-              createdLoading || isCreatingAny || !backendStatus?.hasAccessToken || !createdMetaCampaignIdIsReal
-            }
-            onClick={async () => {
-              setCreatedLoading(true);
-              setError("");
-              setErrorDetails(null);
-              setSuccess("");
-              try {
-                const res = await getMetaCampaign(createdMetaCampaignId);
-                setCreated((prev) => ({
-                  ...(prev ?? {}),
-                  metaCampaign: res.metaCampaign ?? prev?.metaCampaign ?? null,
-                }));
-                setSuccess("Campaign atualizada via Graph.");
-                await refreshLocalGenerated();
-                pushLog({
-                  action: "meta.campaign.get",
-                  ok: true,
-                  details: { metaCampaignId: createdMetaCampaignId, metaCampaign: res?.metaCampaign ?? null },
-                });
-              } catch (err) {
-                const captured = captureError(err, "Falha ao consultar Campaign no Graph.");
-                pushLog({
-                  action: "meta.campaign.get",
-                  ok: false,
-                  error: captured.message || "error",
-                  details: { metaCampaignId: createdMetaCampaignId, errorDetails: captured.details },
-                });
-              } finally {
-                setCreatedLoading(false);
-              }
-            }}
-          >
-            {createdLoading ? "Consultando Campaign..." : "Consultar Campaign no Graph"}
-          </button>
-
-          <button
-            type="button"
-            className="pillOutline"
-            disabled={adSetGraphLoading || isCreatingAny || !backendStatus?.hasAccessToken || !adSetEntityIdIsReal}
-            onClick={async () => {
-              setAdSetGraphLoading(true);
-              setError("");
-              setErrorDetails(null);
-              setSuccess("");
-              try {
-                const res = await getMetaAdSet(adSetEntityId);
-                setCreated((prev) => ({
-                  ...(prev ?? {}),
-                  metaAdSet: res.metaAdSet ?? prev?.metaAdSet ?? null,
-                }));
-                setSuccess("AdSet atualizado via Graph.");
-                await refreshLocalGenerated();
-                await refreshStructure(createdGeneratedCampaignId);
-                pushLog({
-                  action: "meta.adset.get",
-                  ok: true,
-                  details: { metaAdSetId: adSetEntityId, metaAdSet: res?.metaAdSet ?? null },
-                });
-              } catch (err) {
-                const captured = captureError(err, "Falha ao consultar AdSet no Graph.");
-                pushLog({
-                  action: "meta.adset.get",
-                  ok: false,
-                  error: captured.message || "error",
-                  details: { metaAdSetId: adSetEntityId, errorDetails: captured.details },
-                });
-              } finally {
-                setAdSetGraphLoading(false);
-              }
-            }}
-          >
-            {adSetGraphLoading ? "Consultando AdSet..." : "Consultar AdSet no Graph"}
-          </button>
-
-          <button
-            type="button"
-            className="pillOutline"
-            disabled={adGraphLoading || isCreatingAny || !backendStatus?.hasAccessToken || !adEntityIdIsReal}
-            onClick={async () => {
-              setAdGraphLoading(true);
-              setError("");
-              setErrorDetails(null);
-              setSuccess("");
-              try {
-                const res = await getMetaAd(adEntityId);
-                setCreated((prev) => ({
-                  ...(prev ?? {}),
-                  metaAd: res.metaAd ?? prev?.metaAd ?? null,
-                }));
-                setSuccess("Ad atualizado via Graph.");
-                await refreshLocalGenerated();
-                await refreshStructure(createdGeneratedCampaignId);
-                pushLog({
-                  action: "meta.ad.get",
-                  ok: true,
-                  details: { metaAdId: adEntityId, metaAd: res?.metaAd ?? null },
-                });
-              } catch (err) {
-                const captured = captureError(err, "Falha ao consultar Ad no Graph.");
-                pushLog({
-                  action: "meta.ad.get",
-                  ok: false,
-                  error: captured.message || "error",
-                  details: { metaAdId: adEntityId, errorDetails: captured.details },
-                });
-              } finally {
-                setAdGraphLoading(false);
-              }
-            }}
-          >
-            {adGraphLoading ? "Consultando Ad..." : "Consultar Ad no Graph"}
-          </button>
-
-          <div className="muted" style={{ fontWeight: 800 }}>
-            Requer token no backend + IDs reais (não `stub-*`).
-          </div>
-        </div>
-      </CollapsibleCard>
-      <CampaignBatchSection
-        isBusy={loading || isCreatingAny}
-        countriesSource={countriesSource}
-        countryOptions={countryOptions}
-        countryCodeToFlag={countryCodeToFlag}
-        backendHasAccessToken={Boolean(backendStatus?.hasAccessToken)}
-        name={name}
-        objective={objective}
-        adAccountNormalized={adAccountNormalized}
-        createMetaCampaignSimple={createMetaCampaignSimple}
-        refreshBackendStatus={refreshBackendStatus}
-        refreshLocalGenerated={refreshLocalGenerated}
-        pushLog={pushLog}
-        setError={setError}
-        setErrorDetails={setErrorDetails}
-        setSuccess={setSuccess}
-      />
-
-      <BackendStatusSection
-        refreshBackendStatus={refreshBackendStatus}
-        isCreatingAny={isCreatingAny}
-        loading={loading}
-        backendStatusLoading={backendStatusLoading}
-        backendStatusError={backendStatusError}
-        backendStatusErrorDetails={backendStatusErrorDetails}
-        setBackendStatusError={setBackendStatusError}
-        setBackendStatusErrorDetails={setBackendStatusErrorDetails}
-        safeJson={safeJson}
-        backendStatus={backendStatus}
-        validateLoading={validateLoading}
-        setValidateLoading={setValidateLoading}
-        validateError={validateError}
-        setValidateError={setValidateError}
-        validateErrorDetails={validateErrorDetails}
-        setValidateErrorDetails={setValidateErrorDetails}
-        validateMe={validateMe}
-        setValidateMe={setValidateMe}
-        validateMetaToken={validateMetaToken}
-        diagnosticsLoading={diagnosticsLoading}
-        setDiagnosticsLoading={setDiagnosticsLoading}
-        diagnosticsError={diagnosticsError}
-        setDiagnosticsError={setDiagnosticsError}
-        diagnosticsErrorDetails={diagnosticsErrorDetails}
-        setDiagnosticsErrorDetails={setDiagnosticsErrorDetails}
-        diagnosticsMe={diagnosticsMe}
-        setDiagnosticsMe={setDiagnosticsMe}
-        getMetaDiagnostics={getMetaDiagnostics}
-        pushLog={pushLog}
-      />
-
-      <GeneratedCampaignsSection
-        localGenerated={localGenerated}
-        localLoading={localLoading}
-        localError={localError}
-        localErrorDetails={localErrorDetails}
-        createdGeneratedCampaignId={createdGeneratedCampaignId}
-        refreshDisabled={localLoading || loading || isCreatingAny}
-        onRefresh={refreshLocalGenerated}
-        onDismissError={() => {
-          setLocalError("");
-          setLocalErrorDetails(null);
-        }}
-        selectDisabled={localLoading || isCreatingAny}
-        onSelect={handleSelectGeneratedCampaignRow}
-        onCopyIds={handleCopyGeneratedCampaignIds}
-        safeJson={safeJson}
-        countryCodeToFlag={countryCodeToFlag}
-      />
-
-      <GeneratedStructureSection
-        generatedCampaignId={createdGeneratedCampaignId}
-        structureForId={structureForId}
-        loading={structureLoading}
-        error={structureError}
-        errorDetails={structureErrorDetails}
-        generatedAdSets={structureAdSets}
-        generatedAds={structureAds}
-        refreshDisabled={structureLoading || loading || isCreatingAny || !createdGeneratedCampaignId}
-        onRefresh={() => refreshStructure(createdGeneratedCampaignId)}
-        onDismissError={() => {
-          setStructureError("");
-          setStructureErrorDetails(null);
-        }}
-        safeJson={safeJson}
-      />
-
-      <CreativeAssetsSection
-        loading={assetsLoading}
-        error={assetsError}
-        errorDetails={assetsErrorDetails}
-        assets={creativeAssets}
-        onRefresh={refreshCreativeAssets}
-        refreshDisabled={assetsLoading || loading || isCreatingAny}
-        onDismissError={() => {
-          setAssetsError("");
-          setAssetsErrorDetails(null);
-        }}
-        uploadDisabled={assetUploading || loading || isCreatingAny}
-        onUpload={async (file) => {
-          if (!file) return;
-          setAssetUploading(true);
-          setError("");
-          setErrorDetails(null);
-          setSuccess("");
-          try {
-            const res = await uploadCreativeAsset(file);
-            pushLog({
-              action: "creative.asset.upload",
-              ok: true,
-              details: { id: res?.creativeAsset?.id ?? null, mime: res?.creativeAsset?.mime_type ?? null, size: res?.creativeAsset?.size_bytes ?? null },
-            });
-            setSuccess("Asset enviado e persistido.");
-            await refreshCreativeAssets();
-          } catch (err) {
-            const captured = captureError(err, "Falha ao enviar asset.");
-            pushLog({
-              action: "creative.asset.upload",
-              ok: false,
-              error: captured.message || "error",
-              details: { errorDetails: captured.details },
-            });
-          } finally {
-            setAssetUploading(false);
-          }
-        }}
-        safeJson={safeJson}
-      />
-
-      <CreativeDraftsSection
-        generatedCampaignId={createdGeneratedCampaignId}
-        assets={creativeAssets}
-        drafts={creativeDrafts}
-        loading={draftsLoading}
-        error={draftsError}
-        errorDetails={draftsErrorDetails}
-        refreshDisabled={draftsLoading || loading || isCreatingAny || !createdGeneratedCampaignId}
-        onRefresh={() => refreshCreativeDrafts(createdGeneratedCampaignId)}
-        createDisabled={draftCreating || loading || isCreatingAny || !createdGeneratedCampaignId}
-        onCreate={async () => {
-          if (!createdGeneratedCampaignId) return;
-          setDraftCreating(true);
-          setError("");
-          setErrorDetails(null);
-          setSuccess("");
-          try {
-            const payload = {
-              generatedCampaignId: createdGeneratedCampaignId,
-              creativeAssetId: normalizeNonEmptyString(draftAssetId) || null,
-              primaryText: normalizeNonEmptyString(draftPrimaryText) || null,
-              headline: normalizeNonEmptyString(draftHeadline) || null,
-              description: normalizeNonEmptyString(draftDescription) || null,
-              ctaType: normalizeNonEmptyString(draftCtaType) || null,
-              destinationUrl: normalizeNonEmptyString(draftDestinationUrl) || null,
-            };
-            const res = await createCreativeDraft(payload);
-            pushLog({
-              action: "creative.draft.create",
-              ok: true,
-              details: { id: res?.creativeDraft?.id ?? null, generatedCampaignId: createdGeneratedCampaignId },
-            });
-            setSuccess("Creative draft persistido.");
-            setDraftAssetId("");
-            setDraftPrimaryText("");
-            setDraftHeadline("");
-            setDraftDescription("");
-            setDraftCtaType("");
-            setDraftDestinationUrl("");
-            await refreshCreativeDrafts(createdGeneratedCampaignId);
-          } catch (err) {
-            const captured = captureError(err, "Falha ao criar draft.");
-            pushLog({
-              action: "creative.draft.create",
-              ok: false,
-              error: captured.message || "error",
-              details: { errorDetails: captured.details },
-            });
-          } finally {
-            setDraftCreating(false);
-          }
-        }}
-        onDismissError={() => {
-          setDraftsError("");
-          setDraftsErrorDetails(null);
-        }}
-        safeJson={safeJson}
-        draftAssetId={draftAssetId}
-        setDraftAssetId={setDraftAssetId}
-        primaryText={draftPrimaryText}
-        setPrimaryText={setDraftPrimaryText}
-        headline={draftHeadline}
-        setHeadline={setDraftHeadline}
-        description={draftDescription}
-        setDescription={setDraftDescription}
-        ctaType={draftCtaType}
-        setCtaType={setDraftCtaType}
-        destinationUrl={draftDestinationUrl}
-        setDestinationUrl={setDraftDestinationUrl}
-        onDuplicate={async (draftId) => {
-          if (!draftId) return;
-          setError("");
-          setErrorDetails(null);
-          setSuccess("");
-          try {
-            const res = await duplicateCreativeDraft(draftId);
-            pushLog({
-              action: "creative.draft.duplicate",
-              ok: true,
-              details: { sourceId: draftId, id: res?.creativeDraft?.id ?? null },
-            });
-            setSuccess("Draft duplicado.");
-            await refreshCreativeDrafts(createdGeneratedCampaignId);
-          } catch (err) {
-            const captured = captureError(err, "Falha ao duplicar draft.");
-            pushLog({
-              action: "creative.draft.duplicate",
-              ok: false,
-              error: captured.message || "error",
-              details: { errorDetails: captured.details },
-            });
-          }
-        }}
-      />
-
-      <OpsLogsSection
-        opsLogs={opsLogs}
-        filteredOpsLogs={filteredOpsLogs}
-        opsLogsFilter={opsLogsFilter}
-        setOpsLogs={setOpsLogs}
-        setOpsLogsFilter={setOpsLogsFilter}
-        safeJson={safeJson}
-        setError={setError}
-        setErrorDetails={setErrorDetails}
-        setSuccess={setSuccess}
-      />
-
-      <OpsLogsDbSection
-        loading={dbOpsLogsLoading}
-        error={dbOpsLogsError}
-        errorDetails={dbOpsLogsErrorDetails}
-        opsLogs={dbOpsLogs}
-        refreshDisabled={dbOpsLogsLoading || loading || isCreatingAny}
-        onRefresh={refreshDbOpsLogs}
-        onDismissError={() => {
-          setDbOpsLogsError("");
-          setDbOpsLogsErrorDetails(null);
-        }}
-        safeJson={safeJson}
-      />
-
       <StepCampaignSection
         refresh={refresh}
         refreshDisabled={loading || isCreatingAny}
@@ -1512,6 +1133,386 @@ export default function MetaPausedTest() {
         flowMode={flowMode}
         normalizeNonEmptyString={normalizeNonEmptyString}
       />
+
+      <CampaignBatchSection
+        isBusy={loading || isCreatingAny}
+        countriesSource={countriesSource}
+        countryOptions={countryOptions}
+        countryCodeToFlag={countryCodeToFlag}
+        backendHasAccessToken={Boolean(backendStatus?.hasAccessToken)}
+        name={name}
+        objective={objective}
+        adAccountNormalized={adAccountNormalized}
+        createMetaCampaignSimple={createMetaCampaignSimple}
+        refreshBackendStatus={refreshBackendStatus}
+        refreshLocalGenerated={refreshLocalGenerated}
+        pushLog={pushLog}
+        setError={setError}
+        setErrorDetails={setErrorDetails}
+        setSuccess={setSuccess}
+      />
+
+      <BackendStatusSection
+        refreshBackendStatus={refreshBackendStatus}
+        isCreatingAny={isCreatingAny}
+        loading={loading}
+        backendStatusLoading={backendStatusLoading}
+        backendStatusError={backendStatusError}
+        backendStatusErrorDetails={backendStatusErrorDetails}
+        setBackendStatusError={setBackendStatusError}
+        setBackendStatusErrorDetails={setBackendStatusErrorDetails}
+        safeJson={safeJson}
+        backendStatus={backendStatus}
+        validateLoading={validateLoading}
+        setValidateLoading={setValidateLoading}
+        validateError={validateError}
+        setValidateError={setValidateError}
+        validateErrorDetails={validateErrorDetails}
+        setValidateErrorDetails={setValidateErrorDetails}
+        validateMe={validateMe}
+        setValidateMe={setValidateMe}
+        validateMetaToken={validateMetaToken}
+        diagnosticsLoading={diagnosticsLoading}
+        setDiagnosticsLoading={setDiagnosticsLoading}
+        diagnosticsError={diagnosticsError}
+        setDiagnosticsError={setDiagnosticsError}
+        diagnosticsErrorDetails={diagnosticsErrorDetails}
+        setDiagnosticsErrorDetails={setDiagnosticsErrorDetails}
+        diagnosticsMe={diagnosticsMe}
+        setDiagnosticsMe={setDiagnosticsMe}
+        getMetaDiagnostics={getMetaDiagnostics}
+        pushLog={pushLog}
+      />
+
+      <GeneratedCampaignsSection
+        localGenerated={localGenerated}
+        localLoading={localLoading}
+        localError={localError}
+        localErrorDetails={localErrorDetails}
+        createdGeneratedCampaignId={createdGeneratedCampaignId}
+        refreshDisabled={localLoading || loading || isCreatingAny}
+        onRefresh={refreshLocalGenerated}
+        onDismissError={() => {
+          setLocalError("");
+          setLocalErrorDetails(null);
+        }}
+        selectDisabled={localLoading || isCreatingAny}
+        onSelect={handleSelectGeneratedCampaignRow}
+        onCopyIds={handleCopyGeneratedCampaignIds}
+        safeJson={safeJson}
+        countryCodeToFlag={countryCodeToFlag}
+      />
+
+      <GeneratedStructureSection
+        generatedCampaignId={createdGeneratedCampaignId}
+        structureForId={structureForId}
+        loading={structureLoading}
+        error={structureError}
+        errorDetails={structureErrorDetails}
+        generatedAdSets={structureAdSets}
+        generatedAds={structureAds}
+        refreshDisabled={structureLoading || loading || isCreatingAny || !createdGeneratedCampaignId}
+        onRefresh={() => refreshStructure(createdGeneratedCampaignId)}
+        onDismissError={() => {
+          setStructureError("");
+          setStructureErrorDetails(null);
+        }}
+        safeJson={safeJson}
+      />
+
+      <CreativeAssetsSection
+        loading={assetsLoading}
+        error={assetsError}
+        errorDetails={assetsErrorDetails}
+        assets={creativeAssets}
+        onRefresh={refreshCreativeAssets}
+        refreshDisabled={assetsLoading || loading || isCreatingAny}
+        onDismissError={() => {
+          setAssetsError("");
+          setAssetsErrorDetails(null);
+        }}
+        uploadDisabled={assetUploading || loading || isCreatingAny}
+        onUpload={async (file) => {
+          if (!file) return;
+          setAssetUploading(true);
+          setError("");
+          setErrorDetails(null);
+          setSuccess("");
+          try {
+            const res = await uploadCreativeAsset(file);
+            pushLog({
+              action: "creative.asset.upload",
+              ok: true,
+              details: { id: res?.creativeAsset?.id ?? null, mime: res?.creativeAsset?.mime_type ?? null, size: res?.creativeAsset?.size_bytes ?? null },
+            });
+            setSuccess("Asset enviado e persistido.");
+            await refreshCreativeAssets();
+          } catch (err) {
+            const captured = captureError(err, "Falha ao enviar asset.");
+            pushLog({
+              action: "creative.asset.upload",
+              ok: false,
+              error: captured.message || "error",
+              details: { errorDetails: captured.details },
+            });
+          } finally {
+            setAssetUploading(false);
+          }
+        }}
+        safeJson={safeJson}
+      />
+
+      <CreativeDraftsSection
+        generatedCampaignId={createdGeneratedCampaignId}
+        assets={creativeAssets}
+        drafts={creativeDrafts}
+        loading={draftsLoading}
+        error={draftsError}
+        errorDetails={draftsErrorDetails}
+        refreshDisabled={draftsLoading || loading || isCreatingAny || !createdGeneratedCampaignId}
+        onRefresh={() => refreshCreativeDrafts(createdGeneratedCampaignId)}
+        createDisabled={draftCreating || loading || isCreatingAny || !createdGeneratedCampaignId}
+        onCreate={async () => {
+          if (!createdGeneratedCampaignId) return;
+          setDraftCreating(true);
+          setError("");
+          setErrorDetails(null);
+          setSuccess("");
+          try {
+            const payload = {
+              generatedCampaignId: createdGeneratedCampaignId,
+              creativeAssetId: normalizeNonEmptyString(draftAssetId) || null,
+              primaryText: normalizeNonEmptyString(draftPrimaryText) || null,
+              headline: normalizeNonEmptyString(draftHeadline) || null,
+              description: normalizeNonEmptyString(draftDescription) || null,
+              ctaType: normalizeNonEmptyString(draftCtaType) || null,
+              destinationUrl: normalizeNonEmptyString(draftDestinationUrl) || null,
+            };
+            const res = await createCreativeDraft(payload);
+            pushLog({
+              action: "creative.draft.create",
+              ok: true,
+              details: { id: res?.creativeDraft?.id ?? null, generatedCampaignId: createdGeneratedCampaignId },
+            });
+            setSuccess("Creative draft persistido.");
+            setDraftAssetId("");
+            setDraftPrimaryText("");
+            setDraftHeadline("");
+            setDraftDescription("");
+            setDraftCtaType("");
+            setDraftDestinationUrl("");
+            await refreshCreativeDrafts(createdGeneratedCampaignId);
+          } catch (err) {
+            const captured = captureError(err, "Falha ao criar draft.");
+            pushLog({
+              action: "creative.draft.create",
+              ok: false,
+              error: captured.message || "error",
+              details: { errorDetails: captured.details },
+            });
+          } finally {
+            setDraftCreating(false);
+          }
+        }}
+        onDismissError={() => {
+          setDraftsError("");
+          setDraftsErrorDetails(null);
+        }}
+        safeJson={safeJson}
+        draftAssetId={draftAssetId}
+        setDraftAssetId={setDraftAssetId}
+        primaryText={draftPrimaryText}
+        setPrimaryText={setDraftPrimaryText}
+        headline={draftHeadline}
+        setHeadline={setDraftHeadline}
+        description={draftDescription}
+        setDescription={setDraftDescription}
+        ctaType={draftCtaType}
+        setCtaType={setDraftCtaType}
+        destinationUrl={draftDestinationUrl}
+        setDestinationUrl={setDraftDestinationUrl}
+        onDuplicate={async (draftId) => {
+          if (!draftId) return;
+          setError("");
+          setErrorDetails(null);
+          setSuccess("");
+          try {
+            const res = await duplicateCreativeDraft(draftId);
+            pushLog({
+              action: "creative.draft.duplicate",
+              ok: true,
+              details: { sourceId: draftId, id: res?.creativeDraft?.id ?? null },
+            });
+            setSuccess("Draft duplicado.");
+            await refreshCreativeDrafts(createdGeneratedCampaignId);
+          } catch (err) {
+            const captured = captureError(err, "Falha ao duplicar draft.");
+            pushLog({
+              action: "creative.draft.duplicate",
+              ok: false,
+              error: captured.message || "error",
+              details: { errorDetails: captured.details },
+            });
+          }
+        }}
+      />
+
+      <OpsLogsSection
+        opsLogs={opsLogs}
+        filteredOpsLogs={filteredOpsLogs}
+        opsLogsFilter={opsLogsFilter}
+        setOpsLogs={setOpsLogs}
+        setOpsLogsFilter={setOpsLogsFilter}
+        safeJson={safeJson}
+        setError={setError}
+        setErrorDetails={setErrorDetails}
+        setSuccess={setSuccess}
+      />
+
+      <OpsLogsDbSection
+        loading={dbOpsLogsLoading}
+        error={dbOpsLogsError}
+        errorDetails={dbOpsLogsErrorDetails}
+        opsLogs={dbOpsLogs}
+        refreshDisabled={dbOpsLogsLoading || loading || isCreatingAny}
+        onRefresh={refreshDbOpsLogs}
+        onDismissError={() => {
+          setDbOpsLogsError("");
+          setDbOpsLogsErrorDetails(null);
+        }}
+        safeJson={safeJson}
+      />
+
+      <CollapsibleCard
+        id="meta-test-graph-refresh"
+        title="Graph (REAL) — atualizar status"
+        description="Usa `GET /api/meta/*/:id` via backend. STUB não consulta Graph."
+        defaultOpen={false}
+      >
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+          <button
+            type="button"
+            className="pillOutline"
+            disabled={
+              createdLoading || isCreatingAny || !backendStatus?.hasAccessToken || !createdMetaCampaignIdIsReal
+            }
+            onClick={async () => {
+              setCreatedLoading(true);
+              setError("");
+              setErrorDetails(null);
+              setSuccess("");
+              try {
+                const res = await getMetaCampaign(createdMetaCampaignId);
+                setCreated((prev) => ({
+                  ...(prev ?? {}),
+                  metaCampaign: res.metaCampaign ?? prev?.metaCampaign ?? null,
+                }));
+                setSuccess("Campaign atualizada via Graph.");
+                await refreshLocalGenerated();
+                pushLog({
+                  action: "meta.campaign.get",
+                  ok: true,
+                  details: { metaCampaignId: createdMetaCampaignId, metaCampaign: res?.metaCampaign ?? null },
+                });
+              } catch (err) {
+                const captured = captureError(err, "Falha ao consultar Campaign no Graph.");
+                pushLog({
+                  action: "meta.campaign.get",
+                  ok: false,
+                  error: captured.message || "error",
+                  details: { metaCampaignId: createdMetaCampaignId, errorDetails: captured.details },
+                });
+              } finally {
+                setCreatedLoading(false);
+              }
+            }}
+          >
+            {createdLoading ? "Consultando Campaign..." : "Consultar Campaign no Graph"}
+          </button>
+
+          <button
+            type="button"
+            className="pillOutline"
+            disabled={adSetGraphLoading || isCreatingAny || !backendStatus?.hasAccessToken || !adSetEntityIdIsReal}
+            onClick={async () => {
+              setAdSetGraphLoading(true);
+              setError("");
+              setErrorDetails(null);
+              setSuccess("");
+              try {
+                const res = await getMetaAdSet(adSetEntityId);
+                setCreated((prev) => ({
+                  ...(prev ?? {}),
+                  metaAdSet: res.metaAdSet ?? prev?.metaAdSet ?? null,
+                }));
+                setSuccess("AdSet atualizado via Graph.");
+                await refreshLocalGenerated();
+                await refreshStructure(createdGeneratedCampaignId);
+                pushLog({
+                  action: "meta.adset.get",
+                  ok: true,
+                  details: { metaAdSetId: adSetEntityId, metaAdSet: res?.metaAdSet ?? null },
+                });
+              } catch (err) {
+                const captured = captureError(err, "Falha ao consultar AdSet no Graph.");
+                pushLog({
+                  action: "meta.adset.get",
+                  ok: false,
+                  error: captured.message || "error",
+                  details: { metaAdSetId: adSetEntityId, errorDetails: captured.details },
+                });
+              } finally {
+                setAdSetGraphLoading(false);
+              }
+            }}
+          >
+            {adSetGraphLoading ? "Consultando AdSet..." : "Consultar AdSet no Graph"}
+          </button>
+
+          <button
+            type="button"
+            className="pillOutline"
+            disabled={adGraphLoading || isCreatingAny || !backendStatus?.hasAccessToken || !adEntityIdIsReal}
+            onClick={async () => {
+              setAdGraphLoading(true);
+              setError("");
+              setErrorDetails(null);
+              setSuccess("");
+              try {
+                const res = await getMetaAd(adEntityId);
+                setCreated((prev) => ({
+                  ...(prev ?? {}),
+                  metaAd: res.metaAd ?? prev?.metaAd ?? null,
+                }));
+                setSuccess("Ad atualizado via Graph.");
+                await refreshLocalGenerated();
+                await refreshStructure(createdGeneratedCampaignId);
+                pushLog({
+                  action: "meta.ad.get",
+                  ok: true,
+                  details: { metaAdId: adEntityId, metaAd: res?.metaAd ?? null },
+                });
+              } catch (err) {
+                const captured = captureError(err, "Falha ao consultar Ad no Graph.");
+                pushLog({
+                  action: "meta.ad.get",
+                  ok: false,
+                  error: captured.message || "error",
+                  details: { metaAdId: adEntityId, errorDetails: captured.details },
+                });
+              } finally {
+                setAdGraphLoading(false);
+              }
+            }}
+          >
+            {adGraphLoading ? "Consultando Ad..." : "Consultar Ad no Graph"}
+          </button>
+
+          <div className="muted" style={{ fontWeight: 800 }}>
+            Requer token no backend + IDs reais (não `stub-*`).
+          </div>
+        </div>
+      </CollapsibleCard>
     </PageShell>
   );
 }
