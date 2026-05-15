@@ -25,6 +25,8 @@ services:
       META_SYNC_PROVIDER: ${META_SYNC_PROVIDER:-}
       META_GRAPH_VERSION: ${META_GRAPH_VERSION:-v20.0}
       META_ACCESS_TOKEN: ${META_ACCESS_TOKEN:-}
+      META_PAGE_ID: ${META_PAGE_ID:-}
+      META_INSTAGRAM_ACTOR_ID: ${META_INSTAGRAM_ACTOR_ID:-}
     volumes:
       - ./backend:/app
       - backend_node_modules:/app/node_modules
