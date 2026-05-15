@@ -13,6 +13,7 @@ export default function OpsLogsDbSection({
   safeJson,
 }) {
   const [compactMode, setCompactMode] = useState(true);
+  const [copyStatus, setCopyStatus] = useState("");
 
   return (
     <CollapsibleCard
@@ -39,12 +40,37 @@ export default function OpsLogsDbSection({
           >
             Compacto: {compactMode ? "ON" : "OFF"}
           </button>
+          <button
+            type="button"
+            className="pillOutline"
+            onClick={async () => {
+              setCopyStatus("");
+              const text = safeJson(opsLogs ?? []);
+              try {
+                await navigator.clipboard.writeText(text);
+                setCopyStatus("Copiado.");
+              } catch {
+                setCopyStatus("Falha ao copiar.");
+              } finally {
+                window.setTimeout(() => setCopyStatus(""), 3500);
+              }
+            }}
+            disabled={!opsLogs.length}
+          >
+            Copiar JSON
+          </button>
           <button type="button" className="pillOutline" onClick={onRefresh} disabled={refreshDisabled}>
             {loading ? "Atualizando..." : "Atualizar do DB"}
           </button>
         </>
       }
     >
+
+      {copyStatus ? (
+        <div className="muted" style={{ marginTop: 12, fontWeight: 900 }}>
+          {copyStatus}
+        </div>
+      ) : null}
 
       {error ? (
         <div className="card" style={{ padding: 14, marginTop: 12, borderColor: "#fecaca", color: "#991b1b" }}>

@@ -180,7 +180,7 @@ GOVERNANÇA CONTÍNUA:
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-15 17:14]
+Última atualização: [2026-05-15 17:15]
 
 Regras:
 
@@ -231,6 +231,7 @@ Regras:
 - [x] `/meta-test`: atalhos incluem Graph/DB estrutura/logs DB (commit: c6b5eee)
 - [x] `/meta-test`: batch — adicionar botão “Limpar” (países selecionados)
 - [x] `/meta-test`: batch — adicionar botões “Copiar resultados”/“Copiar erros” (JSON)
+- [x] `/meta-test`: troubleshooting — logs persistidos (DB) com botão “Copiar JSON”
 - [x] Melhorar percepção REAL vs STUB
 - [x] `/meta-test`: exibir REAL/STUB por entidade (Campaign/AdSet/Ad) na estrutura Meta
 - [x] Refinar responsividade
