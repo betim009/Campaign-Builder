@@ -118,6 +118,61 @@ Exemplos (`curl`, sempre `PAUSED` e sem token no frontend):
 - Publicar Creative REAL a partir de um `creative_draft` (token no backend): `POST /api/meta/creative-drafts/:id/publish`
   - Requer `creative_drafts.destination_url` preenchido (use `destinationUrl` ao criar o draft).
   - `pageId` pode vir do body (`{ "pageId": "..." }`) ou do env `META_PAGE_ID` (obrigatório).
+
+### Playbook — Validação REAL via `/meta-test` (Creative + Ad)
+
+Última atualização: [2026-05-15 12:31]
+
+Objetivo:
+validar os itens abertos do `PLANS.md` em **P4/P5** (Creative REAL + Ad REAL) usando o console `/meta-test`, preservando os guardrails (**PAUSED obrigatório**; token apenas no backend).
+
+Pré-requisitos:
+
+- Stack no ar: `docker compose up -d`
+- Backend OK: `curl http://localhost:3001/healthz`
+- Token no backend:
+  - `curl http://localhost:3001/api/meta/status` (esperado: `hasAccessToken=true`)
+  - `curl -X POST http://localhost:3001/api/meta/validate -H 'Content-Type: application/json' -d '{}'`
+- Page ID:
+  - Preferir `META_PAGE_ID` no backend **ou** preencher `pageId` no UI (Etapa 3).
+  - Diagnóstico: `curl \"http://localhost:3001/api/meta/pages?metaAdAccountId=act_<id>\"`
+
+Fluxo recomendado (UI):
+
+1) **Operação — fluxo principal**
+   - Etapa 1 (Campaign): preencher `act_...`, nome/objetivo/país, modo `REAL`, criar Campaign.
+   - Etapa 2 (AdSet): criar AdSet (REAL, PAUSED).
+   - Etapa 3 (Ad): preparar Creative e criar Ad (REAL, PAUSED).
+
+2) **Persistência (DB)**
+   - (Opcional) Upload de mídia (dev) em “Mídia (dev) — upload local”.
+   - Criar `creative_draft` (preencher `destinationUrl`).
+
+3) **Etapa 3 — Creative REAL**
+   - Selecionar `creativeDraftId` no dropdown.
+   - (Opcional) clicar em “Listar Pages (Graph)” para obter `pageId` e confirmar acesso.
+   - Clicar em “Publicar Creative REAL” e capturar `meta_creative_id`.
+   - Clicar em “Consultar Creative (Graph)” para evidência (payload fica em accordion).
+
+4) **Etapa 3 — Ad REAL**
+   - Preencher `creativeId` com o `meta_creative_id` publicado.
+   - Clicar em “Criar Ad REAL (PAUSED)”.
+
+5) **Graph (REAL)**
+   - Usar “Graph refresh” para atualizar Campaign/AdSet/Ad via backend (evidência de status).
+
+Checks mínimos (aceite):
+
+- Campaign/AdSet/Ad criados como **PAUSED** (status/effective_status).
+- IDs Meta persistidos no DB (`generated_campaigns` + estrutura `generated_adsets`/`generated_ads`).
+- Creative REAL consultável via Graph (`AdCreative`) e `meta_creative_id` persistido no draft.
+
+Troubleshooting comum:
+
+- “Listar Pages (Graph)” retorna vazio:
+  - token sem acesso a uma Page; informe `pageId` manualmente ou ajuste permissões/associação de Page.
+  - ver `GET /api/meta/diagnostics` e `GET /api/meta/pages`.
+- Erros grandes ficam em accordions no UI (evita poluição visual); use “Copiar” no card de erro global quando necessário.
   - `instagramActorId` é opcional (body ou env `META_INSTAGRAM_ACTOR_ID`).
   - Se houver `creative_asset_id`, o backend faz upload da imagem na Meta (`adimages`) e usa `image_hash`.
 - Consultar Creative no Graph (via backend): `GET /api/meta/creatives/{meta_creative_id}`
