@@ -1,5 +1,6 @@
 import { getBackendBaseUrl } from "../../services/http.js";
 import CollapsibleCard from "./CollapsibleCard.jsx";
+import JsonAccordion from "./JsonAccordion.jsx";
 
 export default function CreativeDraftsSection({
   generatedCampaignId,
@@ -253,21 +254,7 @@ export default function CreativeDraftsSection({
             </button>
           </div>
           <div style={{ marginTop: 6, fontWeight: 700 }}>{error}</div>
-          {errorDetails ? (
-            <pre
-              style={{
-                marginTop: 12,
-                background: "#0b1220",
-                color: "#e5e7eb",
-                padding: 12,
-                borderRadius: 12,
-                overflowX: "auto",
-                whiteSpace: "pre-wrap",
-              }}
-            >
-{safeJson(errorDetails)}
-            </pre>
-          ) : null}
+          <JsonAccordion title="Detalhes (erro drafts)" value={errorDetails} safeJson={safeJson} />
         </div>
       ) : null}
 

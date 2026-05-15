@@ -11,6 +11,7 @@ import GeneratedStructureSection from "./metaTest/GeneratedStructureSection.jsx"
 import CreativeAssetsSection from "./metaTest/CreativeAssetsSection.jsx";
 import CreativeDraftsSection from "./metaTest/CreativeDraftsSection.jsx";
 import CollapsibleCard from "./metaTest/CollapsibleCard.jsx";
+import JsonAccordion from "./metaTest/JsonAccordion.jsx";
 import StepAdSetSection from "./metaTest/StepAdSetSection.jsx";
 import StepAdSection from "./metaTest/StepAdSection.jsx";
 import StepCampaignSection from "./metaTest/StepCampaignSection.jsx";
@@ -750,21 +751,7 @@ export default function MetaPausedTest() {
             </div>
           </div>
           <div style={{ marginTop: 6, fontWeight: 700 }}>{error}</div>
-          {errorDetails ? (
-            <pre
-              style={{
-                marginTop: 12,
-                background: "#0b1220",
-                color: "#e5e7eb",
-                padding: 12,
-                borderRadius: 12,
-                overflowX: "auto",
-                whiteSpace: "pre-wrap",
-              }}
-            >
-{safeJson(errorDetails)}
-            </pre>
-          ) : null}
+          <JsonAccordion title="Detalhes (erro)" value={errorDetails} safeJson={safeJson} />
         </div>
       ) : null}
 

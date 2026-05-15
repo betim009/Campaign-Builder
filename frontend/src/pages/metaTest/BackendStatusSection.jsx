@@ -1,4 +1,5 @@
 import CollapsibleCard from "./CollapsibleCard.jsx";
+import JsonAccordion from "./JsonAccordion.jsx";
 
 export default function BackendStatusSection({
   refreshBackendStatus,
@@ -66,21 +67,7 @@ export default function BackendStatusSection({
             </button>
           </div>
           <div style={{ marginTop: 6, fontWeight: 700 }}>{backendStatusError}</div>
-          {backendStatusErrorDetails ? (
-            <pre
-              style={{
-                marginTop: 12,
-                background: "#0b1220",
-                color: "#e5e7eb",
-                padding: 12,
-                borderRadius: 12,
-                overflowX: "auto",
-                whiteSpace: "pre-wrap",
-              }}
-            >
-{safeJson(backendStatusErrorDetails)}
-            </pre>
-          ) : null}
+          <JsonAccordion title="Detalhes (backend status)" value={backendStatusErrorDetails} safeJson={safeJson} />
         </div>
       ) : null}
 
@@ -240,21 +227,7 @@ export default function BackendStatusSection({
             </button>
           </div>
           <div style={{ marginTop: 6, fontWeight: 700 }}>{validateError}</div>
-          {validateErrorDetails ? (
-            <pre
-              style={{
-                marginTop: 12,
-                background: "#0b1220",
-                color: "#e5e7eb",
-                padding: 12,
-                borderRadius: 12,
-                overflowX: "auto",
-                whiteSpace: "pre-wrap",
-              }}
-            >
-{safeJson(validateErrorDetails)}
-            </pre>
-          ) : null}
+          <JsonAccordion title="Detalhes (validate)" value={validateErrorDetails} safeJson={safeJson} />
         </div>
       ) : null}
 
@@ -286,42 +259,11 @@ export default function BackendStatusSection({
             </button>
           </div>
           <div style={{ marginTop: 6, fontWeight: 700 }}>{diagnosticsError}</div>
-          {diagnosticsErrorDetails ? (
-            <pre
-              style={{
-                marginTop: 12,
-                background: "#0b1220",
-                color: "#e5e7eb",
-                padding: 12,
-                borderRadius: 12,
-                overflowX: "auto",
-                whiteSpace: "pre-wrap",
-              }}
-            >
-{safeJson(diagnosticsErrorDetails)}
-            </pre>
-          ) : null}
+          <JsonAccordion title="Detalhes (diagnostics)" value={diagnosticsErrorDetails} safeJson={safeJson} />
         </div>
       ) : null}
 
-      {diagnosticsMe ? (
-        <details style={{ marginTop: 12 }}>
-          <summary style={{ cursor: "pointer", fontWeight: 900 }}>Diagnostics (token)</summary>
-          <pre
-            style={{
-              marginTop: 10,
-              background: "#0b1220",
-              color: "#e5e7eb",
-              padding: 12,
-              borderRadius: 12,
-              overflowX: "auto",
-              whiteSpace: "pre-wrap",
-            }}
-          >
-{safeJson(diagnosticsMe)}
-          </pre>
-        </details>
-      ) : null}
+      <JsonAccordion title="Diagnostics (token)" value={diagnosticsMe} safeJson={safeJson} />
     </CollapsibleCard>
   );
 }
