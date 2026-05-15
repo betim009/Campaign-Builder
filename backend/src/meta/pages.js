@@ -172,6 +172,33 @@ export async function metaListBusinessOwnedPages({ businessId, accessToken, limi
   return pickPages(json)
 }
 
+export async function metaFetchAdAccountBusiness({ metaAdAccountId, accessToken } = {}) {
+  const act = normalizeMetaAdAccountId(metaAdAccountId)
+  if (!act) {
+    const err = new Error('metaAdAccountId is required (expected act_<digits>)')
+    err.status = 400
+    throw err
+  }
+
+  const token = normalizeNonEmptyString(accessToken)
+  if (!token) {
+    const err = new Error('accessToken is required')
+    err.status = 400
+    throw err
+  }
+
+  const url = buildUrl(act, {
+    access_token: token,
+    fields: 'business{id,name}'
+  })
+  const json = await fetchJson(url, { retries: 2 })
+  const business = json?.business ?? null
+  const id = normalizeNonEmptyString(business?.id) ?? null
+  return id
+    ? { id, name: normalizeNonEmptyString(business?.name) ?? null }
+    : null
+}
+
 export async function metaListAdAccountPromotePages({ metaAdAccountId, accessToken, limit = 50 } = {}) {
   const act = normalizeMetaAdAccountId(metaAdAccountId)
   if (!act) {

@@ -15,6 +15,7 @@ import { metaCreateAd, metaCreateAdStub, metaFetchAd } from '../meta/ads.js'
 import { metaCreateAdCreative, metaFetchAdCreative, metaUploadAdImage } from '../meta/creatives.js'
 import {
   metaListAdAccountPromotePages,
+  metaFetchAdAccountBusiness,
   metaListBusinessOwnedPages,
   metaListMyBusinesses,
   metaListMyPages
@@ -387,13 +388,32 @@ export function metaRouter() {
           }
         }
 
+        let adAccountBusiness = null
+        let ownedPagesFromAdAccountBusiness = []
+        if (metaAdAccountId) {
+          try {
+            adAccountBusiness = await metaFetchAdAccountBusiness({ metaAdAccountId, accessToken })
+            if (adAccountBusiness?.id) {
+              ownedPagesFromAdAccountBusiness = await metaListBusinessOwnedPages({
+                businessId: adAccountBusiness.id,
+                accessToken
+              })
+            }
+          } catch {
+            adAccountBusiness = null
+            ownedPagesFromAdAccountBusiness = []
+          }
+        }
+
         return res.json({
           ok: true,
           meta_ad_account_id: metaAdAccountId,
           my_pages: myPages,
           promote_pages: promotePages,
           businesses,
-          owned_pages_by_business: ownedPagesByBusiness
+          owned_pages_by_business: ownedPagesByBusiness,
+          ad_account_business: adAccountBusiness,
+          owned_pages_from_ad_account_business: ownedPagesFromAdAccountBusiness
         })
       } catch (err) {
         const status = typeof err?.status === 'number' ? err.status : 502
