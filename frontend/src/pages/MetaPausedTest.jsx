@@ -12,6 +12,7 @@ import CreativeAssetsSection from "./metaTest/CreativeAssetsSection.jsx";
 import CreativeDraftsSection from "./metaTest/CreativeDraftsSection.jsx";
 import CollapsibleCard from "./metaTest/CollapsibleCard.jsx";
 import JsonAccordion from "./metaTest/JsonAccordion.jsx";
+import SectionDivider from "./metaTest/SectionDivider.jsx";
 import StepAdSetSection from "./metaTest/StepAdSetSection.jsx";
 import StepAdSection from "./metaTest/StepAdSection.jsx";
 import StepCampaignSection from "./metaTest/StepCampaignSection.jsx";
@@ -776,6 +777,13 @@ export default function MetaPausedTest() {
         countryNameByCode={countryNameByCode}
       />
 
+      <SectionDivider
+        id="meta-test-section-flow"
+        title="Operação — fluxo principal"
+        subtitle="Campaign → AdSet → Ad (execute de cima para baixo)"
+        tone="flow"
+      />
+
       <StepCampaignSection
         refresh={refresh}
         refreshDisabled={loading || isCreatingAny}
@@ -1134,6 +1142,13 @@ export default function MetaPausedTest() {
         normalizeNonEmptyString={normalizeNonEmptyString}
       />
 
+      <SectionDivider
+        id="meta-test-section-ops"
+        title="Operação — avançado"
+        subtitle="Batch, status/token e utilitários"
+        tone="default"
+      />
+
       <CampaignBatchSection
         isBusy={loading || isCreatingAny}
         countriesSource={countriesSource}
@@ -1182,6 +1197,13 @@ export default function MetaPausedTest() {
         setDiagnosticsMe={setDiagnosticsMe}
         getMetaDiagnostics={getMetaDiagnostics}
         pushLog={pushLog}
+      />
+
+      <SectionDivider
+        id="meta-test-section-db"
+        title="Persistência (DB)"
+        subtitle="Evidências: generated_campaigns + estrutura + creative drafts/assets"
+        tone="db"
       />
 
       <GeneratedCampaignsSection
@@ -1357,6 +1379,13 @@ export default function MetaPausedTest() {
         }}
       />
 
+      <SectionDivider
+        id="meta-test-section-troubleshooting"
+        title="Troubleshooting"
+        subtitle="Logs locais e logs persistidos (DB)"
+        tone="troubleshooting"
+      />
+
       <OpsLogsSection
         opsLogs={opsLogs}
         filteredOpsLogs={filteredOpsLogs}
@@ -1381,6 +1410,13 @@ export default function MetaPausedTest() {
           setDbOpsLogsErrorDetails(null);
         }}
         safeJson={safeJson}
+      />
+
+      <SectionDivider
+        id="meta-test-section-graph"
+        title="Graph (REAL)"
+        subtitle="Consultas diretas via backend (somente IDs reais)"
+        tone="graph"
       />
 
       <CollapsibleCard

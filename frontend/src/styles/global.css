@@ -243,6 +243,50 @@ button {
   align-items: center;
 }
 
+.metaSectionDivider {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+}
+
+.metaSectionDividerTitle {
+  font-weight: 950;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.metaSectionDividerSubtitle {
+  margin-top: 6px;
+  font-weight: 800;
+}
+
+.metaSectionDividerTone-default {
+  background: #ffffff;
+}
+
+.metaSectionDividerTone-flow {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.metaSectionDividerTone-db {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.metaSectionDividerTone-troubleshooting {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.metaSectionDividerTone-graph {
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+}
+
 .gridMetrics {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));

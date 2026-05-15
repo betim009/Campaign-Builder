@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import CollapsibleCard from "./CollapsibleCard.jsx";
 
 export default function CampaignBatchSection({
   isBusy,
@@ -131,14 +132,12 @@ export default function CampaignBatchSection({
   }
 
   return (
-    <div className="card" style={{ padding: 18, marginTop: 16 }}>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
-        <div>
-          <div style={{ fontWeight: 900, fontSize: 16 }}>Batch — Campaign por país</div>
-          <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
-            Gera Campaigns independentes por país (todas nascem `PAUSED`).
-          </div>
-        </div>
+    <CollapsibleCard
+      id="meta-test-batch"
+      title="Batch — Campaign por país"
+      description="Gera Campaigns independentes por país (todas nascem `PAUSED`)."
+      defaultOpen={false}
+      headerRight={
         <button
           type="button"
           className="pillOutline"
@@ -147,7 +146,8 @@ export default function CampaignBatchSection({
         >
           Selecionar todos
         </button>
-      </div>
+      }
+    >
 
       <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "end" }}>
         <label style={{ display: "grid", gap: 6, minWidth: 220 }}>
@@ -299,7 +299,6 @@ export default function CampaignBatchSection({
           </div>
         </div>
       ) : null}
-    </div>
+    </CollapsibleCard>
   );
 }
-

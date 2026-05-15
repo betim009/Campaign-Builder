@@ -70,6 +70,9 @@ export default function ShortcutsCard({ stepCampaignOk, stepAdSetOk, stepAdOk })
         >
           Graph refresh
         </a>
+        <a className="pillOutline" href="#meta-test-batch" onClick={() => ensureCollapsibleOpen("meta-test-batch")}>
+          Batch
+        </a>
         <a
           className="pillOutline"
           href="#meta-test-step-campaign"
