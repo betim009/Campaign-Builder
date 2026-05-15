@@ -160,7 +160,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-15 12:54]
+Última atualização: [2026-05-15 13:26]
 
 Regras:
 
@@ -324,6 +324,8 @@ Regras:
 ### P7 — Refinamento do fluxo legado
 
 - [ ] Reduzir dependência da Nova Campanha
+  - [x] Dashboard: destacar console `/meta-test` e rotular “Nova Campanha” como legado (commit: 95ed428)
+  - [x] `/nova-campanha`: aviso “Fluxo legado” + atalho para `/meta-test` (commit: 95ed428)
 - [ ] Remover responsabilidades excessivas
 - [ ] Migrar partes úteis para `/meta-test`
 - [ ] Isolar partes obsoletas
