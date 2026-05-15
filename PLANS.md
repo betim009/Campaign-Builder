@@ -160,7 +160,7 @@ Fontes únicas (para reduzir drift):
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-15 12:30]
+Última atualização: [2026-05-15 12:31]
 
 Regras:
 
@@ -229,8 +229,9 @@ Regras:
 #### Troubleshooting UX
 - [x] Criar modo compacto para troubleshooting (commit: d7467c4)
 - [x] Transformar payloads técnicos em accordions (commit: 2bd673e)
-- [ ] Reduzir excesso de informações simultâneas
+- [x] Reduzir excesso de informações simultâneas (commit: 0d37f40)
   - [x] `/meta-test`: erro do DB (`generated_campaigns`) em accordion (commit: 578d835)
+  - [x] `/meta-test`: Pages/Creative/Preview (Etapa 3) em accordions (commit: 0d37f40)
 
 #### Separação contextual
 - [x] Separar visualmente (commit: 8c6f584):
