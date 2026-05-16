@@ -1,3 +1,5 @@
+import CollapsibleCard from "./CollapsibleCard.jsx";
+
 export default function StepAdSetSection({
   createdMetaCampaignId,
   adSetName,
@@ -20,11 +22,13 @@ export default function StepAdSetSection({
   normalizeNonEmptyString,
 }) {
   return (
-    <div id="meta-test-step-adset" className="card" style={{ padding: 18, marginTop: 16 }}>
-      <div style={{ fontWeight: 900, fontSize: 16 }}>Etapa 2 — AdSet (PAUSED)</div>
-      <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
-        Criação incremental via `POST /api/meta/adsets` (REAL/STUB). Sempre PAUSED.
-      </div>
+    <CollapsibleCard
+      id="meta-test-step-adset"
+      title="Etapa 2 — AdSet (PAUSED)"
+      description="Criação incremental via `POST /api/meta/adsets` (REAL/STUB). Sempre PAUSED."
+      meta={stepAdSetOk ? "OK" : "—"}
+      defaultOpen={Boolean(normalizeNonEmptyString(createdMetaCampaignId))}
+    >
 
       <div
         style={{
@@ -203,10 +207,9 @@ export default function StepAdSetSection({
   },
   null,
   2,
-)}
+	)}
         </pre>
       </details>
-    </div>
+    </CollapsibleCard>
   );
 }
-

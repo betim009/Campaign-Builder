@@ -1,4 +1,5 @@
 import JsonAccordion from "./JsonAccordion.jsx";
+import CollapsibleCard from "./CollapsibleCard.jsx";
 import { getBackendBaseUrl } from "../../services/http.js";
 
 function escapeShellSingleQuotes(value) {
@@ -84,11 +85,13 @@ export default function StepAdSection({
   })();
 
   return (
-    <div id="meta-test-step-ad" className="card" style={{ padding: 18, marginTop: 16 }}>
-      <div style={{ fontWeight: 900, fontSize: 16 }}>Etapa 3 — Ad (PAUSED)</div>
-      <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
-        Criação incremental via `POST /api/meta/ads` (REAL/STUB). Sempre PAUSED. REAL requer `creativeId` existente.
-      </div>
+    <CollapsibleCard
+      id="meta-test-step-ad"
+      title="Etapa 3 — Ad (PAUSED)"
+      description="Criação incremental via `POST /api/meta/ads` (REAL/STUB). Sempre PAUSED. REAL requer `creativeId` existente."
+      meta={normalizeNonEmptyString(createdMetaAdSetId) ? "OK" : "—"}
+      defaultOpen={Boolean(normalizeNonEmptyString(createdMetaAdSetId))}
+    >
 
       <div
         style={{
@@ -502,6 +505,6 @@ export default function StepAdSection({
           mode: flowMode,
         }}
       />
-    </div>
+    </CollapsibleCard>
   );
 }
