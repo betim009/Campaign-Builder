@@ -180,7 +180,7 @@ GOVERNANÇA CONTÍNUA:
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-16 14:31]
+Última atualização: [2026-05-16 14:34]
 
 Regras:
 
@@ -322,6 +322,7 @@ Regras:
 - [x] Associar creative ao Ad (creative_draft_id em `generated_ads` + UI seleção) (commits: 1fa8d8f, 5a6e520)
 - [x] Publicar Creative REAL a partir de `creative_drafts` (endpoint + UI) (commit: cac550e)
 - [x] `/meta-test`: consultar Creative REAL (Graph) para evidência operacional (commit: f3e7472)
+- [x] `/meta-test`: checklist P4 (Creative REAL) com evidência copiável em JSON (commit: b9154c7)
 - [ ] Validar creative REAL (prep: `force republish` no UI + evidência imediata do publish; validação REAL ainda pendente) (commits: 98cc5c0, 8bed865)
 - [x] Exibir preview operacional (preview texto + mídia) (commit: f8689c5)
 - [x] Preparar variações futuras (duplicar creative drafts) (commits: ba2322f, 41c1d13)
@@ -367,7 +368,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-14 20:07]
+Última atualização: [2026-05-16 14:34]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -378,6 +379,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-06 17:55] `PLANS.md` reduzido para estado atual + backlog ativo único; histórico isolado em `ARCHIVE.md` e procedimentos em `RUNBOOK.md`.
 - [2026-05-06 19:22] Endpoints de Financeiro/ROI adicionados em `/api/finance/*`; provider `stub` passou a gerar `revenue` para permitir cálculo de ROI no dev.
 - [2026-05-06 19:54] Estratégia de token (MVP): sem auth no frontend; token fica apenas no backend (env `META_ACCESS_TOKEN` ou `POST /api/meta/tokens`), com escopo opcional por `userId` (uuid) para multiusuário futuro. Refresh automático fora do escopo por enquanto (operar com token válido/long-lived e `expires_at` para invalidar).
+- [2026-05-16 14:34] Decisão: adicionar checklist P4 (Creative REAL) no `/meta-test` com evidência copiável (JSON) para acelerar validação e troubleshooting sem expor token.
 - [2026-05-06 19:54] Automação MVP via executor no backend (regras em `automation_rules`, logs em `automation_logs`) acionado manualmente por endpoint.
 - [2026-05-06 19:58] Integração externa Meta Graph com retry/backoff para erros transitórios (429/5xx/timeouts). `META_SYNC_PROVIDER=meta` pode forçar Graph e evitar fallback para `stub` quando não há token.
 - [2026-05-06 20:00] Endpoint `POST /api/meta/validate` adicionado para validar token e retornar `me` via Meta Graph (sem expor token no frontend).
