@@ -21,6 +21,7 @@ import MetaStructureCard from "./metaTest/MetaStructureCard.jsx";
 import CampaignResultSection from "./metaTest/CampaignResultSection.jsx";
 import CampaignBatchSection from "./metaTest/CampaignBatchSection.jsx";
 import AdRealAcceptanceCard from "./metaTest/AdRealAcceptanceCard.jsx";
+import CreativeRealAcceptanceCard from "./metaTest/CreativeRealAcceptanceCard.jsx";
 import { getCountries } from "../services/reference.js";
 import { getMetaCampaign } from "../services/metaCampaigns.js";
 import { getMetaAdSet } from "../services/metaAdSets.js";
@@ -1174,6 +1175,64 @@ export default function MetaPausedTest() {
         createdGeneratedCampaignId={createdGeneratedCampaignId}
         flowMode={flowMode}
         normalizeNonEmptyString={normalizeNonEmptyString}
+      />
+
+      <CreativeRealAcceptanceCard
+        flowMode={flowMode}
+        backendHasPageId={hasPageIdFromEnv}
+        metaPageId={metaPageId}
+        metaInstagramActorId={metaInstagramActorId}
+        creativePublishForce={creativePublishForce}
+        selectedCreativeDraft={selectedCreativeDraft}
+        adCreativeId={adCreativeId}
+        creativeGetResult={creativeGetResult}
+        isRealMetaId={isRealMetaId}
+        normalizeNonEmptyString={normalizeNonEmptyString}
+        onCopyEvidence={async () => {
+          setError("");
+          setErrorDetails(null);
+          setSuccess("");
+          try {
+            const payload = {
+              generatedCampaignId: createdGeneratedCampaignId || null,
+              flowMode,
+              page: {
+                pageIdUi: normalizeNonEmptyString(metaPageId) || null,
+                hasPageIdEnv: Boolean(hasPageIdFromEnv),
+                instagramActorIdUi: normalizeNonEmptyString(metaInstagramActorId) || null,
+              },
+              creativeDraft: selectedCreativeDraft
+                ? {
+                    id: selectedCreativeDraft?.id ?? null,
+                    destination_url: selectedCreativeDraft?.destination_url ?? null,
+                    cta_type: selectedCreativeDraft?.cta_type ?? null,
+                    creative_asset_id: selectedCreativeDraft?.creative_asset_id ?? null,
+                    meta_creative_id: selectedCreativeDraft?.meta_creative_id ?? null,
+                  }
+                : null,
+              creative: {
+                creativeIdInput: normalizeNonEmptyString(adCreativeId) || null,
+                forceRepublish: creativePublishForce === true,
+                graphGet: creativeGetResult ?? null,
+              },
+            };
+            await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+            setSuccess("Evidência P4 copiada para a área de transferência.");
+            pushLog({
+              action: "p4.acceptance.copy",
+              ok: true,
+              details: { generatedCampaignId: createdGeneratedCampaignId || null },
+            });
+          } catch (err) {
+            setError("Não foi possível copiar a evidência P4.");
+            setErrorDetails(err?.message ? String(err.message) : null);
+            pushLog({
+              action: "p4.acceptance.copy",
+              ok: false,
+              error: err?.message ? String(err.message) : "error",
+            });
+          }
+        }}
       />
 
       <AdRealAcceptanceCard
