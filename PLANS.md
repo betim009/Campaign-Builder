@@ -180,7 +180,7 @@ GOVERNANÇA CONTÍNUA:
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-16 14:27]
+Última atualização: [2026-05-16 14:31]
 
 Regras:
 
@@ -336,6 +336,7 @@ Regras:
 - [ ] Validar status PAUSED
 - [ ] Validar persistência do Ad
 - [ ] Validar leitura REAL do Graph
+- [x] `/meta-test`: checklist operacional P5 (evidência copiável em JSON) (commit: 9c0eea5)
 
 ### P6 — Governança operacional leve
 
