@@ -49,12 +49,14 @@
 
 ### Meta — Operações principais (backend)
 
-Última atualização: [2026-05-13 14:09]
+Última atualização: [2026-05-17 13:55]
 
 - Criar Campaign REAL (PAUSED): `POST /api/meta/campaigns`
 - Criar Campaign REAL/STUB mínima (PAUSED): `POST /api/meta/campaigns/simple`
 - Criar AdSet/Ad (REAL/STUB, PAUSED): `POST /api/meta/adsets`, `POST /api/meta/ads`
-  - `POST /api/meta/ads`: campo opcional `creativeDraftId` (uuid) para rastreabilidade local (não substitui `creativeId` no REAL)
+  - `POST /api/meta/ads`:
+    - `creativeDraftId` (uuid) é opcional para rastreabilidade/persistência local
+    - no REAL, `creativeId` pode ser omitido se o draft já tiver `meta_creative_id` persistido (fallback)
 - Consultar Campaign no Graph (via backend): `GET /api/meta/campaigns/{meta_campaign_id}`
 - Consultar AdSet no Graph (via backend): `GET /api/meta/adsets/{meta_adset_id}`
 - Consultar Ad no Graph (via backend): `GET /api/meta/ads/{meta_ad_id}`
@@ -64,8 +66,10 @@ Exemplos (`curl`, sempre `PAUSED` e sem token no frontend):
 
 - Criar AdSet REAL/STUB:
   - `curl -X POST http://localhost:3001/api/meta/adsets -H 'Content-Type: application/json' -d '{\"generatedCampaignId\":\"<generated_campaign_uuid>\",\"name\":\"AdSet BR\",\"dailyBudgetCents\":1000,\"billingEvent\":\"IMPRESSIONS\",\"optimizationGoal\":\"LINK_CLICKS\",\"mode\":\"REAL\"}'`
-- Criar Ad REAL (requer `creativeId` existente e AdSet criado):
+- Criar Ad REAL (requer AdSet criado; `creativeId` pode vir do draft):
   - `curl -X POST http://localhost:3001/api/meta/ads -H 'Content-Type: application/json' -d '{\"generatedCampaignId\":\"<generated_campaign_uuid>\",\"name\":\"Ad BR — 1\",\"creativeId\":\"<meta_creative_id>\",\"creativeDraftId\":\"<creative_draft_uuid>\",\"mode\":\"REAL\"}'`
+- Criar Ad REAL sem `creativeId` (fallback: usa `creative_drafts.meta_creative_id` do `creativeDraftId`):
+  - `curl -X POST http://localhost:3001/api/meta/ads -H 'Content-Type: application/json' -d '{\"generatedCampaignId\":\"<generated_campaign_uuid>\",\"name\":\"Ad BR — 1\",\"creativeDraftId\":\"<creative_draft_uuid>\",\"mode\":\"REAL\"}'`
 - Criar Ad STUB (não requer `creativeId`):
   - `curl -X POST http://localhost:3001/api/meta/ads -H 'Content-Type: application/json' -d '{\"generatedCampaignId\":\"<generated_campaign_uuid>\",\"name\":\"Ad BR — STUB\",\"creativeDraftId\":\"<creative_draft_uuid>\",\"mode\":\"STUB\"}'`
 
@@ -123,7 +127,7 @@ Exemplos (`curl`, sempre `PAUSED` e sem token no frontend):
 
 ### Playbook — Validação REAL via `/meta-test` (Creative + Ad)
 
-Última atualização: [2026-05-15 12:31]
+Última atualização: [2026-05-17 13:55]
 
 Objetivo:
 validar os itens abertos do `PLANS.md` em **P4/P5** (Creative REAL + Ad REAL) usando o console `/meta-test`, preservando os guardrails (**PAUSED obrigatório**; token apenas no backend).
@@ -157,7 +161,7 @@ Fluxo recomendado (UI):
    - Clicar em “Consultar Creative (Graph)” para evidência (payload fica em accordion).
 
 4) **Etapa 3 — Ad REAL**
-   - Preencher `creativeId` com o `meta_creative_id` publicado.
+   - Se o draft já tem `meta_creative_id`, o `creativeId` pode ser omitido (fallback) ou preenchido com o mesmo valor.
    - Clicar em “Criar Ad REAL (PAUSED)”.
 
 5) **Graph (REAL)**
