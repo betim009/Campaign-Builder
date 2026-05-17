@@ -387,7 +387,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-06 20:06] `docker-compose.yml` expõe `META_SYNC_PROVIDER`, `META_GRAPH_VERSION`, `META_ACCESS_TOKEN` para habilitar sync real sem mudanças de código/arquitetura.
 - [2026-05-06 20:08] `.env.example` adicionado para padronizar configuração local do Meta sync via Docker Compose (sem commitar `.env` real).
 - [2026-05-06 20:13] `revenue_cents` pode vir do Graph Insights via `action_values` (purchase/omni_purchase) quando disponível; mantém fallback `stub` para dev.
-- [2026-05-17 11:58] Decisão: `/api/meta/pages` passa a paginar resultados (cursor `after`) e aceita `?limit=` para reduzir “falso vazio” ao descobrir `pageId` (mitiga bloqueio P4/P5 sem expor token).
+- [2026-05-17 11:58] Decisão: `/api/meta/pages` passa a paginar resultados (cursor `after`) e aceita `?limit=` para reduzir “falso vazio” ao descobrir `pageId` (mitiga bloqueio P4/P5 sem expor token) (commit: d54a77b).
 - [2026-05-07 13:54] Criação real de campanhas Meta Ads validada em ambiente de desenvolvimento. Durante o desenvolvimento, toda campanha criada via API deve nascer obrigatoriamente com `status: PAUSED` para evitar veiculação acidental.
 - [2026-05-07 14:03] Criação real de campanhas implementada via `POST /api/meta/campaigns` + persistência em `generated_campaigns` (`meta_campaign_id`, `meta_ad_account_id`, `meta_user_id`, `meta_status`, `meta_effective_status`, `meta_objective`); UI passa a exibir `STUB`/`REAL` e status Meta.
 - [2026-05-07 14:49] `POST /api/generated-campaigns/:id/mark-published` deixa de setar `ACTIVE` automaticamente (evitar estado local indevido); passa a apenas vincular `meta_campaign_id`.
@@ -469,7 +469,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
   - Mitigação: `/api/meta/pages` tenta também descobrir o `business` do Ad Account (`act_*`) e listar `owned_pages` desse business (commit: 204e1b3); `/meta-test` inclui isso nas sugestões (commit: ba67fc3).
   - Mitigação: endpoint read-only `GET /api/meta/pages/:id` + botão “Validar Page ID” no `/meta-test` (commits: 6ccabf6, bd1969e).
   - Mitigação: `docker-compose.yml` faz passthrough de `META_PAGE_ID`/`META_INSTAGRAM_ACTOR_ID` para o backend (commit: b1c3d72).
-  - Mitigação: `/api/meta/pages` agora suporta paginação (cursor `after`) e `?limit=` para reduzir “falso vazio” em tokens com muitas páginas/businesses.
+  - Mitigação: `/api/meta/pages` agora suporta paginação (cursor `after`) e `?limit=` para reduzir “falso vazio” em tokens com muitas páginas/businesses (commit: d54a77b).
 
 ## Risks
 
