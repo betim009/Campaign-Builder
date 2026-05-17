@@ -1213,7 +1213,12 @@ export function metaRouter() {
       }
 
       if (mode === 'REAL' && !creativeId) {
-        return jsonError(res, 400, 'Missing creativeId (expected existing creative id)')
+        return jsonError(
+          res,
+          400,
+          'Missing creativeId (provide body.creativeId, or send creativeDraftId with meta_creative_id already published on the draft)',
+          { creative_draft_id: creativeDraftId ?? null }
+        )
       }
 
       const accessToken = await resolveAccessToken(pool, req)
