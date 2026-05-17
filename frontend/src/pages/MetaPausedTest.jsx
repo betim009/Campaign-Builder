@@ -1137,7 +1137,7 @@ export default function MetaPausedTest() {
               generatedCampaignId: createdGeneratedCampaignId,
               name: adName.trim(),
               ...(normalizeNonEmptyString(adCreativeDraftId) ? { creativeDraftId: adCreativeDraftId } : null),
-              ...(flowMode === "REAL" ? { creativeId: adCreativeId.trim() } : null),
+              ...(flowMode === "REAL" && normalizeNonEmptyString(adCreativeId) ? { creativeId: adCreativeId.trim() } : null),
               mode: flowMode,
             };
             const res = await createAd(payload);

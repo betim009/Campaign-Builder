@@ -51,6 +51,16 @@ export default function StepAdSection({
   flowMode,
   normalizeNonEmptyString,
 }) {
+  const effectiveCreativeId =
+    normalizeNonEmptyString(adCreativeId) ||
+    (selectedCreativeDraftMetaCreativeIdIsReal ? normalizeNonEmptyString(selectedCreativeDraftMetaCreativeId) : null) ||
+    null;
+  const canUseDraftCreativeId =
+    flowMode === "REAL" &&
+    normalizeNonEmptyString(creativeDraftId) &&
+    selectedCreativeDraftMetaCreativeIdIsReal &&
+    !normalizeNonEmptyString(adCreativeId);
+
   const candidates = (() => {
     const list = [];
 
@@ -88,7 +98,7 @@ export default function StepAdSection({
     <CollapsibleCard
       id="meta-test-step-ad"
       title="Etapa 3 — Ad (PAUSED)"
-      description="Criação incremental via `POST /api/meta/ads` (REAL/STUB). Sempre PAUSED. REAL requer `creativeId` existente."
+      description="Criação incremental via `POST /api/meta/ads` (REAL/STUB). Sempre PAUSED. REAL requer token no backend e um creative válido (via `creativeId` ou draft com `meta_creative_id`)."
       meta={normalizeNonEmptyString(createdMetaAdSetId) ? "OK" : "—"}
       defaultOpen={Boolean(normalizeNonEmptyString(createdMetaAdSetId))}
     >
@@ -145,12 +155,14 @@ export default function StepAdSection({
 
         <label style={{ display: "grid", gap: 6 }}>
           <span className="muted" style={{ fontWeight: 900 }}>
-            Creative ID (somente REAL)
+            Creative ID (somente REAL; opcional se draft já tem `meta_creative_id`)
           </span>
           <input
             value={adCreativeId}
             onChange={(e) => setAdCreativeId(e.target.value)}
-            placeholder="Ex: 1234567890"
+            placeholder={
+              selectedCreativeDraftMetaCreativeIdIsReal ? `Sugestão: ${selectedCreativeDraftMetaCreativeId}` : "Ex: <meta_creative_id>"
+            }
             disabled={flowMode === "STUB"}
             style={{
               height: 38,
@@ -164,6 +176,17 @@ export default function StepAdSection({
             }}
           />
         </label>
+
+        {canUseDraftCreativeId ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <button type="button" className="pillOutline" onClick={() => setAdCreativeId(String(selectedCreativeDraftMetaCreativeId))}>
+              Usar `meta_creative_id` do draft
+            </button>
+            <div className="muted" style={{ fontWeight: 800 }}>
+              Draft já tem creative REAL publicado.
+            </div>
+          </div>
+        ) : null}
 
         <label style={{ display: "grid", gap: 6 }}>
           <span className="muted" style={{ fontWeight: 900 }}>
@@ -491,7 +514,7 @@ export default function StepAdSection({
           Copiar curl (Ad REAL)
         </button>
         <div className="muted" style={{ fontWeight: 800 }}>
-          Requer AdSet criado acima. REAL exige token no backend e `creativeId`.
+          Requer AdSet criado acima. REAL exige token no backend e `creativeId` (ou draft com `meta_creative_id`).
         </div>
       </div>
 
@@ -500,7 +523,8 @@ export default function StepAdSection({
         value={{
           generatedCampaignId: createdGeneratedCampaignId || null,
           name: normalizeNonEmptyString(adName) || null,
-          creativeId: flowMode === "REAL" ? normalizeNonEmptyString(adCreativeId) || null : undefined,
+          creativeIdInput: flowMode === "REAL" ? normalizeNonEmptyString(adCreativeId) || null : undefined,
+          creativeIdEffective: flowMode === "REAL" ? effectiveCreativeId : undefined,
           creativeDraftId: normalizeNonEmptyString(creativeDraftId) || null,
           mode: flowMode,
         }}
