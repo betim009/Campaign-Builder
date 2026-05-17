@@ -180,7 +180,7 @@ GOVERNANÇA CONTÍNUA:
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-17 14:34]
+Última atualização: [2026-05-17 14:40]
 
 Regras:
 
@@ -367,7 +367,15 @@ Regras:
 - [ ] Migrar partes úteis para `/meta-test`
 - [ ] Isolar partes obsoletas
 - [ ] Melhorar compatibilidade temporária
-- [ ] Criar estratégia de substituição gradual
+- [x] Criar estratégia de substituição gradual
+  - Definição: `/meta-test` é o fluxo evolutivo; “Nova Campanha” fica apenas em modo manutenção/compatibilidade.
+  - Regras: novas capacidades vão para `/meta-test`; correções no legado só quando bloquearem operação.
+  - Caminho incremental (sem refactor massivo):
+    - 1) Antes de portar algo: reproduzir no legado e capturar evidência mínima (payload esperado).
+    - 2) Implementar no `/meta-test` com guardrails (REAL sempre `PAUSED`, token só no backend) + evidência copiável.
+    - 3) Se necessário, manter “ponte” no legado via link/atalho para o console (evitar duplicar lógica).
+    - 4) Marcar no backlog o item portado e manter checklist de paridade (por entidade: Campaign/AdSet/Ad/Creative).
+    - 5) Quando houver paridade suficiente, reduzir superfície do legado (ocultar ações avançadas por padrão).
 - [ ] Evitar duplicação operacional
 
 Histórico/itens concluídos:
@@ -376,7 +384,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-17 13:40]
+Última atualização: [2026-05-17 14:40]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -397,6 +405,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-06 20:13] `revenue_cents` pode vir do Graph Insights via `action_values` (purchase/omni_purchase) quando disponível; mantém fallback `stub` para dev.
 - [2026-05-17 11:58] Decisão: `/api/meta/pages` passa a paginar resultados (cursor `after`) e aceita `?limit=` para reduzir “falso vazio” ao descobrir `pageId` (mitiga bloqueio P4/P5 sem expor token) (commit: d54a77b).
 - [2026-05-17 13:40] Decisão: `POST /api/meta/ads` (REAL) pode derivar `creativeId` a partir de `creativeDraftId.meta_creative_id` quando `creativeId` não for enviado (mantém token no backend e reduz erro operacional no P5).
+- [2026-05-17 14:40] Decisão: “Nova Campanha” permanece em manutenção/compatibilidade; novas capacidades devem ser implementadas no `/meta-test` com evidência operacional e sem duplicar lógica no legado.
 - [2026-05-07 13:54] Criação real de campanhas Meta Ads validada em ambiente de desenvolvimento. Durante o desenvolvimento, toda campanha criada via API deve nascer obrigatoriamente com `status: PAUSED` para evitar veiculação acidental.
 - [2026-05-07 14:03] Criação real de campanhas implementada via `POST /api/meta/campaigns` + persistência em `generated_campaigns` (`meta_campaign_id`, `meta_ad_account_id`, `meta_user_id`, `meta_status`, `meta_effective_status`, `meta_objective`); UI passa a exibir `STUB`/`REAL` e status Meta.
 - [2026-05-07 14:49] `POST /api/generated-campaigns/:id/mark-published` deixa de setar `ACTIVE` automaticamente (evitar estado local indevido); passa a apenas vincular `meta_campaign_id`.
