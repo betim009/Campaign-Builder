@@ -180,7 +180,7 @@ GOVERNANÇA CONTÍNUA:
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-17 13:32]
+Última atualização: [2026-05-17 13:40]
 
 Regras:
 
@@ -339,6 +339,7 @@ Regras:
 - [ ] Validar leitura REAL do Graph
 - [x] `/meta-test`: checklist operacional P5 (evidência copiável em JSON) (commit: 9c0eea5)
 - [x] `/meta-test`: checklist P5 evidencia dependências (Campaign/AdSet) + próximos passos (anchors) (commit: 3736f9a)
+- [ ] Backend: `POST /api/meta/ads` (REAL) aceita `creativeDraftId` e usa `creative_drafts.meta_creative_id` como fallback quando `creativeId` estiver ausente (destrava operação P5 incrementalmente)
 
 ### P6 — Governança operacional leve
 
@@ -369,7 +370,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-17 11:58]
+Última atualização: [2026-05-17 13:40]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -389,6 +390,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-06 20:08] `.env.example` adicionado para padronizar configuração local do Meta sync via Docker Compose (sem commitar `.env` real).
 - [2026-05-06 20:13] `revenue_cents` pode vir do Graph Insights via `action_values` (purchase/omni_purchase) quando disponível; mantém fallback `stub` para dev.
 - [2026-05-17 11:58] Decisão: `/api/meta/pages` passa a paginar resultados (cursor `after`) e aceita `?limit=` para reduzir “falso vazio” ao descobrir `pageId` (mitiga bloqueio P4/P5 sem expor token) (commit: d54a77b).
+- [2026-05-17 13:40] Decisão: `POST /api/meta/ads` (REAL) pode derivar `creativeId` a partir de `creativeDraftId.meta_creative_id` quando `creativeId` não for enviado (mantém token no backend e reduz erro operacional no P5).
 - [2026-05-07 13:54] Criação real de campanhas Meta Ads validada em ambiente de desenvolvimento. Durante o desenvolvimento, toda campanha criada via API deve nascer obrigatoriamente com `status: PAUSED` para evitar veiculação acidental.
 - [2026-05-07 14:03] Criação real de campanhas implementada via `POST /api/meta/campaigns` + persistência em `generated_campaigns` (`meta_campaign_id`, `meta_ad_account_id`, `meta_user_id`, `meta_status`, `meta_effective_status`, `meta_objective`); UI passa a exibir `STUB`/`REAL` e status Meta.
 - [2026-05-07 14:49] `POST /api/generated-campaigns/:id/mark-published` deixa de setar `ACTIVE` automaticamente (evitar estado local indevido); passa a apenas vincular `meta_campaign_id`.
