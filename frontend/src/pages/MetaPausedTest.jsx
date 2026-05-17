@@ -1251,32 +1251,38 @@ export default function MetaPausedTest() {
           setError("");
           setErrorDetails(null);
           setSuccess("");
-          try {
-            const payload = {
-              generatedCampaignId: createdGeneratedCampaignId || null,
-              flowMode,
-              meta: {
-                campaignId: created?.metaCampaign?.id ?? null,
-                adsetId: created?.metaAdSet?.id ?? null,
-                adId: created?.metaAd?.id ?? null,
-                adEffectiveStatus: created?.metaAd?.effective_status ?? null,
-              },
-              creativeDraft: selectedCreativeDraft
-                ? {
-                    id: selectedCreativeDraft?.id ?? null,
-                    destination_url: selectedCreativeDraft?.destination_url ?? null,
-                    cta_type: selectedCreativeDraft?.cta_type ?? null,
-                    creative_asset_id: selectedCreativeDraft?.creative_asset_id ?? null,
-                    meta_creative_id: selectedCreativeDraft?.meta_creative_id ?? null,
-                  }
-                : null,
-              adCreativeId: normalizeNonEmptyString(adCreativeId) || null,
-            };
-            await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
-            setSuccess("Evidência P5 copiada para a área de transferência.");
-            pushLog({
-              action: "p5.acceptance.copy",
-              ok: true,
+	          try {
+	            const effectiveCreativeId =
+	              normalizeNonEmptyString(adCreativeId) ||
+	              normalizeNonEmptyString(selectedCreativeDraft?.meta_creative_id) ||
+	              null;
+	            const payload = {
+	              generatedCampaignId: createdGeneratedCampaignId || null,
+	              flowMode,
+	              meta: {
+	                campaignId: created?.metaCampaign?.id ?? null,
+	                adsetId: created?.metaAdSet?.id ?? null,
+	                adId: created?.metaAd?.id ?? null,
+	                adEffectiveStatus: created?.metaAd?.effective_status ?? null,
+	                creativeIdSource: created?.metaAdCreate?.creativeIdSource ?? null,
+	              },
+	              creativeDraft: selectedCreativeDraft
+	                ? {
+	                    id: selectedCreativeDraft?.id ?? null,
+	                    destination_url: selectedCreativeDraft?.destination_url ?? null,
+	                    cta_type: selectedCreativeDraft?.cta_type ?? null,
+	                    creative_asset_id: selectedCreativeDraft?.creative_asset_id ?? null,
+	                    meta_creative_id: selectedCreativeDraft?.meta_creative_id ?? null,
+	                  }
+	                : null,
+	              adCreativeIdInput: normalizeNonEmptyString(adCreativeId) || null,
+	              creativeIdEffective: effectiveCreativeId,
+	            };
+	            await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+	            setSuccess("Evidência P5 copiada para a área de transferência.");
+	            pushLog({
+	              action: "p5.acceptance.copy",
+	              ok: true,
               details: { generatedCampaignId: createdGeneratedCampaignId || null },
             });
           } catch (err) {
