@@ -1157,15 +1157,12 @@ export function metaRouter() {
       const modeRaw = normalizeNonEmptyString(req.body?.mode)
       const mode = modeRaw === 'STUB' ? 'STUB' : 'REAL'
 
-      const creativeId = normalizeNonEmptyString(req.body?.creativeId)
       const creativeDraftId = normalizeNonEmptyString(req.body?.creativeDraftId)
       if (creativeDraftId && !isUuid(creativeDraftId)) {
         return jsonError(res, 400, 'Invalid creativeDraftId')
       }
 
-      if (mode === 'REAL' && !creativeId) {
-        return jsonError(res, 400, 'Missing creativeId (expected existing creative id)')
-      }
+      let creativeId = normalizeNonEmptyString(req.body?.creativeId)
 
       const pool = getPool()
       const { rows: gcRows, rowCount } = await pool.query(
@@ -1193,6 +1190,30 @@ export function metaRouter() {
       const metaAdSetId = normalizeNonEmptyString(gc.meta_adset_id)
       if (!metaAdSetId) {
         return jsonError(res, 400, 'Missing meta_adset_id (create AdSet first)')
+      }
+
+      if (mode === 'REAL' && !creativeId && creativeDraftId) {
+        const { rows: draftRows, rowCount: draftCount } = await pool.query(
+          `
+            SELECT meta_creative_id
+            FROM creative_drafts
+            WHERE id = $1 AND generated_campaign_id = $2
+          `,
+          [creativeDraftId, generatedCampaignId]
+        )
+
+        if (draftCount === 0) {
+          return jsonError(res, 400, 'creativeDraftId not found for generatedCampaignId')
+        }
+
+        const fromDraft = normalizeNonEmptyString(draftRows?.[0]?.meta_creative_id)
+        if (fromDraft && !fromDraft.startsWith('stub-')) {
+          creativeId = fromDraft
+        }
+      }
+
+      if (mode === 'REAL' && !creativeId) {
+        return jsonError(res, 400, 'Missing creativeId (expected existing creative id)')
       }
 
       const accessToken = await resolveAccessToken(pool, req)
