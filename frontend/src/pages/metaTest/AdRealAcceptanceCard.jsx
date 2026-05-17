@@ -15,6 +15,18 @@ export default function AdRealAcceptanceCard({
 }) {
   const isRealFlow = flowMode === "REAL";
 
+  const metaCampaignId =
+    normalizeNonEmptyString(created?.metaCampaign?.id) ||
+    normalizeNonEmptyString(created?.generatedCampaign?.meta_campaign_id) ||
+    "";
+  const metaCampaignIdIsReal = metaCampaignId !== "" && isRealMetaId(metaCampaignId);
+
+  const metaAdSetId =
+    normalizeNonEmptyString(created?.metaAdSet?.id) ||
+    normalizeNonEmptyString(created?.generatedCampaign?.meta_adset_id) ||
+    "";
+  const metaAdSetIdIsReal = metaAdSetId !== "" && isRealMetaId(metaAdSetId);
+
   const creativeDraftId = normalizeNonEmptyString(selectedCreativeDraft?.id);
   const creativeDraftHasUrl = normalizeNonEmptyString(selectedCreativeDraft?.destination_url) !== "";
   const creativeDraftHasCta = normalizeNonEmptyString(selectedCreativeDraft?.cta_type) !== "";
@@ -31,6 +43,13 @@ export default function AdRealAcceptanceCard({
   const metaAdEffectiveStatus = normalizeNonEmptyString(created?.metaAd?.effective_status);
 
   const checks = [
+    {
+      key: "campaign",
+      label: "Campaign REAL criado (meta_campaign_id real)",
+      ok: metaCampaignIdIsReal,
+      hidden: !isRealFlow,
+    },
+    { key: "adset", label: "AdSet REAL criado (meta_adset_id real)", ok: metaAdSetIdIsReal, hidden: !isRealFlow },
     { key: "draft", label: "Draft selecionado", ok: Boolean(creativeDraftId) },
     { key: "url", label: "Destination URL preenchida", ok: creativeDraftHasUrl },
     { key: "cta", label: "CTA definido (opcional)", ok: creativeDraftHasCta, optional: true },
@@ -60,6 +79,8 @@ export default function AdRealAcceptanceCard({
   const optionalChecks = checks.filter((c) => c.optional);
   const requiredOk = requiredChecks.length ? requiredChecks.every((c) => c.ok) : false;
 
+  const missing = isRealFlow ? requiredChecks.filter((c) => !c.ok).map((c) => c.key) : [];
+
   return (
     <CollapsibleCard
       id="meta-test-p5-acceptance"
@@ -84,6 +105,40 @@ export default function AdRealAcceptanceCard({
           </>
         )}
       </div>
+
+      {isRealFlow && missing.length ? (
+        <div className="card" style={{ marginTop: 12, padding: 12, border: "1px solid #fed7aa", background: "#fffbeb" }}>
+          <div style={{ fontWeight: 900, color: "#92400e" }}>Próximos passos (para destravar)</div>
+          <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
+            {missing.includes("campaign") ? (
+              <div>
+                - Crie a Campaign REAL na <a href="#meta-test-step-campaign">Etapa 1</a>.
+              </div>
+            ) : null}
+            {missing.includes("adset") ? (
+              <div>
+                - Crie o AdSet REAL na <a href="#meta-test-step-adset">Etapa 2</a> (P5 exige `meta_adset_id` real).
+              </div>
+            ) : null}
+            {missing.includes("draft") ? (
+              <div>
+                - Selecione um draft em <a href="#meta-test-creative-drafts">Creative Drafts</a>.
+              </div>
+            ) : null}
+            {missing.includes("url") ? <div>- Preencha `destinationUrl` no draft antes de publicar.</div> : null}
+            {missing.includes("creative") || missing.includes("creativeId") ? (
+              <div>
+                - Publique/valide o Creative REAL no checklist <a href="#meta-test-p4-acceptance">P4</a>.
+              </div>
+            ) : null}
+            {missing.includes("ad") ? (
+              <div>
+                - Crie o Ad REAL na <a href="#meta-test-step-ad">Etapa 3</a>.
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
         <div className="card" style={{ padding: 12 }}>
@@ -127,4 +182,3 @@ export default function AdRealAcceptanceCard({
     </CollapsibleCard>
   );
 }
-
