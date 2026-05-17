@@ -1192,6 +1192,8 @@ export function metaRouter() {
         return jsonError(res, 400, 'Missing meta_adset_id (create AdSet first)')
       }
 
+      let creativeIdSource = creativeId ? 'body' : null
+
       if (mode === 'REAL' && !creativeId && creativeDraftId) {
         const { rows: draftRows, rowCount: draftCount } = await pool.query(
           `
@@ -1209,6 +1211,7 @@ export function metaRouter() {
         const fromDraft = normalizeNonEmptyString(draftRows?.[0]?.meta_creative_id)
         if (fromDraft && !fromDraft.startsWith('stub-')) {
           creativeId = fromDraft
+          creativeIdSource = 'draft'
         }
       }
 
@@ -1327,7 +1330,9 @@ export function metaRouter() {
           )
 
           await client.query('COMMIT')
-          return res.status(201).json({ ok: true, mode, meta_ad: created, generated_campaign: updated.rows[0] })
+          return res
+            .status(201)
+            .json({ ok: true, mode, creative_id_source: creativeIdSource, meta_ad: created, generated_campaign: updated.rows[0] })
         } catch (err) {
           await client.query('ROLLBACK')
           throw err
