@@ -180,7 +180,7 @@ GOVERNANÇA CONTÍNUA:
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-16 14:34]
+Última atualização: [2026-05-17 13:20]
 
 Regras:
 
@@ -352,7 +352,7 @@ Regras:
 
 ### P7 — Refinamento do fluxo legado
 
-- [ ] Reduzir dependência da Nova Campanha
+- [x] Reduzir dependência da Nova Campanha
   - [x] Dashboard: destacar console `/meta-test` e rotular “Nova Campanha” como legado (commit: 95ed428)
   - [x] `/nova-campanha`: aviso “Fluxo legado” + atalho para `/meta-test` (commit: 95ed428)
 - [ ] Remover responsabilidades excessivas
