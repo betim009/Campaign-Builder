@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import StatusBadge from "./StatusBadge.jsx";
 import { BarChartIcon, LanguageIcon, PlayArrowIcon } from "../styles/icons.js";
+import { duplicateCampaign } from "../services/campaigns.js";
 
 export default function CampaignCard({
   id,
@@ -12,6 +14,7 @@ export default function CampaignCard({
   countryFlags,
 }) {
   const navigate = useNavigate();
+  const [duplicating, setDuplicating] = useState(false);
 
   return (
     <div className="card campaignCard">
@@ -25,15 +28,27 @@ export default function CampaignCard({
             type="button"
             className="pillOutline"
             onClick={() => navigate(`/campanhas/${id}`)}
+            disabled={duplicating}
           >
             Ver Detalhes
           </button>
           <button
             type="button"
             className="pillOutline"
-            onClick={() => navigate(`/campanhas/${id}/duplicar`)}
+            disabled={duplicating}
+            onClick={async () => {
+              setDuplicating(true);
+              try {
+                const res = await duplicateCampaign(id);
+                navigate(`/campanhas/${res.campaign.id}`);
+              } catch {
+                navigate(`/campanhas/${id}/duplicar`);
+              } finally {
+                setDuplicating(false);
+              }
+            }}
           >
-            Duplicar
+            {duplicating ? "Duplicando..." : "Duplicar"}
           </button>
         </div>
       </div>

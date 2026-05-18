@@ -400,7 +400,7 @@ Regras:
 
 ## Backlog Ativo — Próxima Fase Operacional
 
-Última atualização: [2026-05-18 20:19]
+Última atualização: [2026-05-18 20:22]
 ### P8 — Console operacional
 
 - [ ] Consolidar layout operacional definitivo
@@ -437,7 +437,7 @@ Regras:
 ### P11 — Templates operacionais
 
 - [ ] Salvar estrutura base de campanhas
-- [ ] Duplicar campanhas rapidamente
+- [x] Duplicar campanhas rapidamente
 - [ ] Templates de países
 - [ ] Templates de creatives
 - [ ] Templates de copy
