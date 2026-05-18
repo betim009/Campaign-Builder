@@ -180,7 +180,7 @@ GOVERNANÇA CONTÍNUA:
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-18 14:14]
+Última atualização: [2026-05-18 15:02]
 
 Regras:
 
@@ -339,6 +339,7 @@ Regras:
 - [ ] Validar leitura REAL do Graph
 - [x] `/meta-test`: checklist operacional P5 (evidência copiável em JSON) (commit: 9c0eea5)
 - [x] `/meta-test`: checklist P5 evidencia dependências (Campaign/AdSet) + próximos passos (anchors) (commit: 3736f9a)
+- [x] `/meta-test`: previews (Graph) para Creative/Ad (`/api/meta/*/:id/previews`, HTML/iframe) (commit: 893321b)
 - [x] Backend: `POST /api/meta/ads` (REAL) aceita `creativeDraftId` e usa `creative_drafts.meta_creative_id` como fallback quando `creativeId` estiver ausente (commit: 8996bdd)
 - [x] `/meta-test`: Etapa 3 (Ad) sugere/usa `meta_creative_id` do draft quando `creativeId` estiver vazio (commit: 10ec7d1)
 - [x] `RUNBOOK.md`: atualizar exemplos P5 (Ad REAL) para `creativeId` opcional via draft (commit: ac709af)
@@ -388,7 +389,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-17 14:40]
+Última atualização: [2026-05-18 15:02]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -479,6 +480,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-13 13:17] Decisão: publicação de Creative REAL (AdCreative) é feita via backend (`POST /api/meta/creative-drafts/:id/publish`), exigindo `destination_url` no draft; `META_PAGE_ID` é obrigatório (ou body `pageId`); `META_INSTAGRAM_ACTOR_ID` é opcional; se houver asset local, o backend faz upload para Meta (`adimages`) e usa `image_hash`. (commit: cac550e)
 - [2026-05-14 20:07] Decisão: endpoints `/api/meta/status` e `/api/meta/validate` devem funcionar mesmo sem DB (modo troubleshooting via `META_ACCESS_TOKEN` env), sem expor token no frontend. (commit: 2eabf2d)
 - [2026-05-14 20:07] Decisão: `docker-compose.yml` suporta override de portas do host por env (`DB_HOST_PORT`/`BACKEND_HOST_PORT`/`FRONTEND_HOST_PORT`), mantendo defaults (5433/3001/5173). (commit: bb1c792)
+- [2026-05-18 15:02] Decisão: adicionar endpoints read-only de preview (Graph) para Creative/Ad (`/api/meta/*/:id/previews`, `ad_format`) e expor no `/meta-test` como evidência HTML copiável (token permanece apenas no backend). (commit: 893321b)
 
 ## Blockers
 
