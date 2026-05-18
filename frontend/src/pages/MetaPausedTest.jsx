@@ -26,9 +26,6 @@ import { getCountries } from "../services/reference.js";
 import { getMetaCampaign } from "../services/metaCampaigns.js";
 import { getMetaAdSet } from "../services/metaAdSets.js";
 import { getMetaAd } from "../services/metaAds.js";
-import { getMetaStatus, validateMetaToken } from "../services/metaStatus.js";
-import { getMetaDiagnostics } from "../services/metaStatus.js";
-import { getMetaPage, listMetaPages } from "../services/metaPages.js";
 import { countryCodeToFlag } from "../services/fallbacks.js";
 import { getGeneratedCampaignStructure, listGeneratedCampaigns } from "../services/generatedCampaigns.js";
 import { listOpsLogs } from "../services/opsLogs.js";
@@ -38,6 +35,13 @@ import { publishCreativeDraftAndExtractId, fetchMetaCreative } from "./metaTest/
 import { createCampaignSimple, listPausedCampaigns } from "./metaTest/actions/campaignActions.js";
 import { createAdSet } from "./metaTest/actions/adSetActions.js";
 import { createAd } from "./metaTest/actions/adActions.js";
+import {
+  fetchBackendDiagnostics,
+  fetchBackendStatus,
+  listPages,
+  validateBackendToken,
+  validatePage,
+} from "./metaTest/actions/statusActions.js";
 import useOpsLogs from "./metaTest/useOpsLogs.js";
 import {
   copyJsonToClipboard,
@@ -214,7 +218,7 @@ export default function MetaPausedTest() {
     setBackendStatusErrorDetails(null);
     setBackendStatusLoading(true);
     try {
-      const res = await getMetaStatus();
+      const res = await fetchBackendStatus();
       setBackendStatus(res);
       pushLog({ action: "meta.status", ok: true, details: { hasAccessToken: res?.hasAccessToken } });
     } catch (err) {
@@ -1016,7 +1020,7 @@ export default function MetaPausedTest() {
           setPageValidateErrorDetails(null);
           setPageValidateResult(null);
           try {
-            const res = await getMetaPage({ metaPageId: id });
+            const res = await validatePage({ metaPageId: id });
             setPageValidateResult(res?.metaPage ?? null);
             pushLog({ action: "meta.page.get", ok: true, details: { metaPageId: id } });
           } catch (err) {
@@ -1047,7 +1051,7 @@ export default function MetaPausedTest() {
           setPagesError("");
           setPagesErrorDetails(null);
           try {
-            const res = await listMetaPages({ metaAdAccountId: normalizeMetaAdAccountId(metaAdAccountId) });
+            const res = await listPages({ metaAdAccountId });
             setPagesResult({
               metaAdAccountId: res?.metaAdAccountId ?? null,
               myPages: res?.myPages ?? [],
@@ -1340,7 +1344,7 @@ export default function MetaPausedTest() {
         setValidateErrorDetails={setValidateErrorDetails}
         validateMe={validateMe}
         setValidateMe={setValidateMe}
-        validateMetaToken={validateMetaToken}
+        validateMetaToken={validateBackendToken}
         diagnosticsLoading={diagnosticsLoading}
         setDiagnosticsLoading={setDiagnosticsLoading}
         diagnosticsError={diagnosticsError}
@@ -1349,7 +1353,7 @@ export default function MetaPausedTest() {
         setDiagnosticsErrorDetails={setDiagnosticsErrorDetails}
         diagnosticsMe={diagnosticsMe}
         setDiagnosticsMe={setDiagnosticsMe}
-        getMetaDiagnostics={getMetaDiagnostics}
+        getMetaDiagnostics={fetchBackendDiagnostics}
         pushLog={pushLog}
       />
 
