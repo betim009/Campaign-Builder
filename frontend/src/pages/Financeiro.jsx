@@ -44,6 +44,18 @@ export default function Financeiro() {
   const spendSeries = data?.spendSeries ?? [];
   const performanceDaily = data?.performanceDaily ?? [];
   const tableRows = data?.tableRows ?? [];
+  const latestDay = performanceDaily.length ? performanceDaily[performanceDaily.length - 1] : null;
+  const previousDay = performanceDaily.length > 1 ? performanceDaily[performanceDaily.length - 2] : null;
+  const profitDeltaCents =
+    latestDay?._raw?.profit_cents === null || latestDay?._raw?.profit_cents === undefined
+      ? null
+      : previousDay?._raw?.profit_cents === null || previousDay?._raw?.profit_cents === undefined
+        ? null
+        : Number(latestDay._raw.profit_cents) - Number(previousDay._raw.profit_cents);
+  const profitDeltaLabel =
+    profitDeltaCents === null
+      ? "—"
+      : new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(profitDeltaCents / 100);
 
   const countryMaps = useMemo(() => {
     const nameByCode = Object.fromEntries(countries.map((c) => [c.code, c.name]));
@@ -187,6 +199,46 @@ export default function Financeiro() {
               </span>
             </div>
           </section>
+
+      {latestDay ? (
+        <section className="card" style={{ marginTop: 24, padding: 24 }} aria-label="Resumo operacional diário">
+          <div style={{ fontWeight: 900, fontSize: 16 }}>Resumo operacional diário</div>
+          <div className="muted" style={{ marginTop: 8, fontWeight: 800 }}>
+            Último dia no período: <b>{latestDay.dateLabel}</b>
+          </div>
+          <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <span className="pillOutline" style={{ background: "#ffffff", fontWeight: 900 }}>
+              Gasto: {latestDay.spend}
+            </span>
+            <span className="pillOutline" style={{ background: "#ffffff", fontWeight: 900 }}>
+              Receita: {latestDay.revenue}
+            </span>
+            <span className="pillOutline" style={{ background: "#ffffff", fontWeight: 900 }}>
+              Lucro: {latestDay.profit}
+            </span>
+            <span className="pillOutline" style={{ background: "#ffffff", fontWeight: 900 }}>
+              ROI: {latestDay.roi}
+            </span>
+            <span className="pillOutline" style={{ background: "#ffffff", fontWeight: 900 }}>
+              ROAS: {latestDay.roas}
+            </span>
+            {profitDeltaCents !== null ? (
+              <span
+                className="pillOutline"
+                style={{
+                  background: profitDeltaCents >= 0 ? "#dcfce7" : "#fee2e2",
+                  borderColor: profitDeltaCents >= 0 ? "#bbf7d0" : "#fecaca",
+                  fontWeight: 900,
+                }}
+                title="Delta de lucro vs dia anterior (no período)"
+              >
+                Δ Lucro: {profitDeltaCents >= 0 ? "+" : ""}
+                {profitDeltaLabel}
+              </span>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
 
       <section className="card tableCard" aria-label="Timeline de performance">
             <div className="tableHeaderRow">

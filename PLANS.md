@@ -400,7 +400,7 @@ Regras:
 
 ## Backlog Ativo — Próxima Fase Operacional
 
-Última atualização: [2026-05-18 20:18]
+Última atualização: [2026-05-18 20:19]
 ### P8 — Console operacional
 
 - [ ] Consolidar layout operacional definitivo
@@ -432,7 +432,7 @@ Regras:
 - [x] Timeline de performance
 - [x] Histórico operacional de spend
 - [x] Melhorar visualização de lucro/prejuízo
-- [ ] Criar resumo operacional diário
+- [x] Criar resumo operacional diário
 
 ### P11 — Templates operacionais
 
