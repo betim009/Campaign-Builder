@@ -179,7 +179,7 @@ export default function CampanhaDetalhes() {
                   </td>
                   <td>
                     {!gc.meta_campaign_id || String(gc.meta_campaign_id).startsWith("stub-") ? (
-                      <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
                         <input
                           value={metaIdDraftByGeneratedId[gc.id] ?? ""}
                           onChange={(e) =>
@@ -245,36 +245,64 @@ export default function CampanhaDetalhes() {
                         >
                           Usar stub
                         </button>
+                        <button
+                          type="button"
+                          className="pillOutline"
+                          disabled={busy || loading}
+                          onClick={() => {
+                            const params = new URLSearchParams();
+                            params.set("generatedCampaignId", String(gc.id));
+                            params.set("name", String(gc.name || ""));
+                            navigate(`/meta-test?${params.toString()}`);
+                          }}
+                        >
+                          Abrir /meta-test
+                        </button>
                       </div>
                     ) : (
-                      <button
-                        type="button"
-                        className="pillOutline"
-                        disabled={busy || loading}
-                        onClick={async () => {
-                          setBusy(true);
-                          setError("");
-                          try {
-                            const res = await syncGeneratedCampaign(gc.id);
-                            const inserted = res?.sync?.inserted ?? 0;
-                            const updated = res?.sync?.updated ?? 0;
-                            const provider = res?.sync?.provider ?? "—";
-                            const fallback = res?.sync?.fallback ?? null;
-                            const fallbackNote = fallback?.reason
-                              ? ` (fallback: ${fallback.reason})`
-                              : fallback
-                                ? " (fallback)"
-                                : "";
-                            setLastSync(`${inserted} inseridos / ${updated} atualizados — provider: ${provider}${fallbackNote}`);
-                          } catch (err) {
-                            setError(err?.message ? String(err.message) : "Falha ao sincronizar métricas.");
-                          } finally {
-                            setBusy(false);
-                          }
-                        }}
-                      >
-                        Sync métricas
-                      </button>
+                      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          className="pillOutline"
+                          disabled={busy || loading}
+                          onClick={async () => {
+                            setBusy(true);
+                            setError("");
+                            try {
+                              const res = await syncGeneratedCampaign(gc.id);
+                              const inserted = res?.sync?.inserted ?? 0;
+                              const updated = res?.sync?.updated ?? 0;
+                              const provider = res?.sync?.provider ?? "—";
+                              const fallback = res?.sync?.fallback ?? null;
+                              const fallbackNote = fallback?.reason
+                                ? ` (fallback: ${fallback.reason})`
+                                : fallback
+                                  ? " (fallback)"
+                                  : "";
+                              setLastSync(`${inserted} inseridos / ${updated} atualizados — provider: ${provider}${fallbackNote}`);
+                            } catch (err) {
+                              setError(err?.message ? String(err.message) : "Falha ao sincronizar métricas.");
+                            } finally {
+                              setBusy(false);
+                            }
+                          }}
+                        >
+                          Sync métricas
+                        </button>
+                        <button
+                          type="button"
+                          className="pillOutline"
+                          disabled={busy || loading}
+                          onClick={() => {
+                            const params = new URLSearchParams();
+                            params.set("generatedCampaignId", String(gc.id));
+                            params.set("name", String(gc.name || ""));
+                            navigate(`/meta-test?${params.toString()}`);
+                          }}
+                        >
+                          Abrir /meta-test
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
