@@ -8,6 +8,8 @@ export default function LatestExecutionsCard({
   const dbList = Array.isArray(dbOpsLogs) ? dbOpsLogs : [];
   const localLatest = localList.slice(0, 8);
   const dbLatest = dbList.slice(0, 8);
+  const devModeBlocked =
+    localLatest.some((l) => isMetaDevModeBlocked(l?.details)) || dbLatest.some((l) => isMetaDevModeBlocked(l?.details));
 
   function ensureCollapsibleOpen(id) {
     try {
@@ -16,6 +18,24 @@ export default function LatestExecutionsCard({
       if (details && !details.open) details.open = true;
     } catch {
       // ignore
+    }
+  }
+
+  function getMetaErrorSubcode(details) {
+    if (!details || typeof details !== "object") return null;
+    const raw = details?.error_subcode ?? details?.error?.error_subcode ?? null;
+    if (raw === null || raw === undefined || raw === "") return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function isMetaDevModeBlocked(details) {
+    const subcode = getMetaErrorSubcode(details);
+    if (subcode === 1885183) return true;
+    try {
+      return JSON.stringify(details || {}).includes("1885183");
+    } catch {
+      return false;
     }
   }
 
@@ -46,6 +66,25 @@ export default function LatestExecutionsCard({
       <div className="muted" style={{ marginTop: 8, fontWeight: 800, lineHeight: 1.55 }}>
         Resumo rápido das últimas ações (Local + DB quando disponível).
       </div>
+
+      {devModeBlocked ? (
+        <div
+          className="card"
+          style={{
+            marginTop: 12,
+            padding: 12,
+            borderColor: "#fdba74",
+            background: "#fff7ed",
+            color: "#9a3412",
+          }}
+        >
+          <div style={{ fontWeight: 900 }}>Bloqueio comum (Meta Dev Mode)</div>
+          <div className="muted" style={{ marginTop: 6, fontWeight: 800, color: "#9a3412", lineHeight: 1.55 }}>
+            Detectado `error_subcode=1885183` em execuções recentes. Para publicar Creative/Ad REAL: coloque o App em{" "}
+            <b>Live</b> e garanta roles adequados (admin/developer/tester).
+          </div>
+        </div>
+      ) : null}
 
       <div
         style={{
@@ -144,4 +183,3 @@ export default function LatestExecutionsCard({
     </div>
   );
 }
-
