@@ -31,7 +31,25 @@ export function safeJson(value) {
 
 export function extractErrorDetails(err) {
   if (!err) return null;
-  return err?.body?.error?.details ?? err?.body ?? null;
+
+  // Prefer backend-provided structured payloads (HttpError.body).
+  const body = err?.body ?? null;
+  const bodyDetails = body?.error?.details ?? null;
+  if (bodyDetails) return bodyDetails;
+  if (body) return body;
+
+  // Fallback for non-HTTP errors (or when JSON parse fails).
+  const message = err?.message ? String(err.message) : "";
+  const status = err?.status ?? null;
+  const name = err?.name ? String(err.name) : "";
+  const hasAny = Boolean(message) || status !== null || Boolean(name);
+  if (!hasAny) return null;
+
+  return {
+    message: message || null,
+    status,
+    name: name || null,
+  };
 }
 
 export async function copyTextToClipboard(text) {
