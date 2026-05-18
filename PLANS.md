@@ -486,16 +486,12 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 
 ## Blockers
 
-Última atualização: [2026-05-17 11:58]
+Última atualização: [2026-05-18 14:46]
 
 - Execução com DB/stack depende do daemon do Docker estar rodando (`docker compose up -d`). Ver `RUNBOOK.md`.
-- Para validar P4/P5 (Creative/Ad REAL) é necessário `META_PAGE_ID` (env) ou `pageId` no `/meta-test` + token com acesso a uma Page (no momento, nenhuma Page foi listada via Graph com o token atual).
-  - Evidência (ambiente atual): `GET /api/meta/status` → `has_access_token=true` e `has_page_id=false`; `POST /api/meta/validate` OK; `GET /api/meta/pages?metaAdAccountId=act_259174718403969` → `my_pages=[]` e `promote_pages=[]`; permissões incluem `pages_show_list` (ver `GET /api/meta/diagnostics`).
-  - Mitigação: `/api/meta/pages` agora tenta também `me/businesses` + `owned_pages` para descobrir `pageId` (commit: c67e164), e o `/meta-test` exibe sugestões de `pageId` quando houver (commit: a4e302e).
-  - Mitigação: `/api/meta/pages` tenta também descobrir o `business` do Ad Account (`act_*`) e listar `owned_pages` desse business (commit: 204e1b3); `/meta-test` inclui isso nas sugestões (commit: ba67fc3).
-  - Mitigação: endpoint read-only `GET /api/meta/pages/:id` + botão “Validar Page ID” no `/meta-test` (commits: 6ccabf6, bd1969e).
-  - Mitigação: `docker-compose.yml` faz passthrough de `META_PAGE_ID`/`META_INSTAGRAM_ACTOR_ID` para o backend (commit: b1c3d72).
-  - Mitigação: `/api/meta/pages` agora suporta paginação (cursor `after`) e `?limit=` para reduzir “falso vazio” em tokens com muitas páginas/businesses (commit: d54a77b).
+- P4/P5 (Creative/Ad REAL) bloqueados ao publicar Creative REAL: Meta retorna `error_subcode=1885183` (“app em modo de desenvolvimento”) no `POST /api/meta/creative-drafts/:id/publish`.
+  - Evidência (ambiente atual): `POST /api/meta/validate` OK; `GET /api/meta/status` indica `has_page_id=true`; `GET /api/meta/pages?metaAdAccountId=act_*` retorna Page(s) e `GET /api/meta/pages/:id` valida leitura.
+  - Mitigação (fora do código): colocar o App Meta em modo público (Live) e/ou garantir que o usuário/token esteja em roles adequados do app (admin/developer/tester) para permitir criação de AdCreative/Ad.
 
 ## Risks
 
@@ -510,10 +506,11 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 
 ## Technical Debt
 
-Última atualização: [2026-05-18 14:14]
+Última atualização: [2026-05-18 14:46]
 
 - `/meta-test`: centralizar parsing de erro (`error.details` vs `body`) em helper (`extractErrorDetails`) para reduzir duplicação e risco de drift.
 - `/meta-test`: `extractErrorDetails` agora tem fallback acionável quando não houver `body` (inclui `status/message/name`) para reduzir “erro vazio” no troubleshooting. (commit: bfeb654)
+- `/meta-test`: banner de erro global agora prioriza `error_user_msg`/`error_user_title` (Meta Graph) quando disponível, reduzindo “Invalid parameter” genérico.
 - Frontend: `frontend/src/pages/MetaPausedTest.jsx` foi reduzido e teve seções extraídas, mas ainda concentra handlers/payloads. Próximo passo: extrair actions por entidade (Campaign/AdSet/Ad) para reduzir risco de regressão.
 - Frontend: padrão de `actions/` por entidade em `frontend/src/pages/metaTest/actions/*` (Creative/AdSet/Ad/Campaign) para reduzir complexidade incrementalmente.
 - Frontend: `actions/*` reutilizam helpers centrais (`normalizeNonEmptyString`) de `frontend/src/pages/metaTest/metaTestUtils.js` para reduzir duplicação e drift.

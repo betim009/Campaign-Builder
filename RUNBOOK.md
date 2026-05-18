@@ -180,6 +180,8 @@ Troubleshooting comum:
 - “Listar Pages (Graph)” retorna vazio:
   - token sem acesso a uma Page; informe `pageId` manualmente ou ajuste permissões/associação de Page.
   - ver `GET /api/meta/diagnostics` e `GET /api/meta/pages`.
+- “Publicar Creative REAL” falha com `error_subcode=1885183` (“app em modo de desenvolvimento”):
+  - o App Meta usado pelo token está em modo Dev; coloque em modo público (Live) e/ou use roles adequados no app (admin/developer/tester).
 - Erros grandes ficam em accordions no UI (evita poluição visual); use “Copiar” no card de erro global quando necessário.
   - `instagramActorId` é opcional (body ou env `META_INSTAGRAM_ACTOR_ID`).
   - Se houver `creative_asset_id`, o backend faz upload da imagem na Meta (`adimages`) e usa `image_hash`.
@@ -201,6 +203,12 @@ Esta seção deve ser atualizada sempre que:
 - Algo não for implementado pelo Codex
 - Um bug for encontrado
 - Um fluxo estiver incompleto
+
+[2026-05-18 14:46]
+
+- Progresso (P4/P5 — Creative/Ad REAL): token valida e Pages retornam via Graph, mas publish do Creative REAL falha com `error_subcode=1885183` (“app em modo de desenvolvimento”).
+  - Evidência: `POST /api/meta/validate` OK; `GET /api/meta/pages?metaAdAccountId=act_*` retorna Page(s); `POST /api/meta/creative-drafts/:id/publish` retorna subcode 1885183.
+  - Ação: colocar o App Meta em modo público (Live) e/ou ajustar roles do app para permitir criação de AdCreative/Ad.
 
 [2026-05-14 20:06]
 
