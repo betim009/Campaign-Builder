@@ -189,7 +189,7 @@ GOVERNANÇA CONTÍNUA:
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-18 17:16]
+Última atualização: [2026-05-18 19:41]
 
 Regras:
 
@@ -332,21 +332,21 @@ Regras:
 - [x] Publicar Creative REAL a partir de `creative_drafts` (endpoint + UI) (commit: cac550e)
 - [x] `/meta-test`: consultar Creative REAL (Graph) para evidência operacional (commit: f3e7472)
 - [x] `/meta-test`: checklist P4 (Creative REAL) com evidência copiável em JSON (commit: b9154c7)
-- [ ] Validar creative REAL (prep: `force republish` no UI + evidência imediata do publish; validação REAL ainda pendente) (commits: 98cc5c0, 8bed865)
+- [ ] Validar creative REAL (BLOCKED: `error_subcode=1885183` / App Meta em Dev Mode; requer Live Mode + roles) (prep: `force republish` no UI + evidência imediata do publish; validação REAL ainda pendente) (commits: 98cc5c0, 8bed865)
 - [x] `/meta-test`: quando publish falhar com `error_subcode=1885183`, exibir callout de mitigação (App Live + roles) (commit: 1253b69)
 - [x] Exibir preview operacional (preview texto + mídia) (commit: f8689c5)
 - [x] Preparar variações futuras (duplicar creative drafts) (commits: ba2322f, 41c1d13)
 
 ### P5 — Ad REAL mínimo
 
-- [ ] Validar criação REAL de Ad
-- [ ] Validar creative vinculado
-- [ ] Validar CTA
-- [ ] Validar mídia
-- [ ] Validar preview
-- [ ] Validar status PAUSED
-- [ ] Validar persistência do Ad
-- [ ] Validar leitura REAL do Graph
+- [ ] Validar criação REAL de Ad (BLOCKED: `error_subcode=1885183` / App Meta em Dev Mode; requer Live Mode + roles)
+- [ ] Validar creative vinculado (BLOCKED: depende de criação REAL do Ad)
+- [ ] Validar CTA (BLOCKED: depende de criação REAL do Ad)
+- [ ] Validar mídia (BLOCKED: depende de criação REAL do Ad)
+- [ ] Validar preview (BLOCKED: depende de criação REAL do Ad)
+- [ ] Validar status PAUSED (BLOCKED: depende de criação REAL do Ad)
+- [ ] Validar persistência do Ad (BLOCKED: depende de criação REAL do Ad)
+- [ ] Validar leitura REAL do Graph (BLOCKED: depende de criação REAL do Ad)
 - [x] `/meta-test`: checklist operacional P5 (evidência copiável em JSON) (commit: 9c0eea5)
 - [x] `/meta-test`: checklist P5 evidencia dependências (Campaign/AdSet) + próximos passos (anchors) (commit: 3736f9a)
 - [x] `/meta-test`: previews (Graph) para Creative/Ad (`/api/meta/*/:id/previews`, HTML/iframe) (commit: 893321b)
