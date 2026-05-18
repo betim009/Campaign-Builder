@@ -180,7 +180,7 @@ GOVERNANÇA CONTÍNUA:
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-18 17:07]
+Última atualização: [2026-05-18 17:12]
 
 Regras:
 
@@ -371,7 +371,8 @@ Regras:
   - [x] `/meta-test`: extrair actions de status/pages (status/validate/diagnostics + pages list/validate) para reduzir responsabilidades do `MetaPausedTest.jsx` (commit: 54ed7af)
   - [x] `/meta-test`: extrair actions de Graph refresh (Campaign/AdSet/Ad) para reduzir responsabilidades do `MetaPausedTest.jsx` (commit: 1c81c7c)
   - [x] `/meta-test`: extrair seção “Graph (REAL) — atualizar status” em componente dedicado (`GraphRefreshSection`) (commit: c662d64)
-- [ ] Migrar partes úteis para `/meta-test`
+- [x] Migrar partes úteis para `/meta-test`
+  - Deep-link de `Campanha Detalhes` → `/meta-test?generatedCampaignId=...` + auto-select do registro no console (commits: 8ae538f, 757af11)
 - [ ] Isolar partes obsoletas
 - [x] Melhorar compatibilidade temporária
   - Deep-link `/nova-campanha` → `/meta-test` com prefill (`name`, `pageId`, `destinationUrl`) via query params (sem token no frontend). (commit: dc152a3)
@@ -392,7 +393,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-18 17:07]
+Última atualização: [2026-05-18 17:12]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -416,6 +417,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-17 14:40] Decisão: “Nova Campanha” permanece em manutenção/compatibilidade; novas capacidades devem ser implementadas no `/meta-test` com evidência operacional e sem duplicar lógica no legado.
 - [2026-05-18 16:18] Decisão: permitir deep-link para o `/meta-test` com prefill via query params (`name`, `pageId`, `destinationUrl`) para reduzir atrito do fluxo legado, sem expor token no frontend. (commit: dc152a3)
 - [2026-05-18 17:07] Decisão: no `/meta-test`, detectar `error_subcode=1885183` no card global de erro e exibir orientação acionável (App Live + roles) para reduzir atrito de troubleshooting no P4/P5. (commit: 1253b69)
+- [2026-05-18 17:12] Decisão: permitir deep-link para o `/meta-test` pré-selecionar `generated_campaign_id` (query param) e expor atalho “Abrir /meta-test” na tabela de `Campanha Detalhes` para continuidade operacional sem duplicar UI. (commits: 8ae538f, 757af11)
 - [2026-05-07 13:54] Criação real de campanhas Meta Ads validada em ambiente de desenvolvimento. Durante o desenvolvimento, toda campanha criada via API deve nascer obrigatoriamente com `status: PAUSED` para evitar veiculação acidental.
 - [2026-05-07 14:03] Criação real de campanhas implementada via `POST /api/meta/campaigns` + persistência em `generated_campaigns` (`meta_campaign_id`, `meta_ad_account_id`, `meta_user_id`, `meta_status`, `meta_effective_status`, `meta_objective`); UI passa a exibir `STUB`/`REAL` e status Meta.
 - [2026-05-07 14:49] `POST /api/generated-campaigns/:id/mark-published` deixa de setar `ACTIVE` automaticamente (evitar estado local indevido); passa a apenas vincular `meta_campaign_id`.
