@@ -1,6 +1,7 @@
 import CollapsibleCard from "./CollapsibleCard.jsx";
 import JsonAccordion from "./JsonAccordion.jsx";
 import { useState } from "react";
+import { extractErrorDetails } from "./metaTestUtils.js";
 
 export default function BackendStatusSection({
   refreshBackendStatus,
@@ -217,7 +218,7 @@ export default function BackendStatusSection({
             } catch (err) {
               setValidateMe(null);
               setValidateError(err?.message ? String(err.message) : "Falha ao validar token.");
-              const details = err?.body?.error?.details ?? err?.body ?? null;
+              const details = extractErrorDetails(err);
               setValidateErrorDetails(details);
               pushLog({
                 action: "meta.validate",
@@ -248,7 +249,7 @@ export default function BackendStatusSection({
             } catch (err) {
               setDiagnosticsMe(null);
               setDiagnosticsError(err?.message ? String(err.message) : "Falha ao consultar diagnostics.");
-              const details = err?.body?.error?.details ?? err?.body ?? null;
+              const details = extractErrorDetails(err);
               setDiagnosticsErrorDetails(details);
               pushLog({
                 action: "meta.diagnostics",

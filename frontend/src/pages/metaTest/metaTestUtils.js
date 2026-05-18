@@ -29,6 +29,11 @@ export function safeJson(value) {
   }
 }
 
+export function extractErrorDetails(err) {
+  if (!err) return null;
+  return err?.body?.error?.details ?? err?.body ?? null;
+}
+
 export function inferEntityFromAction(action) {
   const a = normalizeNonEmptyString(action);
   if (!a) return "unknown";
@@ -39,4 +44,3 @@ export function inferEntityFromAction(action) {
   if (a.startsWith("db.")) return "db";
   return "other";
 }
-

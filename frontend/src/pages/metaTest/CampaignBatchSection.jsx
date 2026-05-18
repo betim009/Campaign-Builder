@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import CollapsibleCard from "./CollapsibleCard.jsx";
-import { safeJson } from "./metaTestUtils.js";
+import { extractErrorDetails, safeJson } from "./metaTestUtils.js";
 
 export default function CampaignBatchSection({
   isBusy,
@@ -101,7 +101,7 @@ export default function CampaignBatchSection({
         } catch (err) {
           const captured = {
             message: err?.message ? String(err.message) : "error",
-            details: err?.body?.error?.details ?? err?.body ?? null,
+            details: extractErrorDetails(err),
           };
           pushLog({
             action: "campaign.create.simple",

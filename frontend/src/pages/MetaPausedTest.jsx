@@ -40,6 +40,7 @@ import { createAdSet } from "./metaTest/actions/adSetActions.js";
 import { createAd } from "./metaTest/actions/adActions.js";
 import useOpsLogs from "./metaTest/useOpsLogs.js";
 import {
+  extractErrorDetails,
   isRealMetaId,
   normalizeMetaAdAccountId,
   normalizeNonEmptyString,
@@ -167,7 +168,7 @@ export default function MetaPausedTest() {
 
   function captureError(err, fallbackMessage) {
     const message = err?.message ? String(err.message) : fallbackMessage || "Erro";
-    const details = err?.body?.error?.details ?? err?.body ?? null;
+    const details = extractErrorDetails(err);
     setError(message);
     setErrorDetails(details);
     setSuccess("");
@@ -217,7 +218,7 @@ export default function MetaPausedTest() {
     } catch (err) {
       setBackendStatus(null);
       setBackendStatusError(err?.message ? String(err.message) : "Falha ao consultar /api/meta/status.");
-      setBackendStatusErrorDetails(err?.body?.error?.details ?? err?.body ?? null);
+      setBackendStatusErrorDetails(extractErrorDetails(err));
       pushLog({ action: "meta.status", ok: false, error: err?.message ? String(err.message) : "error" });
     } finally {
       setBackendStatusLoading(false);
@@ -398,7 +399,7 @@ export default function MetaPausedTest() {
       setLocalError(
         err?.message ? String(err.message) : "Falha ao carregar `generated_campaigns` (DB/API indisponível).",
       );
-      const details = err?.body?.error?.details ?? err?.body ?? null;
+      const details = extractErrorDetails(err);
       setLocalErrorDetails(details);
       pushLog({
         action: "db.generated_campaigns.list",
@@ -438,7 +439,7 @@ export default function MetaPausedTest() {
       setStructureAdSets([]);
       setStructureAds([]);
       setStructureError(err?.message ? String(err.message) : "Falha ao carregar estrutura (generated_adsets/generated_ads).");
-      const details = err?.body?.error?.details ?? err?.body ?? null;
+      const details = extractErrorDetails(err);
       setStructureErrorDetails(details);
       pushLog({
         action: "db.generated_structure.get",
@@ -461,7 +462,7 @@ export default function MetaPausedTest() {
     } catch (err) {
       setDbOpsLogs([]);
       setDbOpsLogsError(err?.message ? String(err.message) : "Falha ao carregar ops_logs (DB/API indisponível).");
-      setDbOpsLogsErrorDetails(err?.body?.error?.details ?? err?.body ?? null);
+      setDbOpsLogsErrorDetails(extractErrorDetails(err));
     } finally {
       setDbOpsLogsLoading(false);
     }
@@ -477,7 +478,7 @@ export default function MetaPausedTest() {
     } catch (err) {
       setCreativeAssets([]);
       setAssetsError(err?.message ? String(err.message) : "Falha ao carregar assets (DB/API indisponível).");
-      setAssetsErrorDetails(err?.body?.error?.details ?? err?.body ?? null);
+      setAssetsErrorDetails(extractErrorDetails(err));
     } finally {
       setAssetsLoading(false);
     }
@@ -498,7 +499,7 @@ export default function MetaPausedTest() {
     } catch (err) {
       setCreativeDrafts([]);
       setDraftsError(err?.message ? String(err.message) : "Falha ao carregar creative drafts.");
-      setDraftsErrorDetails(err?.body?.error?.details ?? err?.body ?? null);
+      setDraftsErrorDetails(extractErrorDetails(err));
     } finally {
       setDraftsLoading(false);
     }
@@ -879,7 +880,7 @@ export default function MetaPausedTest() {
             });
           } catch (err) {
             setMetaError(err?.message ? String(err.message) : "Falha ao listar campanhas na Meta (PAUSED).");
-            const details = err?.body?.error?.details ?? err?.body ?? null;
+            const details = extractErrorDetails(err);
             setMetaErrorDetails(details);
             setMetaCampaigns([]);
             pushLog({
@@ -1019,7 +1020,7 @@ export default function MetaPausedTest() {
           } catch (err) {
             setPageValidateResult(null);
             setPageValidateError(err?.message ? String(err.message) : "Falha ao validar Page ID.");
-            setPageValidateErrorDetails(err?.body?.error?.details ?? err?.body ?? null);
+            setPageValidateErrorDetails(extractErrorDetails(err));
             pushLog({ action: "meta.page.get", ok: false, error: err?.message ? String(err.message) : "error" });
           } finally {
             setPageValidateLoading(false);
@@ -1058,7 +1059,7 @@ export default function MetaPausedTest() {
           } catch (err) {
             setPagesResult(null);
             setPagesError(err?.message ? String(err.message) : "Falha ao listar Pages (Graph).");
-            setPagesErrorDetails(err?.body?.error?.details ?? err?.body ?? null);
+            setPagesErrorDetails(extractErrorDetails(err));
             pushLog({ action: "meta.pages.list", ok: false, error: err?.message ? String(err.message) : "error" });
           } finally {
             setPagesLoading(false);
