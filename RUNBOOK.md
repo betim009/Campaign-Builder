@@ -435,3 +435,20 @@ Esta seção deve ser atualizada sempre que:
 Bootstrap inicial, checklists históricos e regras de fases antigas foram movidos para o arquivo de histórico, para não competir com este runbook operacional.
 
 - Ver `ARCHIVE.md` em `## RUNBOOK (legado) — não executar`.
+
+
+## Loop de execução contínua para IA
+
+Última atualização: [2026-05-18 19:33]
+
+Ao executar o projeto com Codex:
+
+1. Ler `PLANS.md`.
+2. Identificar o primeiro item `[ ]` executável no Backlog Ativo.
+3. Se o item depender de bloqueio externo da Meta, registrar no `Blockers` e seguir para o próximo item.
+4. Implementar em mudança pequena.
+5. Validar com build, smoke test, curl ou teste manual documentado.
+6. Atualizar `PLANS.md` com `[x]`, timestamp e commit.
+7. Atualizar `RUNBOOK.md` somente se houver novo comando, endpoint ou procedimento.
+8. Não executar backlog do `ARCHIVE.md`.
+9. Repetir até não existir item executável sem bloqueio externo.

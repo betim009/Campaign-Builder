@@ -10,6 +10,9 @@ lerna-debug.log*
 PROMPT.template.txt
 PROMPT.correcao.txt
 
+# Notas locais (não é backlog oficial; fonte de verdade é PLANS.md)
+progress.md
+
 # Local screenshots (evitar commits acidentais no repo root)
 /Captura de Tela*.png
 
