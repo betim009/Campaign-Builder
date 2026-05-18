@@ -129,7 +129,7 @@ Exemplos (`curl`, sempre `PAUSED` e sem token no frontend):
 
 ### Playbook — Validação REAL via `/meta-test` (Creative + Ad)
 
-Última atualização: [2026-05-17 13:55]
+Última atualização: [2026-05-18 17:25]
 
 Objetivo:
 validar os itens abertos do `PLANS.md` em **P4/P5** (Creative REAL + Ad REAL) usando o console `/meta-test`, preservando os guardrails (**PAUSED obrigatório**; token apenas no backend).
@@ -144,6 +144,15 @@ Pré-requisitos:
 - Page ID:
   - Preferir `META_PAGE_ID` no backend **ou** preencher `pageId` no UI (Etapa 3).
   - Diagnóstico: `curl \"http://localhost:3001/api/meta/pages?metaAdAccountId=act_<id>\"`
+
+Atalhos (deep-links úteis):
+
+- **Prefill (legado → lab):** o fluxo “Nova Campanha” agora abre o `/meta-test` com prefill via query params (`name`, `pageId`, `destinationUrl`) para reduzir atrito operacional (não envolve token no frontend).
+- **Preselect (DB → lab):** em “Detalhes da Campanha”, cada linha de `generated_campaigns` tem o botão “Abrir /meta-test”, que abre o console já com `generatedCampaignId` e o registro selecionado automaticamente.
+- **Manual (exemplos):**
+  - `/meta-test?generatedCampaignId=<uuid>`
+  - `/meta-test?generatedCampaignId=<uuid>&name=<nome>`
+  - `/meta-test?name=<nome>&pageId=<page_id>&destinationUrl=https%3A%2F%2F...`
 
 Fluxo recomendado (UI):
 
