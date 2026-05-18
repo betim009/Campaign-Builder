@@ -261,12 +261,22 @@ export function toFinanceViewModel(overview, { countryNameByCode } = {}) {
   const spendSeries = Array.isArray(overview?.spend_series) ? overview.spend_series : [];
   const breakdown = Array.isArray(overview?.breakdown) ? overview.breakdown : [];
 
+  const spendCents = Number(totals.spend_cents) || 0;
+  const revenueCents =
+    totals.revenue_cents === null || totals.revenue_cents === undefined ? null : Number(totals.revenue_cents);
+  const profitCents = revenueCents === null ? null : revenueCents - spendCents;
+  const roas = revenueCents === null || !spendCents ? null : revenueCents / spendCents;
+
   const metrics = {
-    spendTotal: formatCurrencyBRLFromCents(totals.spend_cents),
+    spendTotal: formatCurrencyBRLFromCents(spendCents),
     cpm: totals.cpm_cents === null ? "—" : formatCurrencyBRLFromCents(totals.cpm_cents),
     clicks: formatInt(totals.clicks),
     impressions: formatInt(totals.impressions),
     cpc: totals.cpc_cents === null ? "—" : formatCurrencyBRLFromCents(totals.cpc_cents),
+    revenueTotal: revenueCents === null ? "—" : formatCurrencyBRLFromCents(revenueCents),
+    profitTotal: profitCents === null ? "—" : formatCurrencyBRLFromCents(profitCents),
+    roiOverall: formatPercentOrDash(totals.roi_percent, { digits: 0 }),
+    roasOverall: roas === null ? "—" : `${roas.toFixed(2)}x`,
   };
 
   const spendSeriesPoints = spendSeries.map((p) => ({

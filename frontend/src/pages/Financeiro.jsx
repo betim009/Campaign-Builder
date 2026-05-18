@@ -112,6 +112,22 @@ export default function Financeiro() {
               label="Gasto Total"
             />
             <FinanceMetricCard
+              badgeBg="#ede9fe"
+              badgeColor="#7c3aed"
+              badgeText={<TrendingUpIcon fontSize="small" />}
+              value={metrics.roiOverall}
+              labelIcon={<TrendingUpIcon fontSize="small" />}
+              label="ROI (Geral)"
+            />
+            <FinanceMetricCard
+              badgeBg="#ffedd5"
+              badgeColor="#f97316"
+              badgeText={<AttachMoneyIcon fontSize="small" />}
+              value={metrics.roasOverall}
+              labelIcon={<AttachMoneyIcon fontSize="small" />}
+              label="ROAS (Geral)"
+            />
+            <FinanceMetricCard
               badgeBg="#dbeafe"
               badgeColor="#2563eb"
               badgeText={<TrendingUpIcon fontSize="small" />}
