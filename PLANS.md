@@ -180,7 +180,7 @@ GOVERNANÇA CONTÍNUA:
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-18 17:12]
+Última atualização: [2026-05-18 17:14]
 
 Regras:
 
@@ -373,7 +373,8 @@ Regras:
   - [x] `/meta-test`: extrair seção “Graph (REAL) — atualizar status” em componente dedicado (`GraphRefreshSection`) (commit: c662d64)
 - [x] Migrar partes úteis para `/meta-test`
   - Deep-link de `Campanha Detalhes` → `/meta-test?generatedCampaignId=...` + auto-select do registro no console (commits: 8ae538f, 757af11)
-- [ ] Isolar partes obsoletas
+- [x] Isolar partes obsoletas
+  - `Campanha Detalhes`: colapsar ações avançadas (legado) por padrão e manter `/meta-test` como caminho principal (commit: 21c05dc)
 - [x] Melhorar compatibilidade temporária
   - Deep-link `/nova-campanha` → `/meta-test` com prefill (`name`, `pageId`, `destinationUrl`) via query params (sem token no frontend). (commit: dc152a3)
 - [x] Criar estratégia de substituição gradual
@@ -393,7 +394,7 @@ Histórico/itens concluídos:
 
 ## Decision Log (Ativo)
 
-Última atualização: [2026-05-18 17:12]
+Última atualização: [2026-05-18 17:14]
 
 Mantém apenas decisões ainda válidas para execução atual. Histórico completo: ver `ARCHIVE.md` em `## Decision Log (histórico completo)`.
 
@@ -418,6 +419,7 @@ Mantém apenas decisões ainda válidas para execução atual. Histórico comple
 - [2026-05-18 16:18] Decisão: permitir deep-link para o `/meta-test` com prefill via query params (`name`, `pageId`, `destinationUrl`) para reduzir atrito do fluxo legado, sem expor token no frontend. (commit: dc152a3)
 - [2026-05-18 17:07] Decisão: no `/meta-test`, detectar `error_subcode=1885183` no card global de erro e exibir orientação acionável (App Live + roles) para reduzir atrito de troubleshooting no P4/P5. (commit: 1253b69)
 - [2026-05-18 17:12] Decisão: permitir deep-link para o `/meta-test` pré-selecionar `generated_campaign_id` (query param) e expor atalho “Abrir /meta-test” na tabela de `Campanha Detalhes` para continuidade operacional sem duplicar UI. (commits: 8ae538f, 757af11)
+- [2026-05-18 17:14] Decisão: isolar ações de compatibilidade (legado) em `Campanha Detalhes` atrás de UI colapsável para reduzir ruído operacional e manter `/meta-test` como fluxo evolutivo. (commit: 21c05dc)
 - [2026-05-07 13:54] Criação real de campanhas Meta Ads validada em ambiente de desenvolvimento. Durante o desenvolvimento, toda campanha criada via API deve nascer obrigatoriamente com `status: PAUSED` para evitar veiculação acidental.
 - [2026-05-07 14:03] Criação real de campanhas implementada via `POST /api/meta/campaigns` + persistência em `generated_campaigns` (`meta_campaign_id`, `meta_ad_account_id`, `meta_user_id`, `meta_status`, `meta_effective_status`, `meta_objective`); UI passa a exibir `STUB`/`REAL` e status Meta.
 - [2026-05-07 14:49] `POST /api/generated-campaigns/:id/mark-published` deixa de setar `ACTIVE` automaticamente (evitar estado local indevido); passa a apenas vincular `meta_campaign_id`.
