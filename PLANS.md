@@ -180,7 +180,7 @@ GOVERNANÇA CONTÍNUA:
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-18 17:15]
+Última atualização: [2026-05-18 17:16]
 
 Regras:
 
@@ -386,9 +386,8 @@ Regras:
     - 3) Se necessário, manter “ponte” no legado via link/atalho para o console (evitar duplicar lógica).
     - 4) Marcar no backlog o item portado e manter checklist de paridade (por entidade: Campaign/AdSet/Ad/Creative).
     - 5) Quando houver paridade suficiente, reduzir superfície do legado (ocultar ações avançadas por padrão).
-- [ ] Evitar duplicação operacional
 - [x] Evitar duplicação operacional
-  - Legado mantém “ponte” (deep-links) para o `/meta-test` e isola ações avançadas por padrão (commits: dc152a3, 757af11, 21c05dc)
+  - Legado mantém “ponte” (deep-links) para o `/meta-test` e isola ações avançadas por padrão (commits: dc152a3, 8ae538f, 757af11, 21c05dc)
 
 Histórico/itens concluídos:
 - Ver `ARCHIVE.md` em `## Backlog (concluído) — snapshots de execução` e `## Integração Meta — histórico consolidado`.
