@@ -77,7 +77,7 @@ Exemplos (`curl`, sempre `PAUSED` e sem token no frontend):
 
 ### Meta — Sync / Automação (dev)
 
-Última atualização: [2026-05-18 20:05]
+Última atualização: [2026-05-18 20:08]
 
 - Sync manual de métricas: `POST /api/meta/sync/generated-campaigns/:id`
 - Fallback seguro: se o Graph falhar e `META_SYNC_PROVIDER` não for `meta`, o backend retorna `provider=stub` + campo `fallback` (para fail-fast, use `META_SYNC_PROVIDER=meta`).
@@ -85,8 +85,8 @@ Exemplos (`curl`, sempre `PAUSED` e sem token no frontend):
 - Executor de automação (persistindo logs): `curl -X POST http://localhost:3001/api/automation/run -H 'Content-Type: application/json' -d '{}'`
 - Scheduler (opcional, dev — requer DB): `AUTOMATION_SCHEDULER_ENABLED=true` (intervalo via `AUTOMATION_SCHEDULER_INTERVAL_MS`; opcional `AUTOMATION_SCHEDULER_RUN_ON_STARTUP=true`)
 - Status do scheduler: `GET /api/automation/scheduler/status`
-- Scheduler Meta status (opcional, dev — requer token+DB): `META_STATUS_SCHEDULER_ENABLED=true` (intervalo via `META_STATUS_SCHEDULER_INTERVAL_MS`; opcional `META_STATUS_SCHEDULER_RUN_ON_STARTUP=true`)
-- Scheduler Meta metrics (opcional, dev — requer token+DB): `META_METRICS_SCHEDULER_ENABLED=true` (intervalo via `META_METRICS_SCHEDULER_INTERVAL_MS`; opcional `META_METRICS_SCHEDULER_RUN_ON_STARTUP=true`)
+- Scheduler Meta status (opcional, dev — requer token+DB): `META_STATUS_SCHEDULER_ENABLED=true` (intervalo via `META_STATUS_SCHEDULER_INTERVAL_MS`; concurrency via `META_STATUS_SCHEDULER_CONCURRENCY`; opcional `META_STATUS_SCHEDULER_RUN_ON_STARTUP=true`)
+- Scheduler Meta metrics (opcional, dev — requer token+DB): `META_METRICS_SCHEDULER_ENABLED=true` (intervalo via `META_METRICS_SCHEDULER_INTERVAL_MS`; concurrency via `META_METRICS_SCHEDULER_CONCURRENCY`; opcional `META_METRICS_SCHEDULER_RUN_ON_STARTUP=true`)
 - Status (todos schedulers): `GET /api/scheduler/status`
 
 ### DB — Evidência operacional (dev)

@@ -20,6 +20,12 @@ function parseLimit(value, fallback) {
   return Math.min(200, Math.trunc(n))
 }
 
+function parseConcurrency(value, fallback) {
+  const n = Number(value)
+  if (!Number.isFinite(n) || n <= 0) return fallback
+  return Math.min(6, Math.max(1, Math.trunc(n)))
+}
+
 function normalizeNonEmptyString(value) {
   if (typeof value !== 'string') return null
   const trimmed = value.trim()
@@ -32,16 +38,52 @@ function isRealMetaId(value) {
   return !id.startsWith('stub-')
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function withRetry(fn, { attempts = 2, delayMs = 400 } = {}) {
+  let lastErr = null
+  for (let i = 0; i < attempts; i += 1) {
+    try {
+      return await fn()
+    } catch (err) {
+      lastErr = err
+      if (i + 1 < attempts) await sleep(delayMs)
+    }
+  }
+  throw lastErr
+}
+
+async function runWithConcurrency(items, concurrency, handler) {
+  const list = Array.isArray(items) ? items : []
+  const safeConcurrency = Math.max(1, Math.trunc(concurrency || 1))
+  let idx = 0
+
+  const workers = Array.from({ length: Math.min(safeConcurrency, list.length || 1) }, async () => {
+    while (true) {
+      const current = idx
+      idx += 1
+      if (current >= list.length) return
+      await handler(list[current])
+    }
+  })
+
+  await Promise.all(workers)
+}
+
 export function startMetaMetricsScheduler(app) {
   const enabled = parseBool(process.env.META_METRICS_SCHEDULER_ENABLED)
   const intervalMs = parseIntervalMs(process.env.META_METRICS_SCHEDULER_INTERVAL_MS, 60 * 60 * 1000)
   const limit = parseLimit(process.env.META_METRICS_SCHEDULER_LIMIT, 25)
+  const concurrency = parseConcurrency(process.env.META_METRICS_SCHEDULER_CONCURRENCY, 2)
   const runOnStartup = parseBool(process.env.META_METRICS_SCHEDULER_RUN_ON_STARTUP)
 
   const state = {
     enabled,
     intervalMs,
     limit,
+    concurrency,
     runOnStartup,
     status: enabled ? (app.locals.dbEnabled ? 'enabled' : 'blocked_db_disabled') : 'disabled',
     running: false,
@@ -96,22 +138,23 @@ export function startMetaMetricsScheduler(app) {
         [limit]
       )
 
-      let scanned = 0
+      const scanned = Array.isArray(rows) ? rows.length : 0
       let synced = 0
       let failed = 0
       const providers = {}
 
-      for (const gc of rows ?? []) {
-        scanned += 1
-        if (!isRealMetaId(gc.meta_campaign_id)) continue
+      await runWithConcurrency(rows ?? [], concurrency, async (gc) => {
+        if (!isRealMetaId(gc.meta_campaign_id)) return
 
         try {
-          const result = await syncGeneratedCampaignMetrics({
-            pool,
-            generatedCampaignId: gc.id,
-            metaCampaignId: String(gc.meta_campaign_id),
-            accessToken
-          })
+          const result = await withRetry(() =>
+            syncGeneratedCampaignMetrics({
+              pool,
+              generatedCampaignId: gc.id,
+              metaCampaignId: String(gc.meta_campaign_id),
+              accessToken
+            })
+          )
           synced += 1
           const p = normalizeNonEmptyString(result?.provider) ?? 'unknown'
           providers[p] = (providers[p] ?? 0) + 1
@@ -122,7 +165,7 @@ export function startMetaMetricsScheduler(app) {
             error: err?.message ? String(err.message) : 'sync_failed'
           })
         }
-      }
+      })
 
       const result = { ok: true, scanned, synced, failed, providers }
       state.lastOkAt = new Date().toISOString()
@@ -160,4 +203,3 @@ export function startMetaMetricsScheduler(app) {
     }
   }
 }
-
