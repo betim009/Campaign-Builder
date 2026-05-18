@@ -87,7 +87,7 @@ export function startMetaStatusScheduler(app) {
     limit,
     concurrency,
     runOnStartup,
-    status: enabled ? (app.locals.dbEnabled ? 'enabled' : 'blocked_db_disabled') : 'disabled',
+    status: enabled ? (app.locals.dbEnabled ? 'waiting_first_tick' : 'blocked_db_disabled') : 'disabled',
     running: false,
     lastRunAt: null,
     lastOkAt: null,
@@ -244,9 +244,11 @@ export function startMetaStatusScheduler(app) {
       state.lastErrorAt = null
       state.lastError = null
       state.lastResult = result
+      state.status = 'enabled'
     } catch (err) {
       state.lastErrorAt = new Date().toISOString()
       state.lastError = err?.message ? String(err.message) : 'meta_status_scheduler_failed'
+      state.status = 'error'
       console.error('[scheduler] meta status scheduler error', err)
     } finally {
       state.running = false

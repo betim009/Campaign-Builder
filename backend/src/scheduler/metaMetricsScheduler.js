@@ -86,7 +86,7 @@ export function startMetaMetricsScheduler(app) {
     limit,
     concurrency,
     runOnStartup,
-    status: enabled ? (app.locals.dbEnabled ? 'enabled' : 'blocked_db_disabled') : 'disabled',
+    status: enabled ? (app.locals.dbEnabled ? 'waiting_first_tick' : 'blocked_db_disabled') : 'disabled',
     running: false,
     lastRunAt: null,
     lastOkAt: null,
@@ -204,9 +204,11 @@ export function startMetaMetricsScheduler(app) {
       state.lastErrorAt = null
       state.lastError = null
       state.lastResult = result
+      state.status = 'enabled'
     } catch (err) {
       state.lastErrorAt = new Date().toISOString()
       state.lastError = err?.message ? String(err.message) : 'meta_metrics_scheduler_failed'
+      state.status = 'error'
       console.error('[scheduler] meta metrics scheduler error', err)
     } finally {
       state.running = false

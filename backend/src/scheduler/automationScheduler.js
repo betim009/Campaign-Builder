@@ -22,7 +22,7 @@ export function startAutomationScheduler(app) {
     enabled,
     intervalMs,
     runOnStartup,
-    status: enabled ? (app.locals.dbEnabled ? 'enabled' : 'blocked_db_disabled') : 'disabled',
+    status: enabled ? (app.locals.dbEnabled ? 'waiting_first_tick' : 'blocked_db_disabled') : 'disabled',
     running: false,
     lastRunAt: null,
     lastOkAt: null,
@@ -57,10 +57,12 @@ export function startAutomationScheduler(app) {
       state.lastErrorAt = null
       state.lastError = null
       state.lastResult = result
+      state.status = 'enabled'
       console.log('[scheduler] automation ok', { date: result?.date ?? null, dryRun: result?.dryRun ?? null })
     } catch (err) {
       state.lastErrorAt = new Date().toISOString()
       state.lastError = err?.message ? String(err.message) : 'automation_failed'
+      state.status = 'error'
       console.error('[scheduler] automation error', err)
     } finally {
       state.running = false
@@ -89,4 +91,3 @@ export function startAutomationScheduler(app) {
     }
   }
 }
-
