@@ -1,7 +1,7 @@
 import CollapsibleCard from "./CollapsibleCard.jsx";
 import JsonAccordion from "./JsonAccordion.jsx";
 import { useState } from "react";
-import { extractErrorDetails } from "./metaTestUtils.js";
+import { copyTextToClipboard, extractErrorDetails } from "./metaTestUtils.js";
 
 export default function BackendStatusSection({
   refreshBackendStatus,
@@ -51,7 +51,7 @@ export default function BackendStatusSection({
               setCopyStatus("");
               const text = safeJson(backendStatus ?? null);
               try {
-                await navigator.clipboard.writeText(text);
+                await copyTextToClipboard(text);
                 setCopyStatus("Status copiado.");
               } catch {
                 setCopyStatus("Falha ao copiar.");
@@ -94,7 +94,7 @@ export default function BackendStatusSection({
               className="pillOutline"
               onClick={async () => {
                 try {
-                  await navigator.clipboard.writeText("META_PAGE_ID=\nMETA_INSTAGRAM_ACTOR_ID=\n");
+                  await copyTextToClipboard("META_PAGE_ID=\nMETA_INSTAGRAM_ACTOR_ID=\n");
                   setCopyStatus("Snippet (.env) copiado.");
                 } catch {
                   setCopyStatus("Falha ao copiar snippet.");

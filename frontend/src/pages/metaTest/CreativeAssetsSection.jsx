@@ -1,6 +1,7 @@
 import { getBackendBaseUrl } from "../../services/http.js";
 import CollapsibleCard from "./CollapsibleCard.jsx";
 import JsonAccordion from "./JsonAccordion.jsx";
+import { copyTextToClipboard } from "./metaTestUtils.js";
 
 export default function CreativeAssetsSection({
   loading,
@@ -92,7 +93,7 @@ export default function CreativeAssetsSection({
                     disabled={!a.url}
                     onClick={async () => {
                       try {
-                        await navigator.clipboard.writeText(a.url ? `${baseUrl}${a.url}` : "");
+                        await copyTextToClipboard(a.url ? `${baseUrl}${a.url}` : "");
                       } catch {
                         // ignore
                       }

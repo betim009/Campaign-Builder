@@ -34,6 +34,19 @@ export function extractErrorDetails(err) {
   return err?.body?.error?.details ?? err?.body ?? null;
 }
 
+export async function copyTextToClipboard(text) {
+  if (typeof navigator === "undefined" || !navigator?.clipboard?.writeText) {
+    throw new Error("Clipboard API indisponível.");
+  }
+  await navigator.clipboard.writeText(String(text ?? ""));
+}
+
+export async function copyJsonToClipboard(value) {
+  const text = safeJson(value) || "";
+  await copyTextToClipboard(text);
+  return text;
+}
+
 export function inferEntityFromAction(action) {
   const a = normalizeNonEmptyString(action);
   if (!a) return "unknown";

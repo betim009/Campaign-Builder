@@ -40,6 +40,8 @@ import { createAdSet } from "./metaTest/actions/adSetActions.js";
 import { createAd } from "./metaTest/actions/adActions.js";
 import useOpsLogs from "./metaTest/useOpsLogs.js";
 import {
+  copyJsonToClipboard,
+  copyTextToClipboard,
   extractErrorDetails,
   isRealMetaId,
   normalizeMetaAdAccountId,
@@ -523,7 +525,7 @@ export default function MetaPausedTest() {
         metaAdSetId: gc?.meta_adset_id ?? null,
         metaAdId: gc?.meta_ad_id ?? null,
       };
-      await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+      await copyJsonToClipboard(payload);
       setSuccess("IDs copiados para a área de transferência.");
       pushLog({ action: "db.generated_campaigns.copy_ids", ok: true, details: payload });
     } catch (err) {
@@ -562,7 +564,7 @@ export default function MetaPausedTest() {
         opsLogsDb: dbOpsLogs.slice(0, 200),
       };
 
-      await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+      await copyJsonToClipboard(payload);
       setSuccess("Bundle de recuperação copiado para a área de transferência.");
       pushLog({ action: "ops.recovery_bundle.copy", ok: true, details: { generatedCampaignId: createdGeneratedCampaignId } });
     } catch (err) {
@@ -738,7 +740,7 @@ export default function MetaPausedTest() {
                   setSuccess("");
                   try {
                     const text = errorDetails ? safeJson(errorDetails) : String(error || "");
-                    await navigator.clipboard.writeText(text);
+                    await copyTextToClipboard(text);
                     setSuccess("Erro copiado para a área de transferência.");
                   } catch {
                     // ignore
@@ -1222,7 +1224,7 @@ export default function MetaPausedTest() {
                 graphGet: creativeGetResult ?? null,
               },
             };
-            await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+            await copyJsonToClipboard(payload);
             setSuccess("Evidência P4 copiada para a área de transferência.");
             pushLog({
               action: "p4.acceptance.copy",
@@ -1279,7 +1281,7 @@ export default function MetaPausedTest() {
 	              adCreativeIdInput: normalizeNonEmptyString(adCreativeId) || null,
 	              creativeIdEffective: effectiveCreativeId,
 	            };
-	            await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+	            await copyJsonToClipboard(payload);
 	            setSuccess("Evidência P5 copiada para a área de transferência.");
 	            pushLog({
 	              action: "p5.acceptance.copy",

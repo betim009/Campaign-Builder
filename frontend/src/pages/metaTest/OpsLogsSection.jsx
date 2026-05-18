@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import CollapsibleCard from "./CollapsibleCard.jsx";
+import { copyTextToClipboard } from "./metaTestUtils.js";
 
 export default function OpsLogsSection({
   opsLogs,
@@ -82,7 +83,7 @@ export default function OpsLogsSection({
               setSuccess("");
               const text = safeJson(viewLogs);
               try {
-                await navigator.clipboard.writeText(text);
+                await copyTextToClipboard(text);
                 setSuccess("Logs (filtro atual) copiados para a área de transferência.");
               } catch {
                 setError("Não foi possível copiar os logs.");

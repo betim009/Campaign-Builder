@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import CollapsibleCard from "./CollapsibleCard.jsx";
-import { extractErrorDetails, safeJson } from "./metaTestUtils.js";
+import { copyTextToClipboard, extractErrorDetails, safeJson } from "./metaTestUtils.js";
 
 export default function CampaignBatchSection({
   isBusy,
@@ -165,7 +165,7 @@ export default function CampaignBatchSection({
               setSuccess("");
               const text = safeJson(batchResults);
               try {
-                await navigator.clipboard.writeText(text);
+                await copyTextToClipboard(text);
                 setSuccess("Batch (resultados) copiado para a área de transferência.");
               } catch {
                 setError("Não foi possível copiar os resultados do batch.");
@@ -185,7 +185,7 @@ export default function CampaignBatchSection({
               setSuccess("");
               const text = safeJson(batchErrors);
               try {
-                await navigator.clipboard.writeText(text);
+                await copyTextToClipboard(text);
                 setSuccess("Batch (erros) copiado para a área de transferência.");
               } catch {
                 setError("Não foi possível copiar os erros do batch.");

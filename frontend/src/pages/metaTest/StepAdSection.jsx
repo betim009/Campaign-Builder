@@ -1,6 +1,7 @@
 import JsonAccordion from "./JsonAccordion.jsx";
 import CollapsibleCard from "./CollapsibleCard.jsx";
 import { getBackendBaseUrl } from "../../services/http.js";
+import { copyTextToClipboard } from "./metaTestUtils.js";
 
 function escapeShellSingleQuotes(value) {
   return String(value ?? "").replace(/'/g, `'\"'\"'`);
@@ -294,7 +295,7 @@ export default function StepAdSection({
               const json = JSON.stringify(payload);
               const cmd = `curl -X POST '${escapeShellSingleQuotes(`${baseUrl}/api/meta/creative-drafts/${id}/publish`)}' -H 'Content-Type: application/json' -d '${escapeShellSingleQuotes(json)}'`;
               try {
-                await navigator.clipboard.writeText(cmd);
+                await copyTextToClipboard(cmd);
               } catch {
                 // ignore
               }
@@ -332,7 +333,7 @@ export default function StepAdSection({
               const act = metaAdAccountId.trim();
               const cmd = `curl '${escapeShellSingleQuotes(`${baseUrl}/api/meta/pages?metaAdAccountId=${encodeURIComponent(act)}`)}'`;
               try {
-                await navigator.clipboard.writeText(cmd);
+                await copyTextToClipboard(cmd);
               } catch {
                 // ignore
               }
@@ -418,7 +419,7 @@ export default function StepAdSection({
                           className="pillOutline"
                           onClick={async () => {
                             try {
-                              await navigator.clipboard.writeText(String(p.id));
+                              await copyTextToClipboard(String(p.id));
                             } catch {
                               // ignore
                             }
@@ -504,7 +505,7 @@ export default function StepAdSection({
             const json = JSON.stringify(payload);
             const cmd = `curl -X POST '${escapeShellSingleQuotes(`${baseUrl}/api/meta/ads`)}' -H 'Content-Type: application/json' -d '${escapeShellSingleQuotes(json)}'`;
             try {
-              await navigator.clipboard.writeText(cmd);
+              await copyTextToClipboard(cmd);
             } catch {
               // ignore
             }

@@ -1,6 +1,7 @@
 import CollapsibleCard from "./CollapsibleCard.jsx";
 import JsonAccordion from "./JsonAccordion.jsx";
 import { useState } from "react";
+import { copyTextToClipboard } from "./metaTestUtils.js";
 
 export default function OpsLogsDbSection({
   loading,
@@ -47,7 +48,7 @@ export default function OpsLogsDbSection({
               setCopyStatus("");
               const text = safeJson(opsLogs ?? []);
               try {
-                await navigator.clipboard.writeText(text);
+                await copyTextToClipboard(text);
                 setCopyStatus("Copiado.");
               } catch {
                 setCopyStatus("Falha ao copiar.");
