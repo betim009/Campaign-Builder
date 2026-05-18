@@ -180,7 +180,7 @@ GOVERNANÇA CONTÍNUA:
 
 ## Backlog Ativo (ÚNICO)
 
-Última atualização: [2026-05-18 14:05]
+Última atualização: [2026-05-18 14:07]
 
 Regras:
 
@@ -366,6 +366,7 @@ Regras:
 - [ ] Remover responsabilidades excessivas
   - [x] `/meta-test`: centralizar helpers de clipboard (`copyTextToClipboard`/`copyJsonToClipboard`) e remover duplicação de `navigator.clipboard.writeText` (commit: f80e2c9)
   - [x] `/meta-test`: extrair actions de status/pages (status/validate/diagnostics + pages list/validate) para reduzir responsabilidades do `MetaPausedTest.jsx` (commit: 54ed7af)
+  - [x] `/meta-test`: extrair actions de Graph refresh (Campaign/AdSet/Ad) para reduzir responsabilidades do `MetaPausedTest.jsx` (commit: 1c81c7c)
 - [ ] Migrar partes úteis para `/meta-test`
 - [ ] Isolar partes obsoletas
 - [ ] Melhorar compatibilidade temporária
