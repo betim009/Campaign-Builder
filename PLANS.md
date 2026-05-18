@@ -400,7 +400,7 @@ Regras:
 
 ## Backlog Ativo — Próxima Fase Operacional
 
-Última atualização: [2026-05-18 19:33]
+Última atualização: [2026-05-18 19:40]
 ### P8 — Console operacional
 
 - [ ] Consolidar layout operacional definitivo
@@ -410,7 +410,7 @@ Regras:
 - [ ] Melhorar timeline operacional
 - [ ] Criar visão “últimas execuções”
 - [ ] Melhorar feedback visual de bloqueios Meta
-- [ ] Melhorar navegação entre Campaigns geradas
+- [x] Melhorar navegação entre Campaigns geradas (filtros: modo + busca)
 - [ ] Melhorar visualização de REAL/STUB/FALLBACK
 
 ### P9 — Scheduler e automação leve

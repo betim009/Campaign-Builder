@@ -1,4 +1,5 @@
 import JsonAccordion from "./JsonAccordion.jsx";
+import { useMemo, useState } from "react";
 
 export default function GeneratedCampaignsSection({
   localGenerated,
@@ -15,6 +16,54 @@ export default function GeneratedCampaignsSection({
   safeJson,
   countryCodeToFlag,
 }) {
+  const [query, setQuery] = useState("");
+  const [modeFilter, setModeFilter] = useState("all"); // all | REAL | STUB | none
+  const totalCount = Array.isArray(localGenerated) ? localGenerated.length : 0;
+
+  const viewRows = useMemo(() => {
+    let list = Array.isArray(localGenerated) ? localGenerated : [];
+
+    const q = String(query || "").trim().toLowerCase();
+    const wantMode = String(modeFilter || "all");
+
+    function inferMode(gc) {
+      const metaId = gc?.meta_campaign_id || "";
+      return (
+        gc?.meta_run_mode ||
+        (metaId && String(metaId).startsWith("stub-") ? "STUB" : metaId ? "REAL" : "—")
+      );
+    }
+
+    if (wantMode !== "all") {
+      list = list.filter((gc) => {
+        const m = inferMode(gc);
+        if (wantMode === "none") return m === "—";
+        return m === wantMode;
+      });
+    }
+
+    if (!q) return list;
+
+    return list.filter((gc) => {
+      const hay = [
+        gc?.id,
+        gc?.name,
+        gc?.country_code,
+        gc?.meta_run_mode,
+        gc?.ops_last_action,
+        gc?.meta_campaign_id,
+        gc?.meta_status,
+        gc?.meta_effective_status,
+        gc?.meta_adset_id,
+        gc?.meta_ad_id,
+      ]
+        .filter(Boolean)
+        .map((v) => String(v).toLowerCase());
+
+      return hay.some((v) => v.includes(q));
+    });
+  }, [localGenerated, query, modeFilter]);
+
   return (
     <div id="meta-test-db" className="card" style={{ padding: 0, marginTop: 16 }}>
       <div style={{ padding: 16, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
@@ -22,6 +71,9 @@ export default function GeneratedCampaignsSection({
           <div style={{ fontWeight: 900, fontSize: 16 }}>Persistência local (DB) — generated_campaigns</div>
           <div className="muted" style={{ marginTop: 6, fontWeight: 800 }}>
             Evidência de persistência de IDs/status Meta (Campaign/AdSet/Ad) no Postgres.
+          </div>
+          <div className="muted" style={{ marginTop: 8, fontWeight: 900 }}>
+            Mostrando <b>{viewRows.length}</b> de <b>{totalCount}</b>.
           </div>
         </div>
         <button
@@ -52,6 +104,68 @@ export default function GeneratedCampaignsSection({
         </div>
       ) : null}
 
+      <div style={{ padding: "0 16px 16px" }}>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "end" }}>
+          <label style={{ display: "grid", gap: 6, minWidth: 220 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>
+              Modo
+            </span>
+            <select
+              value={modeFilter}
+              onChange={(e) => setModeFilter(e.target.value)}
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 900,
+                outline: "none",
+                background: "#ffffff",
+              }}
+            >
+              <option value="all">Todos</option>
+              <option value="REAL">REAL</option>
+              <option value="STUB">STUB</option>
+              <option value="none">Sem meta_campaign_id</option>
+            </select>
+          </label>
+
+          <label style={{ display: "grid", gap: 6, minWidth: 280, flex: 1 }}>
+            <span className="muted" style={{ fontWeight: 900 }}>
+              Buscar
+            </span>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Ex: nome, país, stub-, act_, meta.status..."
+              style={{
+                height: 38,
+                borderRadius: 12,
+                border: "1px solid #e5e7eb",
+                padding: "0 12px",
+                fontSize: 13,
+                fontWeight: 700,
+                outline: "none",
+                background: "#ffffff",
+              }}
+            />
+          </label>
+
+          <button
+            type="button"
+            className="pillOutline"
+            onClick={() => {
+              setModeFilter("all");
+              setQuery("");
+            }}
+            disabled={modeFilter === "all" && !query}
+          >
+            Limpar filtros
+          </button>
+        </div>
+      </div>
+
       <div style={{ borderTop: "1px solid #e5e7eb", overflowX: "auto" }}>
         <table className="dataTable" style={{ marginTop: 0 }}>
           <thead>
@@ -71,7 +185,7 @@ export default function GeneratedCampaignsSection({
             </tr>
           </thead>
           <tbody>
-            {localGenerated.map((gc) => {
+            {viewRows.map((gc) => {
               const metaId = gc.meta_campaign_id || "";
               const mode =
                 gc.meta_run_mode ||
@@ -157,12 +271,14 @@ export default function GeneratedCampaignsSection({
                 </tr>
               );
             })}
-            {!localGenerated.length ? (
+            {!viewRows.length ? (
               <tr>
                 <td colSpan={12} className="muted" style={{ fontWeight: 800 }}>
-                  {localLoading
-                    ? "Carregando..."
-                    : "Vazio. Clique em “Atualizar lista” ou crie Campaigns acima para gerar registros."}
+                  {totalCount
+                    ? "Vazio (filtros atuais)."
+                    : localLoading
+                      ? "Carregando..."
+                      : "Vazio. Clique em “Atualizar lista” ou crie Campaigns acima para gerar registros."}
                 </td>
               </tr>
             ) : null}
