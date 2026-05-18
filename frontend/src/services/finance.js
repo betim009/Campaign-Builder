@@ -259,6 +259,7 @@ export function toFinanceMonthlyViewModel(monthly) {
 export function toFinanceViewModel(overview, { countryNameByCode } = {}) {
   const totals = overview?.totals ?? {};
   const spendSeries = Array.isArray(overview?.spend_series) ? overview.spend_series : [];
+  const performanceSeries = Array.isArray(overview?.performance_series) ? overview.performance_series : [];
   const breakdown = Array.isArray(overview?.breakdown) ? overview.breakdown : [];
 
   const spendCents = Number(totals.spend_cents) || 0;
@@ -283,6 +284,31 @@ export function toFinanceViewModel(overview, { countryNameByCode } = {}) {
     label: formatDdMm(p.metric_date),
     value: Math.round((Number(p.spend_cents) || 0) / 100),
   }));
+
+  const performanceDaily = performanceSeries.map((p) => {
+    const spendCentsDay = Number(p.spend_cents) || 0;
+    const revenueCentsDay =
+      p.revenue_cents === null || p.revenue_cents === undefined ? null : Number(p.revenue_cents);
+    const profitCentsDay =
+      p.profit_cents === null || p.profit_cents === undefined ? null : Number(p.profit_cents);
+    const roas = p.roas === null || p.roas === undefined ? null : Number(p.roas);
+    return {
+      date: p.metric_date,
+      dateLabel: formatDdMm(p.metric_date),
+      spend: formatCurrencyBRLFromCents(spendCentsDay),
+      revenue: revenueCentsDay === null ? "—" : formatCurrencyBRLFromCents(revenueCentsDay),
+      profit: profitCentsDay === null ? "—" : formatCurrencyBRLFromCents(profitCentsDay),
+      roi: formatPercentOrDash(p.roi_percent, { digits: 0 }),
+      roas: roas === null || !Number.isFinite(roas) ? "—" : `${roas.toFixed(2)}x`,
+      _raw: {
+        spend_cents: spendCentsDay,
+        revenue_cents: revenueCentsDay,
+        profit_cents: profitCentsDay,
+        roi_percent: p.roi_percent ?? null,
+        roas,
+      },
+    };
+  });
 
   const rows = breakdown.map((r) => {
     const countryCode = r.country_code;
@@ -311,7 +337,7 @@ export function toFinanceViewModel(overview, { countryNameByCode } = {}) {
     };
   });
 
-  return { metrics, spendSeries: spendSeriesPoints, tableRows: rows };
+  return { metrics, spendSeries: spendSeriesPoints, performanceDaily, tableRows: rows };
 }
 
 export async function getFinancePeriodsViewModel({ periodOptions, countryNameByCode } = {}) {

@@ -302,7 +302,8 @@ export function financeRouter() {
         `
           SELECT
             cm.metric_date::text AS metric_date,
-            COALESCE(SUM(cm.spend_cents), 0) AS spend_cents
+            COALESCE(SUM(cm.spend_cents), 0) AS spend_cents,
+            SUM(cm.revenue_cents) AS revenue_cents
           FROM campaign_metrics cm
           WHERE cm.metric_date BETWEEN $1::date AND $2::date
           GROUP BY cm.metric_date
@@ -348,6 +349,22 @@ export function financeRouter() {
           metric_date: r.metric_date,
           spend_cents: toInt(r.spend_cents)
         })),
+        performance_series: dailyResult.rows.map((r) => {
+          const spendCentsDay = toInt(r.spend_cents)
+          const revenueCentsDay = toNullableInt(r.revenue_cents)
+          const profitCentsDay = revenueCentsDay === null ? null : revenueCentsDay - spendCentsDay
+          return {
+            metric_date: r.metric_date,
+            spend_cents: spendCentsDay,
+            revenue_cents: revenueCentsDay,
+            profit_cents: profitCentsDay,
+            roi_percent: computeRoiPercent({ spendCents: spendCentsDay, revenueCents: revenueCentsDay }),
+            roas:
+              revenueCentsDay === null || !spendCentsDay
+                ? null
+                : Math.round((revenueCentsDay / spendCentsDay) * 1000) / 1000
+          }
+        }),
         breakdown: breakdownResult.rows.map((r) => ({
           campaign_name: r.campaign_name,
           country_code: r.country_code,

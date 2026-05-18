@@ -42,6 +42,7 @@ export default function Financeiro() {
   });
   const metrics = data?.metrics ?? {};
   const spendSeries = data?.spendSeries ?? [];
+  const performanceDaily = data?.performanceDaily ?? [];
   const tableRows = data?.tableRows ?? [];
 
   const countryMaps = useMemo(() => {
@@ -186,6 +187,58 @@ export default function Financeiro() {
               </span>
             </div>
           </section>
+
+      <section className="card tableCard" aria-label="Timeline de performance">
+            <div className="tableHeaderRow">
+              <div>
+                <div className="chartTitleRow">
+                  <CircleIcon fontSize="small" style={{ color: "#111827" }} />
+                  <h2 className="chartTitle">Timeline de performance</h2>
+                </div>
+                <p className="chartSubtitle">Evolução diária de gasto/receita/ROI</p>
+              </div>
+            </div>
+
+            <div style={{ overflowX: "auto" }}>
+              <table className="dataTable">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Gasto</th>
+                    <th>Receita</th>
+                    <th>Lucro</th>
+                    <th>ROI</th>
+                    <th>ROAS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {performanceDaily.map((d) => (
+                    <tr key={d.date}>
+                      <td className="muted" style={{ fontWeight: 900 }}>
+                        {d.dateLabel}
+                      </td>
+                      <td style={{ fontWeight: 900 }}>{d.spend}</td>
+                      <td style={{ fontWeight: 900 }}>{d.revenue}</td>
+                      <td style={{ fontWeight: 900 }}>{d.profit}</td>
+                      <td className="muted" style={{ fontWeight: 900 }}>
+                        {d.roi}
+                      </td>
+                      <td className="muted" style={{ fontWeight: 900 }}>
+                        {d.roas}
+                      </td>
+                    </tr>
+                  ))}
+                  {!performanceDaily.length ? (
+                    <tr>
+                      <td colSpan={6} className="muted" style={{ fontWeight: 800 }}>
+                        Vazio. Rode sync de métricas (Meta ou STUB) e recarregue.
+                      </td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
+      </section>
 
       <section className="card tableCard" aria-label="Detalhamento por Campanha">
             <div className="tableHeaderRow">
