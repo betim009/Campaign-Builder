@@ -400,7 +400,7 @@ Regras:
 
 ## Backlog Ativo — Próxima Fase Operacional
 
-Última atualização: [2026-05-18 20:08]
+Última atualização: [2026-05-18 20:11]
 ### P8 — Console operacional
 
 - [ ] Consolidar layout operacional definitivo
@@ -421,7 +421,7 @@ Regras:
 - [x] Retry automático leve
 - [x] Atualizar métricas automaticamente
 - [x] Criar fila leve de execução
-- [ ] Persistir histórico de sync
+- [x] Persistir histórico de sync
 - [ ] Melhorar estado operacional de falhas
 
 ### P10 — Analytics operacional

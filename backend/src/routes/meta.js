@@ -8,6 +8,7 @@ import { isUuid } from '../lib/validate.js'
 import { syncGeneratedCampaignMetrics } from '../meta/sync.js'
 import { metaFetchMe } from '../meta/graph.js'
 import { coerceAccessToken, resolveAccessToken } from '../meta/accessToken.js'
+import { insertOpsLogBestEffort } from '../ops/opsLogs.js'
 import { metaCreateCampaign, metaFetchCampaign, metaListAdAccountCampaigns } from '../meta/campaigns.js'
 import { slugify } from '../lib/slugify.js'
 import { metaCreateAdSet, metaCreateAdSetStub, metaFetchAdSet } from '../meta/adsets.js'
@@ -667,8 +668,41 @@ export function metaRouter() {
           endDate
         })
 
+        await insertOpsLogBestEffort(pool, {
+          source: 'meta-sync',
+          entity: 'metrics',
+          action: 'meta.metrics.sync',
+          ok: true,
+          details: {
+            generatedCampaignId,
+            metaCampaignId: metaCampaignId.trim(),
+            provider: result?.provider ?? null,
+            inserted: result?.inserted ?? null,
+            updated: result?.updated ?? null,
+            since: result?.since ?? null,
+            until: result?.until ?? null,
+            reason: result?.reason ?? null,
+            startDate: startDate ?? null,
+            endDate: endDate ?? null
+          }
+        })
+
         return res.json({ ok: true, sync: result })
       } catch (err) {
+        await insertOpsLogBestEffort(pool, {
+          source: 'meta-sync',
+          entity: 'metrics',
+          action: 'meta.metrics.sync',
+          ok: false,
+          error: err?.message ? String(err.message) : 'Meta sync failed',
+          details: {
+            generatedCampaignId,
+            metaCampaignId: metaCampaignId.trim(),
+            status: typeof err?.status === 'number' ? err.status : null,
+            startDate: startDate ?? null,
+            endDate: endDate ?? null
+          }
+        })
         const status = typeof err?.status === 'number' ? err.status : 502
         return jsonError(res, status, err?.message ?? 'Meta sync failed', err?.details)
       }

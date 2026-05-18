@@ -1,6 +1,7 @@
 import { getPool } from '../db.js'
 import { resolveAccessTokenForScheduler } from '../meta/accessToken.js'
 import { syncGeneratedCampaignMetrics } from '../meta/sync.js'
+import { insertOpsLogBestEffort } from '../ops/opsLogs.js'
 
 function parseBool(value) {
   const v = String(value ?? '').trim().toLowerCase()
@@ -146,23 +147,54 @@ export function startMetaMetricsScheduler(app) {
       await runWithConcurrency(rows ?? [], concurrency, async (gc) => {
         if (!isRealMetaId(gc.meta_campaign_id)) return
 
+        const generatedCampaignId = gc.id
+        const metaCampaignId = String(gc.meta_campaign_id)
+
         try {
           const result = await withRetry(() =>
             syncGeneratedCampaignMetrics({
               pool,
-              generatedCampaignId: gc.id,
-              metaCampaignId: String(gc.meta_campaign_id),
+              generatedCampaignId,
+              metaCampaignId,
               accessToken
             })
           )
           synced += 1
           const p = normalizeNonEmptyString(result?.provider) ?? 'unknown'
           providers[p] = (providers[p] ?? 0) + 1
+          await insertOpsLogBestEffort(pool, {
+            source: 'meta-sync',
+            entity: 'metrics',
+            action: 'meta.metrics.sync',
+            ok: true,
+            details: {
+              generatedCampaignId,
+              metaCampaignId,
+              provider: result?.provider ?? null,
+              inserted: result?.inserted ?? null,
+              updated: result?.updated ?? null,
+              since: result?.since ?? null,
+              until: result?.until ?? null,
+              reason: result?.reason ?? null
+            }
+          })
         } catch (err) {
           failed += 1
           console.log('[scheduler] meta metrics sync failed', {
-            generatedCampaignId: gc.id,
+            generatedCampaignId,
             error: err?.message ? String(err.message) : 'sync_failed'
+          })
+          await insertOpsLogBestEffort(pool, {
+            source: 'meta-sync',
+            entity: 'metrics',
+            action: 'meta.metrics.sync',
+            ok: false,
+            error: err?.message ? String(err.message) : 'sync_failed',
+            details: {
+              generatedCampaignId,
+              metaCampaignId,
+              status: typeof err?.status === 'number' ? err.status : null
+            }
           })
         }
       })
