@@ -186,6 +186,21 @@ export default function MetaPausedTest() {
 
   const isCreatingAny = campaignCreating || adSetCreating || adCreating;
 
+  function getMetaErrorSubcode(details) {
+    if (!details || typeof details !== "object") return null;
+    const raw = details?.error_subcode ?? details?.error?.error_subcode ?? null;
+    if (raw === null || raw === undefined || raw === "") return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function isMetaDevModeBlocked(details) {
+    const subcode = getMetaErrorSubcode(details);
+    if (subcode === 1885183) return true;
+    const msg = typeof details?.message === "string" ? details.message.toLowerCase() : "";
+    return msg.includes("1885183");
+  }
+
   function captureError(err, fallbackMessage) {
     const details = extractErrorDetails(err);
     const metaUserMsg =
@@ -807,6 +822,25 @@ export default function MetaPausedTest() {
             </div>
           </div>
           <div style={{ marginTop: 6, fontWeight: 700 }}>{error}</div>
+          {isMetaDevModeBlocked(errorDetails) ? (
+            <div
+              className="card"
+              style={{
+                marginTop: 12,
+                padding: 12,
+                borderColor: "#fdba74",
+                background: "#fff7ed",
+                color: "#9a3412",
+              }}
+            >
+              <div style={{ fontWeight: 900 }}>Bloqueio comum (Meta Dev Mode)</div>
+              <div className="muted" style={{ marginTop: 6, fontWeight: 800, color: "#9a3412", lineHeight: 1.55 }}>
+                `error_subcode=1885183` geralmente indica que o App Meta está em modo <b>Development</b>.
+                Para permitir criação de AdCreative/Ad: coloque o App em <b>Live</b> e garanta que o usuário/token está em
+                roles válidas (admin/developer/tester).
+              </div>
+            </div>
+          ) : null}
           <JsonAccordion title="Detalhes (erro)" value={errorDetails} safeJson={safeJson} />
         </div>
       ) : null}
