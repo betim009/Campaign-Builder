@@ -84,6 +84,7 @@ export default function MetaPausedTest() {
   const [createdLoading, setCreatedLoading] = useState(false);
   const [adSetGraphLoading, setAdSetGraphLoading] = useState(false);
   const [adGraphLoading, setAdGraphLoading] = useState(false);
+  const [prefillGeneratedCampaignId, setPrefillGeneratedCampaignId] = useState("");
 
   const [metaLoading, setMetaLoading] = useState(false);
   const [metaError, setMetaError] = useState("");
@@ -310,6 +311,9 @@ export default function MetaPausedTest() {
 
       const destinationUrlParam = normalizeNonEmptyString(params.get("destinationUrl"));
       if (destinationUrlParam) setDraftDestinationUrl(destinationUrlParam);
+
+      const generatedCampaignIdParam = normalizeNonEmptyString(params.get("generatedCampaignId"));
+      if (generatedCampaignIdParam) setPrefillGeneratedCampaignId(generatedCampaignIdParam);
     } catch {
       // ignore
     }
@@ -703,6 +707,30 @@ export default function MetaPausedTest() {
     refreshStructure(gc?.id);
     refreshCreativeDrafts(gc?.id);
   }
+
+  useEffect(() => {
+    const desiredId = normalizeNonEmptyString(prefillGeneratedCampaignId);
+    if (!desiredId) return;
+
+    if (desiredId && desiredId === createdGeneratedCampaignId) {
+      setPrefillGeneratedCampaignId("");
+      return;
+    }
+
+    const list = Array.isArray(localGenerated) ? localGenerated : [];
+    const found = list.find((gc) => gc?.id === desiredId) ?? null;
+    if (found) {
+      setPrefillGeneratedCampaignId("");
+      selectGeneratedCampaignRow(found);
+      return;
+    }
+
+    if (!localLoading && !localError) {
+      setPrefillGeneratedCampaignId("");
+      setError("Registro não encontrado no DB para o deep-link.");
+      setErrorDetails({ generatedCampaignId: desiredId });
+    }
+  }, [prefillGeneratedCampaignId, createdGeneratedCampaignId, localGenerated, localLoading, localError]);
 
   return (
     <PageShell
