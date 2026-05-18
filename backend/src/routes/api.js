@@ -6,6 +6,7 @@ import { generatedCampaignsRouter } from './generatedCampaigns.js'
 import { metaRouter } from './meta.js'
 import { financeRouter } from './finance.js'
 import { automationRouter } from './automation.js'
+import { schedulerRouter } from './scheduler.js'
 import { opsLogsRouter } from './opsLogs.js'
 import { creativeAssetsRouter } from './creativeAssets.js'
 import { creativeDraftsRouter } from './creativeDrafts.js'
@@ -24,6 +25,7 @@ export function apiRouter() {
   router.use('/meta', metaRouter())
   router.use('/finance', financeRouter())
   router.use('/automation', automationRouter())
+  router.use('/scheduler', schedulerRouter())
   router.use('/ops-logs', opsLogsRouter())
   router.use('/creative-assets', creativeAssetsRouter())
   router.use('/creative-drafts', creativeDraftsRouter())

@@ -57,3 +57,13 @@ export async function resolveAccessToken(pool, req) {
 
   return null
 }
+
+export async function resolveAccessTokenForScheduler(pool, { userId } = {}) {
+  const fromEnv = coerceAccessToken(process.env.META_ACCESS_TOKEN)
+  if (fromEnv) return fromEnv
+
+  const fromDb = await lookupToken(pool, { userId })
+  if (fromDb) return fromDb
+
+  return null
+}
