@@ -31,6 +31,7 @@ import { getCountries } from "../services/reference.js";
 import { countryCodeToFlag } from "../services/fallbacks.js";
 import {
   getGeneratedCampaignStructure,
+  createGeneratedCheckpoint,
   listGeneratedCampaignEvents,
   listGeneratedCampaigns,
   updateGeneratedOpsState,
@@ -168,6 +169,7 @@ export default function MetaPausedTest() {
   const [eventsError, setEventsError] = useState("");
   const [eventsErrorDetails, setEventsErrorDetails] = useState(null);
   const [generatedEvents, setGeneratedEvents] = useState([]);
+  const [checkpointCreating, setCheckpointCreating] = useState(false);
 
   const [dbOpsLogsLoading, setDbOpsLogsLoading] = useState(false);
   const [dbOpsLogsError, setDbOpsLogsError] = useState("");
@@ -565,6 +567,41 @@ export default function MetaPausedTest() {
       pushLog({ action: "db.generated_campaign_events.list", ok: false, error: err?.message ? String(err.message) : "error", details });
     } finally {
       setEventsLoading(false);
+    }
+  }
+
+  async function handleCreateCheckpoint({ label, note }) {
+    const id = normalizeNonEmptyString(createdGeneratedCampaignId);
+    if (!id) return;
+
+    setError("");
+    setErrorDetails(null);
+    setSuccess("");
+    setEventsError("");
+    setEventsErrorDetails(null);
+
+    setCheckpointCreating(true);
+    try {
+      await createGeneratedCheckpoint(id, { label, note });
+      pushLog({
+        action: "db.generated_campaign_events.checkpoint.create",
+        ok: true,
+        details: { generatedCampaignId: id, label: String(label || "").trim() || null },
+      });
+      setSuccess("Checkpoint registrado.");
+      await refreshGeneratedEvents(id);
+    } catch (err) {
+      const details = extractErrorDetails(err);
+      pushLog({
+        action: "db.generated_campaign_events.checkpoint.create",
+        ok: false,
+        error: err?.message ? String(err.message) : "error",
+        details,
+      });
+      setEventsError(err?.message ? String(err.message) : "Falha ao registrar checkpoint (DB/API indisponível).");
+      setEventsErrorDetails(details);
+    } finally {
+      setCheckpointCreating(false);
     }
   }
 
@@ -1705,6 +1742,9 @@ export default function MetaPausedTest() {
         events={generatedEvents}
         refreshDisabled={eventsLoading || loading || isCreatingAny || !createdGeneratedCampaignId}
         onRefresh={() => refreshGeneratedEvents(createdGeneratedCampaignId)}
+        checkpointDisabled={loading || isCreatingAny || !createdGeneratedCampaignId}
+        checkpointCreating={checkpointCreating}
+        onCreateCheckpoint={handleCreateCheckpoint}
         onDismissError={() => {
           setEventsError("");
           setEventsErrorDetails(null);

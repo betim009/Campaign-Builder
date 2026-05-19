@@ -112,9 +112,11 @@ Exemplos (`curl`, sempre `PAUSED` e sem token no frontend):
 
 ### Workflow — Histórico (dev)
 
-Última atualização: [2026-05-19 09:52]
+Última atualização: [2026-05-19 10:13]
 
 - Listar eventos do histórico (workflow/publicação): `GET /api/generated-campaigns/<generated_campaign_uuid>/events?limit=50`
+- Criar checkpoint manual (workflow): `POST /api/generated-campaigns/<generated_campaign_uuid>/checkpoints`
+  - Body: `{ "label": "Validado", "note": "opcional" }`
 
 ### DB — Run Mode (REAL/STUB)
 

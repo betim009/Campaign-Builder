@@ -44,3 +44,8 @@ export async function listGeneratedCampaignEvents(id, { limit = 50 } = {}) {
     generatedCampaignEvents: Array.isArray(data?.generated_campaign_events) ? data.generated_campaign_events : [],
   };
 }
+
+export async function createGeneratedCheckpoint(id, { label, note } = {}) {
+  const data = await apiPost(`/api/generated-campaigns/${encodeURIComponent(String(id))}/checkpoints`, { label, note });
+  return { ok: true, generatedCampaignEvent: data?.generated_campaign_event ?? null };
+}

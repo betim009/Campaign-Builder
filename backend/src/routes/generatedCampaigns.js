@@ -6,6 +6,8 @@ import { isUuid } from '../lib/validate.js'
 
 const ALLOWED_STATUSES = new Set(['PAUSED', 'ACTIVE', 'ARCHIVED'])
 const ALLOWED_OPS_STATES = new Set(['draft', 'validated', 'published'])
+const CHECKPOINT_LABEL_MAX = 80
+const CHECKPOINT_NOTE_MAX = 400
 
 async function tryInsertGeneratedCampaignEvent(pool, generatedCampaignId, eventType, payload) {
   try {
@@ -177,6 +179,59 @@ export function generatedCampaignsRouter() {
       )
 
       return res.json({ ok: true, generated_campaign_events: rows })
+    })
+  )
+
+  router.post(
+    '/:id/checkpoints',
+    asyncHandler(async (req, res) => {
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      if (!isUuid(req.params.id)) {
+        return jsonError(res, 400, 'Invalid generated campaign id')
+      }
+
+      const labelRaw = typeof req.body?.label === 'string' ? req.body.label.trim() : ''
+      if (!labelRaw) {
+        return jsonError(res, 400, 'Invalid label')
+      }
+      if (labelRaw.length > CHECKPOINT_LABEL_MAX) {
+        return jsonError(res, 400, 'Label too long', { max: CHECKPOINT_LABEL_MAX })
+      }
+
+      const noteRaw = typeof req.body?.note === 'string' ? req.body.note.trim() : ''
+      if (noteRaw.length > CHECKPOINT_NOTE_MAX) {
+        return jsonError(res, 400, 'Note too long', { max: CHECKPOINT_NOTE_MAX })
+      }
+
+      const pool = getPool()
+      const { rows, rowCount } = await pool.query(
+        `
+          INSERT INTO generated_campaign_events (generated_campaign_id, event_type, payload)
+          VALUES ($1::uuid, 'checkpoint.created', $2::jsonb)
+          RETURNING
+            id,
+            generated_campaign_id,
+            event_type,
+            payload,
+            created_at
+        `,
+        [
+          req.params.id,
+          JSON.stringify({
+            label: labelRaw,
+            note: noteRaw || null,
+          }),
+        ]
+      )
+
+      if (rowCount === 0) {
+        return jsonError(res, 500, 'Failed to create checkpoint')
+      }
+
+      return res.json({ ok: true, generated_campaign_event: rows[0] })
     })
   )
 
