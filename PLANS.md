@@ -436,7 +436,7 @@ Regras:
 
 ### P11 — Templates operacionais
 
-- [x] Salvar estrutura base de campanhas (Campaign Templates: DB + UI no `/meta-test`) (commit: TBD)
+- [x] Salvar estrutura base de campanhas (Campaign Templates: DB + UI no `/meta-test`) (commit: 46d9746)
 - [x] Duplicar campanhas rapidamente
 - [x] Templates de países (persistência DB + fallback local; UI no `/meta-test` batch) (commit: 42f7da7)
 - [x] Templates de creatives
