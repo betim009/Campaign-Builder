@@ -450,7 +450,7 @@ Regras:
 - [x] Histórico de publicação (eventos em `generated_campaign_events` + endpoint + UI no `/meta-test`) (commit: 1c3bfd5)
 - [ ] Melhorar fluxo progressivo
 - [ ] Criar checkpoints operacionais
-- [x] Melhorar recovery operacional (bundle agora inclui `generated_campaign_events`) (commit: TBD)
+- [x] Melhorar recovery operacional (bundle agora inclui `generated_campaign_events`) (commit: 664d149)
 
 
 Histórico/itens concluídos:
