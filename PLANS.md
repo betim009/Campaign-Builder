@@ -403,7 +403,7 @@ Regras:
 Última atualização: [2026-05-19 17:12]
 ### P8 — Console operacional
 
-- [ ] Consolidar layout operacional definitivo
+- [x] Consolidar layout operacional definitivo (commits: bd27f80, 25164d7)
   - [x] Atalho para Campaign Templates (commit: cf86657)
   - [x] Alinhar coluna principal do `/meta-test` (commit: bd27f80)
   - [x] Consolidar layout (classes CSS + responsivo) (commit: 25164d7)
