@@ -427,6 +427,10 @@ export default function MetaPausedTest() {
   const stepCampaignOk = createdMetaCampaignId !== "";
   const stepAdSetOk = createdMetaAdSetId !== "";
   const stepAdOk = createdMetaAdId !== "";
+  const latestCheckpoint = useMemo(
+    () => (Array.isArray(generatedEvents) ? generatedEvents.find((e) => e?.event_type === "checkpoint.created") : null),
+    [generatedEvents]
+  );
   const campaignEntityModeLabel = createdMetaCampaignId ? (createdMetaCampaignIdIsReal ? "REAL" : "STUB") : "—";
   const adSetEntityId = normalizeNonEmptyString(created?.metaAdSet?.id) || createdMetaAdSetId;
   const adSetEntityIdIsReal = isRealMetaId(adSetEntityId);
@@ -896,7 +900,13 @@ export default function MetaPausedTest() {
               refreshDbOpsLogs={refreshDbOpsLogs}
             />
           </div>
-          <FlowProgressCard stepCampaignOk={stepCampaignOk} stepAdSetOk={stepAdSetOk} stepAdOk={stepAdOk} />
+          <FlowProgressCard
+            stepCampaignOk={stepCampaignOk}
+            stepAdSetOk={stepAdSetOk}
+            stepAdOk={stepAdOk}
+            opsState={created?.generatedCampaign?.ops_state ?? null}
+            latestCheckpoint={latestCheckpoint}
+          />
           <div style={{ marginTop: 16 }}>
             <MetaStructureSummaryCard created={created} />
           </div>
