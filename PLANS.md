@@ -400,12 +400,13 @@ Regras:
 
 ## Backlog Ativo — Próxima Fase Operacional
 
-Última atualização: [2026-05-19 17:11]
+Última atualização: [2026-05-19 17:12]
 ### P8 — Console operacional
 
 - [ ] Consolidar layout operacional definitivo
   - [x] Atalho para Campaign Templates (commit: cf86657)
   - [x] Alinhar coluna principal do `/meta-test` (commit: bd27f80)
+  - [x] Consolidar layout (classes CSS + responsivo) (commit: 25164d7)
 - [x] Criar sidebar operacional contextual
 - [x] Melhorar leitura de status Meta
 - [x] Criar visão resumida da estrutura Campaign → AdSet → Ad
