@@ -199,6 +199,36 @@ button {
   padding: 0;
 }
 
+.metaTestLayout {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.metaTestSidebar {
+  flex: 0 1 360px;
+  min-width: 260px;
+  max-width: 420px;
+  position: sticky;
+  top: 16px;
+  align-self: flex-start;
+  margin-top: 16px;
+}
+
+.metaTestMain {
+  flex: 1 1 680px;
+  min-width: 320px;
+  margin-top: 16px;
+}
+
+@media (max-width: 880px) {
+  .metaTestSidebar {
+    position: static;
+    top: auto;
+  }
+}
+
 .collapsibleCardSummary {
   padding: 16px;
   display: flex;

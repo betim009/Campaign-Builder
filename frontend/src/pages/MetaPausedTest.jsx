@@ -1045,18 +1045,8 @@ export default function MetaPausedTest() {
       subtitle="Fluxo progressivo operacional — criação REAL sempre PAUSED"
       backFallbackTo="/configuracoes"
     >
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
-        <div
-          style={{
-            flex: "0 1 360px",
-            minWidth: 260,
-            maxWidth: 420,
-            position: "sticky",
-            top: 16,
-            alignSelf: "flex-start",
-            marginTop: 16,
-          }}
-        >
+      <div className="metaTestLayout">
+        <div className="metaTestSidebar">
           <ModeStatusCard
             runModeLabel={runModeLabel}
             dataModeLabel={dataModeLabel}
@@ -1090,7 +1080,7 @@ export default function MetaPausedTest() {
           </div>
         </div>
 
-        <div style={{ flex: "1 1 680px", minWidth: 320, marginTop: 16 }}>
+        <div className="metaTestMain">
           <CollapsibleCard
         id="meta-test-recovery"
         title="Recuperação operacional"
