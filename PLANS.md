@@ -404,7 +404,7 @@ Regras:
 ### P8 — Console operacional
 
 - [ ] Consolidar layout operacional definitivo
-  - [x] Atalho para Campaign Templates (commit: TBD)
+  - [x] Atalho para Campaign Templates (commit: cf86657)
 - [x] Criar sidebar operacional contextual
 - [x] Melhorar leitura de status Meta
 - [x] Criar visão resumida da estrutura Campaign → AdSet → Ad
@@ -443,7 +443,7 @@ Regras:
 - [x] Templates de creatives
 - [x] Templates de copy
 - [ ] Templates operacionais completos
-  - [x] Campaign Templates: deletar/remover via API + UI (commit: TBD)
+  - [x] Campaign Templates: deletar/remover via API + UI (commit: cf86657)
 
 ### P12 — Workflow operacional
 
