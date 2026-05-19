@@ -7,6 +7,20 @@ import { isUuid } from '../lib/validate.js'
 const ALLOWED_STATUSES = new Set(['PAUSED', 'ACTIVE', 'ARCHIVED'])
 const ALLOWED_OPS_STATES = new Set(['draft', 'validated', 'published'])
 
+async function tryInsertGeneratedCampaignEvent(pool, generatedCampaignId, eventType, payload) {
+  try {
+    await pool.query(
+      `
+        INSERT INTO generated_campaign_events (generated_campaign_id, event_type, payload)
+        VALUES ($1::uuid, $2, $3::jsonb)
+      `,
+      [generatedCampaignId, eventType, JSON.stringify(payload ?? {})]
+    )
+  } catch {
+    // best-effort
+  }
+}
+
 export function generatedCampaignsRouter() {
   const router = Router()
 
@@ -132,6 +146,40 @@ export function generatedCampaignsRouter() {
     })
   )
 
+  router.get(
+    '/:id/events',
+    asyncHandler(async (req, res) => {
+      if (!req.app.locals.dbEnabled) {
+        return jsonError(res, 503, 'Database is not enabled. Set DATABASE_URL.')
+      }
+
+      if (!isUuid(req.params.id)) {
+        return jsonError(res, 400, 'Invalid generated campaign id')
+      }
+
+      const limit = parseLimit(req.query.limit, 50, 200)
+      const pool = getPool()
+
+      const { rows } = await pool.query(
+        `
+          SELECT
+            id,
+            generated_campaign_id,
+            event_type,
+            payload,
+            created_at
+          FROM generated_campaign_events
+          WHERE generated_campaign_id = $1
+          ORDER BY created_at DESC
+          LIMIT $2
+        `,
+        [req.params.id, limit]
+      )
+
+      return res.json({ ok: true, generated_campaign_events: rows })
+    })
+  )
+
   router.post(
     '/:id/status',
     asyncHandler(async (req, res) => {
@@ -244,6 +292,7 @@ export function generatedCampaignsRouter() {
         return jsonError(res, 404, 'Generated campaign not found')
       }
 
+      await tryInsertGeneratedCampaignEvent(pool, req.params.id, 'ops_state.updated', { opsState })
       return res.json({ ok: true, generated_campaign: rows[0] })
     })
   )
@@ -302,6 +351,7 @@ export function generatedCampaignsRouter() {
         return jsonError(res, 404, 'Generated campaign not found')
       }
 
+      await tryInsertGeneratedCampaignEvent(pool, req.params.id, 'meta_campaign_id.set', { metaCampaignId: metaCampaignId.trim() })
       return res.json({ ok: true, generated_campaign: rows[0] })
     })
   )

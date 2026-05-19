@@ -110,6 +110,12 @@ Exemplos (`curl`, sempre `PAUSED` e sem token no frontend):
 - Atualizar `ops_state` (workflow local) de uma `generated_campaign`:
   - `POST /api/generated-campaigns/<generated_campaign_uuid>/ops-state` (body: `{ "opsState": "draft" | "validated" | "published" }`)
 
+### Workflow — Histórico (dev)
+
+Última atualização: [2026-05-19 09:52]
+
+- Listar eventos do histórico (workflow/publicação): `GET /api/generated-campaigns/<generated_campaign_uuid>/events?limit=50`
+
 ### DB — Run Mode (REAL/STUB)
 
 Última atualização: [2026-05-12 18:40]

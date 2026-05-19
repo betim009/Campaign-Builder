@@ -34,3 +34,13 @@ export async function getGeneratedCampaignStructure(id) {
     generatedAds: Array.isArray(data?.generated_ads) ? data.generated_ads : [],
   };
 }
+
+export async function listGeneratedCampaignEvents(id, { limit = 50 } = {}) {
+  const query = new URLSearchParams();
+  if (limit) query.set("limit", String(limit));
+  const data = await apiGet(`/api/generated-campaigns/${encodeURIComponent(String(id))}/events?${query.toString()}`);
+  return {
+    ok: true,
+    generatedCampaignEvents: Array.isArray(data?.generated_campaign_events) ? data.generated_campaign_events : [],
+  };
+}

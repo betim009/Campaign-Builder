@@ -11,6 +11,7 @@ import OpsLogsSection from "./metaTest/OpsLogsSection.jsx";
 import OpsLogsDbSection from "./metaTest/OpsLogsDbSection.jsx";
 import GeneratedCampaignsSection from "./metaTest/GeneratedCampaignsSection.jsx";
 import GeneratedStructureSection from "./metaTest/GeneratedStructureSection.jsx";
+import GeneratedCampaignEventsSection from "./metaTest/GeneratedCampaignEventsSection.jsx";
 import CreativeAssetsSection from "./metaTest/CreativeAssetsSection.jsx";
 import CreativeDraftsSection from "./metaTest/CreativeDraftsSection.jsx";
 import CollapsibleCard from "./metaTest/CollapsibleCard.jsx";
@@ -28,7 +29,12 @@ import CreativeRealAcceptanceCard from "./metaTest/CreativeRealAcceptanceCard.js
 import GraphRefreshSection from "./metaTest/GraphRefreshSection.jsx";
 import { getCountries } from "../services/reference.js";
 import { countryCodeToFlag } from "../services/fallbacks.js";
-import { getGeneratedCampaignStructure, listGeneratedCampaigns, updateGeneratedOpsState } from "../services/generatedCampaigns.js";
+import {
+  getGeneratedCampaignStructure,
+  listGeneratedCampaignEvents,
+  listGeneratedCampaigns,
+  updateGeneratedOpsState,
+} from "../services/generatedCampaigns.js";
 import { listOpsLogs } from "../services/opsLogs.js";
 import { listCreativeAssets, uploadCreativeAsset } from "../services/creativeAssets.js";
 import { createCreativeDraft, duplicateCreativeDraft, listCreativeDrafts } from "../services/creativeDrafts.js";
@@ -157,6 +163,11 @@ export default function MetaPausedTest() {
   const [structureAdSets, setStructureAdSets] = useState([]);
   const [structureAds, setStructureAds] = useState([]);
   const [structureForId, setStructureForId] = useState("");
+
+  const [eventsLoading, setEventsLoading] = useState(false);
+  const [eventsError, setEventsError] = useState("");
+  const [eventsErrorDetails, setEventsErrorDetails] = useState(null);
+  const [generatedEvents, setGeneratedEvents] = useState([]);
 
   const [dbOpsLogsLoading, setDbOpsLogsLoading] = useState(false);
   const [dbOpsLogsError, setDbOpsLogsError] = useState("");
@@ -532,6 +543,31 @@ export default function MetaPausedTest() {
     }
   }
 
+  async function refreshGeneratedEvents(forId) {
+    const id = normalizeNonEmptyString(forId);
+    if (!id) {
+      setGeneratedEvents([]);
+      return;
+    }
+
+    setEventsLoading(true);
+    setEventsError("");
+    setEventsErrorDetails(null);
+    try {
+      const res = await listGeneratedCampaignEvents(id, { limit: 50 });
+      setGeneratedEvents(res.generatedCampaignEvents ?? []);
+      pushLog({ action: "db.generated_campaign_events.list", ok: true, details: { generatedCampaignId: id } });
+    } catch (err) {
+      setGeneratedEvents([]);
+      setEventsError(err?.message ? String(err.message) : "Falha ao carregar histórico (DB/API indisponível).");
+      const details = extractErrorDetails(err);
+      setEventsErrorDetails(details);
+      pushLog({ action: "db.generated_campaign_events.list", ok: false, error: err?.message ? String(err.message) : "error", details });
+    } finally {
+      setEventsLoading(false);
+    }
+  }
+
   async function refreshDbOpsLogs() {
     setDbOpsLogsLoading(true);
     setDbOpsLogsError("");
@@ -757,6 +793,7 @@ export default function MetaPausedTest() {
     });
     setSuccess("Registro selecionado. Você pode continuar o fluxo incremental a partir do DB.");
 
+    refreshGeneratedEvents(gc?.id);
     refreshStructure(gc?.id);
     refreshCreativeDrafts(gc?.id);
   }
@@ -1655,6 +1692,21 @@ export default function MetaPausedTest() {
         onDismissError={() => {
           setStructureError("");
           setStructureErrorDetails(null);
+        }}
+        safeJson={safeJson}
+      />
+
+      <GeneratedCampaignEventsSection
+        generatedCampaignId={createdGeneratedCampaignId}
+        loading={eventsLoading}
+        error={eventsError}
+        errorDetails={eventsErrorDetails}
+        events={generatedEvents}
+        refreshDisabled={eventsLoading || loading || isCreatingAny || !createdGeneratedCampaignId}
+        onRefresh={() => refreshGeneratedEvents(createdGeneratedCampaignId)}
+        onDismissError={() => {
+          setEventsError("");
+          setEventsErrorDetails(null);
         }}
         safeJson={safeJson}
       />
