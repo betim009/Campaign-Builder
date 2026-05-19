@@ -400,7 +400,7 @@ Regras:
 
 ## Backlog Ativo — Próxima Fase Operacional
 
-Última atualização: [2026-05-19 09:52]
+Última atualização: [2026-05-19 09:54]
 ### P8 — Console operacional
 
 - [ ] Consolidar layout operacional definitivo
@@ -450,7 +450,7 @@ Regras:
 - [x] Histórico de publicação (eventos em `generated_campaign_events` + endpoint + UI no `/meta-test`) (commit: 1c3bfd5)
 - [ ] Melhorar fluxo progressivo
 - [ ] Criar checkpoints operacionais
-- [ ] Melhorar recovery operacional
+- [x] Melhorar recovery operacional (bundle agora inclui `generated_campaign_events`) (commit: TBD)
 
 
 Histórico/itens concluídos:

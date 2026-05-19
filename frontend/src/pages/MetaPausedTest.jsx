@@ -714,6 +714,7 @@ export default function MetaPausedTest() {
         generatedCampaign: created?.generatedCampaign ?? null,
         generatedAdSets: structureForId === createdGeneratedCampaignId ? structureAdSets : [],
         generatedAds: structureForId === createdGeneratedCampaignId ? structureAds : [],
+        generatedCampaignEvents: generatedEvents.slice(0, 200),
         opsLogsDb: dbOpsLogs.slice(0, 200),
       };
 
