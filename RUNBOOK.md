@@ -147,6 +147,13 @@ Exemplos (`curl`, sempre `PAUSED` e sem token no frontend):
 - Criar template a partir de draft: `POST /api/creative-templates/from-draft/<creative_draft_uuid>` (body opcional: `{ "name": "..." }`)
 - Aplicar template (cria draft): `POST /api/creative-templates/<template_uuid>/apply` (body: `{ "generatedCampaignId": "<uuid>" }`)
 
+### Campaign Templates — Estrutura base (dev)
+
+Última atualização: [2026-05-19 10:17]
+
+- Listar templates: `GET /api/campaign-templates?limit=50`
+- Criar template a partir de uma `generated_campaign` selecionada: `POST /api/campaign-templates/from-generated/<generated_campaign_uuid>` (body opcional: `{ "name": "..." }`)
+
 ### Country Templates — Templates de países (dev)
 
 Última atualização: [2026-05-19 09:46]

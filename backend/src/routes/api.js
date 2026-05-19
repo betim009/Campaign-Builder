@@ -12,6 +12,7 @@ import { creativeAssetsRouter } from './creativeAssets.js'
 import { creativeDraftsRouter } from './creativeDrafts.js'
 import { creativeTemplatesRouter } from './creativeTemplates.js'
 import { countryTemplatesRouter } from './countryTemplates.js'
+import { campaignTemplatesRouter } from './campaignTemplates.js'
 
 export function apiRouter() {
   const router = Router()
@@ -33,6 +34,7 @@ export function apiRouter() {
   router.use('/creative-drafts', creativeDraftsRouter())
   router.use('/creative-templates', creativeTemplatesRouter())
   router.use('/country-templates', countryTemplatesRouter())
+  router.use('/campaign-templates', campaignTemplatesRouter())
 
   return router
 }

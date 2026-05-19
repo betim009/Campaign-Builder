@@ -12,6 +12,7 @@ import OpsLogsDbSection from "./metaTest/OpsLogsDbSection.jsx";
 import GeneratedCampaignsSection from "./metaTest/GeneratedCampaignsSection.jsx";
 import GeneratedStructureSection from "./metaTest/GeneratedStructureSection.jsx";
 import GeneratedCampaignEventsSection from "./metaTest/GeneratedCampaignEventsSection.jsx";
+import CampaignTemplatesSection from "./metaTest/CampaignTemplatesSection.jsx";
 import CreativeAssetsSection from "./metaTest/CreativeAssetsSection.jsx";
 import CreativeDraftsSection from "./metaTest/CreativeDraftsSection.jsx";
 import CollapsibleCard from "./metaTest/CollapsibleCard.jsx";
@@ -39,6 +40,7 @@ import {
 import { listOpsLogs } from "../services/opsLogs.js";
 import { listCreativeAssets, uploadCreativeAsset } from "../services/creativeAssets.js";
 import { createCreativeDraft, duplicateCreativeDraft, listCreativeDrafts } from "../services/creativeDrafts.js";
+import { createCampaignTemplateFromGenerated, listCampaignTemplates } from "../services/campaignTemplates.js";
 import {
   applyCreativeTemplate,
   createCreativeTemplateFromDraft,
@@ -198,6 +200,11 @@ export default function MetaPausedTest() {
   const [templatesError, setTemplatesError] = useState("");
   const [templatesErrorDetails, setTemplatesErrorDetails] = useState(null);
   const [creativeTemplates, setCreativeTemplates] = useState([]);
+  const [campaignTemplatesLoading, setCampaignTemplatesLoading] = useState(false);
+  const [campaignTemplatesError, setCampaignTemplatesError] = useState("");
+  const [campaignTemplatesErrorDetails, setCampaignTemplatesErrorDetails] = useState(null);
+  const [campaignTemplates, setCampaignTemplates] = useState([]);
+  const [campaignTemplateCreating, setCampaignTemplateCreating] = useState(false);
   const [templateActionLoading, setTemplateActionLoading] = useState(false);
 
   const selectedCreativeDraft = useMemo(
@@ -675,6 +682,57 @@ export default function MetaPausedTest() {
       setTemplatesErrorDetails(extractErrorDetails(err));
     } finally {
       setTemplatesLoading(false);
+    }
+  }
+
+  async function refreshCampaignTemplates() {
+    setCampaignTemplatesLoading(true);
+    setCampaignTemplatesError("");
+    setCampaignTemplatesErrorDetails(null);
+    try {
+      const res = await listCampaignTemplates({ limit: 50 });
+      setCampaignTemplates(res.campaignTemplates ?? []);
+    } catch (err) {
+      setCampaignTemplates([]);
+      setCampaignTemplatesError(err?.message ? String(err.message) : "Falha ao carregar campaign templates (DB/API indisponível).");
+      setCampaignTemplatesErrorDetails(extractErrorDetails(err));
+    } finally {
+      setCampaignTemplatesLoading(false);
+    }
+  }
+
+  async function handleCreateCampaignTemplateFromSelected({ name }) {
+    const id = normalizeNonEmptyString(createdGeneratedCampaignId);
+    if (!id) return;
+
+    setError("");
+    setErrorDetails(null);
+    setSuccess("");
+    setCampaignTemplatesError("");
+    setCampaignTemplatesErrorDetails(null);
+
+    setCampaignTemplateCreating(true);
+    try {
+      const res = await createCampaignTemplateFromGenerated(id, { name: name || undefined });
+      pushLog({
+        action: "campaign_templates.create_from_generated",
+        ok: true,
+        details: { generatedCampaignId: id, templateId: res?.campaignTemplate?.id ?? null },
+      });
+      setSuccess("Campaign template salvo.");
+      await refreshCampaignTemplates();
+    } catch (err) {
+      const details = extractErrorDetails(err);
+      pushLog({
+        action: "campaign_templates.create_from_generated",
+        ok: false,
+        error: err?.message ? String(err.message) : "error",
+        details,
+      });
+      setCampaignTemplatesError(err?.message ? String(err.message) : "Falha ao salvar campaign template (DB/API indisponível).");
+      setCampaignTemplatesErrorDetails(details);
+    } finally {
+      setCampaignTemplateCreating(false);
     }
   }
 
@@ -1758,6 +1816,24 @@ export default function MetaPausedTest() {
         onDismissError={() => {
           setEventsError("");
           setEventsErrorDetails(null);
+        }}
+        safeJson={safeJson}
+      />
+
+      <CampaignTemplatesSection
+        generatedCampaignId={createdGeneratedCampaignId}
+        loading={campaignTemplatesLoading}
+        error={campaignTemplatesError}
+        errorDetails={campaignTemplatesErrorDetails}
+        templates={campaignTemplates}
+        refreshDisabled={campaignTemplatesLoading || loading || isCreatingAny}
+        createFromGeneratedDisabled={loading || isCreatingAny || !createdGeneratedCampaignId}
+        createFromGeneratedLoading={campaignTemplateCreating}
+        onRefresh={refreshCampaignTemplates}
+        onCreateFromGenerated={handleCreateCampaignTemplateFromSelected}
+        onDismissError={() => {
+          setCampaignTemplatesError("");
+          setCampaignTemplatesErrorDetails(null);
         }}
         safeJson={safeJson}
       />
