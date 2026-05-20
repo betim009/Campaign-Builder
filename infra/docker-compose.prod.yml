@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    command: ["postgres", "-p", "5433"]
+    environment:
+      POSTGRES_DB: ${DB_NAME:-campaign_db}
+      POSTGRES_USER: ${DB_USER:-campaign_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
+    volumes:
+      - campaign_builder_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -p 5433 -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - campaign_net
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    environment:
+      PORT: "3001"
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://dominio.com}
+
+      META_SYNC_PROVIDER: ${META_SYNC_PROVIDER:-meta}
+      META_GRAPH_VERSION: ${META_GRAPH_VERSION:-v20.0}
+      META_ACCESS_TOKEN: ${META_ACCESS_TOKEN:-}
+      META_AD_ACCOUNT_ID: ${META_AD_ACCOUNT_ID:-}
+      META_PAGE_ID: ${META_PAGE_ID:-}
+      META_INSTAGRAM_ACTOR_ID: ${META_INSTAGRAM_ACTOR_ID:-}
+
+      AUTOMATION_SCHEDULER_ENABLED: ${AUTOMATION_SCHEDULER_ENABLED:-true}
+      AUTOMATION_SCHEDULER_RUN_ON_STARTUP: ${AUTOMATION_SCHEDULER_RUN_ON_STARTUP:-false}
+      AUTOMATION_SCHEDULER_INTERVAL_MS: ${AUTOMATION_SCHEDULER_INTERVAL_MS:-60000}
+
+      META_STATUS_SCHEDULER_ENABLED: ${META_STATUS_SCHEDULER_ENABLED:-true}
+      META_STATUS_SCHEDULER_RUN_ON_STARTUP: ${META_STATUS_SCHEDULER_RUN_ON_STARTUP:-false}
+      META_STATUS_SCHEDULER_INTERVAL_MS: ${META_STATUS_SCHEDULER_INTERVAL_MS:-300000}
+      META_STATUS_SCHEDULER_CONCURRENCY: ${META_STATUS_SCHEDULER_CONCURRENCY:-2}
+      META_STATUS_SCHEDULER_LIMIT: ${META_STATUS_SCHEDULER_LIMIT:-50}
+
+      META_METRICS_SCHEDULER_ENABLED: ${META_METRICS_SCHEDULER_ENABLED:-true}
+      META_METRICS_SCHEDULER_RUN_ON_STARTUP: ${META_METRICS_SCHEDULER_RUN_ON_STARTUP:-false}
+      META_METRICS_SCHEDULER_INTERVAL_MS: ${META_METRICS_SCHEDULER_INTERVAL_MS:-300000}
+      META_METRICS_SCHEDULER_CONCURRENCY: ${META_METRICS_SCHEDULER_CONCURRENCY:-2}
+      META_METRICS_SCHEDULER_LIMIT: ${META_METRICS_SCHEDULER_LIMIT:-50}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3001:3001"
+    networks:
+      - campaign_net
+
+networks:
+  campaign_net:
+    driver: bridge
+
+volumes:
+  campaign_builder_pgdata:
